@@ -12,33 +12,44 @@ do responsável pelo projeto em 09/10/2026: `npm install`, migration inicial em 
 **Etapa 2 (elenco, patrocinadores, institucional, apoio, contato, privacidade, sitemap)** — instalada e
 executada pelo responsável: migration `fase2` aplicada e `npm run check` sem erros, conforme relatado por ele.
 
-**Etapa 3 (upload de imagens, galeria, capa de notícias, banner com imagem)** — escrita em ambiente sem
-acesso ao npm, portanto **ainda não instalada, compilada nem executada por completo**:
+**Etapa 3 (upload de imagens, galeria, capa de notícias, banner com imagem)** — migration `midia` aplicada
+pelo responsável e lint e tipos sem erros. Um teste de senha estourou o limite de tempo e foi ajustado.
+**Ainda sem confirmação:** build desta etapa e teste manual de upload pelo navegador. O driver S3 nunca foi
+testado contra um serviço real.
 
-| Verificação | Situação da etapa 3 |
+**Etapa 4 (lances e escalação, classificação manual, página de jogador, testes de integração)** — escrita
+em ambiente sem acesso ao npm, portanto **ainda não instalada, compilada nem executada por completo**:
+
+| Verificação | Situação da etapa 4 |
 | --- | --- |
-| Migration das novas tabelas | **Não gerada** — rode `npm run db:migrate -- --name midia` |
+| Migration das novas tabelas | **Não gerada** — rode `npm run db:migrate -- --name lances` |
 | `npm run lint`, `npm run typecheck`, `npm run build` | **Não executados** |
 | `npm run test` (Vitest) | **Não executado com o Vitest**; os arquivos rodaram por camada de compatibilidade (abaixo) |
-| Upload pelo navegador, galeria e visualização ampliada | **Não testados** |
-| Driver S3 contra um serviço real | **Não testado** |
+| `npm run test:integration` | **Não executado** — escrito sem poder rodar; é o ponto com maior chance de ajuste |
 | `npm run test:e2e` (Playwright) | **Não executado** (em nenhuma etapa) |
 | Docker / Docker Compose da aplicação | **Não executado** |
 
-O que foi executado na etapa 3:
+O que foi executado na etapa 4:
 
-1. **Testes unitários — 86 de 86 passaram** (74 anteriores + 12 novos), com `tsx` e o executor nativo do Node,
-   usando um substituto mínimo de `describe/it/expect`. Os novos cobrem: detecção do tipo real da imagem
-   pelos bytes, recusa de arquivo disfarçado (script renomeado para `.png`), limite de 5 MB, formato das
-   chaves de armazenamento e bloqueio de `../`, regras da galeria e a assinatura S3.
-2. **Assinatura S3 (AWS Signature V4)**: o código reproduz exatamente a assinatura do exemplo oficial da
-   documentação da AWS. Isso valida o cálculo; o envio a um serviço real continua não testado.
-3. **Driver local de armazenamento**: gravação, leitura, remoção, recusa de sobrescrita e recusa de chave
-   fora do padrão foram executadas de verdade em uma pasta temporária.
-4. **Checagem parcial de tipos com `tsc`**, com declarações substitutas para Next.js, React e Prisma.
+1. **Testes unitários — 98 de 98 passaram** (86 anteriores + 12 novos), com `tsx` e o executor nativo do Node,
+   usando um substituto mínimo de `describe/it/expect`. Os novos cobrem: soma de gols dos lances (gol contra
+   vale para o adversário), aviso de divergência com o placar, ordenação por minuto, validação da escalação
+   e validação da tabela manual.
+2. **Migrations em banco limpo**: as três migrations versionadas (`init`, `fase2`, `midia`) foram aplicadas
+   em sequência a um PostgreSQL 16 vazio, sem erros, resultando em 20 tabelas. A migration desta etapa
+   ainda não existe, então não entrou nesse teste.
+3. **Checagem parcial de tipos com `tsc`**, com declarações substitutas para Next.js, React e Prisma.
 
-Depois de atualizar: `git pull`, `npm install`, `npm run db:migrate -- --name midia`, `npm run check`.
-Em seguida, teste manualmente um upload no painel (por exemplo, a capa de uma notícia).
+Depois de atualizar: `git pull`, `npm install`, `npm run db:migrate -- --name lances`, `npm run check`.
+
+Para os testes de integração, crie um banco separado e rode:
+
+```bash
+docker compose exec db sh -c 'createdb -U "$POSTGRES_USER" ultimogole_test'
+# no PowerShell: $env:TEST_DATABASE_URL="postgresql://ultimogole:SUASENHA@localhost:5432/ultimogole_test?schema=public"
+# aplique as migrations nesse banco (com DATABASE_URL apontando para ele) usando: npx prisma migrate deploy
+npm run test:integration
+```
 
 ## Implementado
 
@@ -53,13 +64,15 @@ Em seguida, teste manualmente um upload no painel (por exemplo, a capa de uma no
   patrocinadores e chamada de apoio.
 - Jogos com filtros, resultados, detalhes da partida, competições (classificação, calendário, resultados,
   participantes, regulamento), notícias (busca, categorias, paginação, relacionadas, compartilhamento, SEO).
-- Futebol (elenco por posição e comissão técnica), Clube (história, missão, associação, diretoria),
+- Detalhes da partida com lances (gols, cartões, substituições) e escalação do clube.
+- Futebol (elenco por posição e comissão técnica, com página individual do jogador), Clube (história, missão, associação, diretoria),
   Patrocinadores por categoria, Apoie (Pix com botão de copiar), Contato (formulário com validação,
   campo-armadilha e limite de envios), Política de privacidade, `sitemap.xml` e `robots.txt`.
 - Estados vazios em todas as áreas. Nada é simulado quando não há dados.
 
 **Painel administrativo**
 - Notícias, categorias, clubes, competições, temporadas, participantes, partidas com histórico,
+  lances e escalação, classificação manual,
   elenco, patrocinadores, institucional (textos, contato, redes, Pix, banner, rodapé, diretoria e comissão),
   galeria (álbuns, fotos, legendas, texto alternativo, ordem, publicar/arquivar), biblioteca de mídia,
   mensagens de contato, usuários, auditoria e troca da própria senha.
@@ -76,9 +89,8 @@ Em seguida, teste manualmente um upload no painel (por exemplo, a capa de uma no
 
 - Redimensionamento e otimização das imagens enviadas: hoje elas são entregues no tamanho original.
 - Envio de várias fotos de uma vez na galeria (hoje é uma por envio) e reordenação por arrastar.
-- Escalações e eventos de partida; página individual de jogador; linha do tempo e documentos do clube.
-- Digitação da classificação manual pelo painel (o modo existe e o portal o identifica, mas falta a tela).
-- Testes de integração com banco e execução dos testes E2E.
+- Linha do tempo e documentos do clube; escalação do adversário.
+- Execução dos testes de integração e dos testes E2E.
 - Envio de e-mail do formulário de contato: hoje a mensagem fica registrada no painel e o portal informa
   "mensagem recebida", sem afirmar que um e-mail foi enviado.
 - React Hook Form e shadcn/ui previstos na especificação não foram adotados: os formulários usam

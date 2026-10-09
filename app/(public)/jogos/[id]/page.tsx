@@ -3,8 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ClubCrest } from "@/components/football/club-crest";
 import { formatDate, formatTime, formatWeekday } from "@/lib/datetime";
+import { prisma } from "@/lib/db/prisma";
+import { EVENT_TYPE_LABELS, formatMinute, LINEUP_ROLES, LINEUP_ROLE_LABELS, sortEvents, type EventType } from "@/modules/matches/events";
 import { MATCH_STATUS_LABELS, type MatchStatus } from "@/modules/matches/rules";
 import { getMatch } from "@/modules/matches/service";
+import { displayName } from "@/modules/squad/rules";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -23,6 +26,21 @@ export default async function MatchPage({ params }: Props) {
   const { id } = await params;
   const match = await getMatch(id);
   if (!match) notFound();
+
+  const [events, lineup] = await Promise.all([
+    prisma.matchEvent.findMany({ where: { matchId: match.id }, include: { athlete: true, club: true } }),
+    // Na escalação pública entram só jogadores com divulgação autorizada.
+    prisma.matchLineupPlayer.findMany({ where: { matchId: match.id, athlete: { isPublished: true } }, include: { athlete: true } }),
+  ]);
+  const timeline = sortEvents(events);
+  const lineupGroups = LINEUP_ROLES.map((role) => ({
+    role,
+    label: LINEUP_ROLE_LABELS[role],
+    players: lineup
+      .filter((entry) => entry.role === role)
+      .map((entry) => entry.athlete)
+      .sort((a, b) => (a.shirtNumber ?? 999) - (b.shirtNumber ?? 999) || displayName(a).localeCompare(displayName(b), "pt-BR")),
+  })).filter((group) => group.players.length > 0);
 
   const status = match.status as MatchStatus;
   // Placar só é exibido quando existe de fato; partida sem resultado nunca aparece como 0 a 0.
@@ -96,6 +114,54 @@ export default async function MatchPage({ params }: Props) {
             <dd className="mt-1 font-semibold">{match.venue ?? "A definir"}</dd>
           </div>
         </dl>
+
+        {timeline.length > 0 ? (
+          <section className="border-t border-gray-100 px-6 py-6" aria-labelledby="lances">
+            <h2 id="lances" className="section-title text-lg">
+              Lances da partida
+            </h2>
+            <ol className="mt-4 space-y-2">
+              {timeline.map((event) => {
+                // Nome digitado tem prioridade; jogador do elenco só aparece se a divulgação foi autorizada.
+                const player = event.playerName ?? (event.athlete?.isPublished ? displayName(event.athlete) : null);
+                return (
+                  <li key={event.id} className="flex gap-3 text-sm">
+                    <span className="w-10 shrink-0 font-display font-extrabold text-primary">{formatMinute(event.minute)}</span>
+                    <span>
+                      <span className="font-semibold">{EVENT_TYPE_LABELS[event.type as EventType]}</span>
+                      {player ? ` · ${player}` : ""}
+                      <span className="text-gray-600"> ({event.club.name})</span>
+                      {event.note ? <span className="block text-gray-600">{event.note}</span> : null}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        ) : null}
+
+        {lineupGroups.length > 0 ? (
+          <section className="border-t border-gray-100 px-6 py-6" aria-labelledby="escalacao">
+            <h2 id="escalacao" className="section-title text-lg">
+              Escalação do Último Gole FC
+            </h2>
+            <div className="mt-4 grid gap-6 sm:grid-cols-2">
+              {lineupGroups.map((group) => (
+                <div key={group.role}>
+                  <h3 className="eyebrow mb-2">{group.label}</h3>
+                  <ul className="space-y-1 text-sm">
+                    {group.players.map((athlete) => (
+                      <li key={athlete.id} className="flex gap-2">
+                        <span className="w-7 shrink-0 font-display font-extrabold text-primary">{athlete.shirtNumber ?? "–"}</span>
+                        <span>{displayName(athlete)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         {match.notes ? (
           <section className="border-t border-gray-100 px-6 py-6">

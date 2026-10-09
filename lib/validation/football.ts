@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TIEBREAKERS } from "@/modules/competitions/standings";
+import { EVENT_TYPES } from "@/modules/matches/events";
 import { MATCH_STATUSES } from "@/modules/matches/rules";
 
 const optionalText = (max: number, message: string) =>
@@ -61,4 +62,19 @@ export const matchSchema = z.object({
   homeScore: score,
   awayScore: score,
   notes: optionalText(5000, "Informações muito longas."),
+});
+
+export const matchEventSchema = z.object({
+  type: z.enum(EVENT_TYPES, { errorMap: () => ({ message: "Selecione o tipo de lance." }) }),
+  // O lado é resolvido para o clube no servidor; o navegador nunca envia o identificador do clube.
+  side: z.enum(["home", "away"], { errorMap: () => ({ message: "Selecione a equipe." }) }),
+  minute: z
+    .string()
+    .trim()
+    .regex(/^\d{0,3}$/, "Informe o minuto como número.")
+    .transform((value) => (value === "" ? null : Number(value)))
+    .refine((value) => value === null || value <= 130, "O minuto deve estar entre 0 e 130."),
+  athleteId: optionalText(40, "Jogador inválido."),
+  playerName: optionalText(80, "Nome muito longo."),
+  note: optionalText(200, "Observação muito longa."),
 });

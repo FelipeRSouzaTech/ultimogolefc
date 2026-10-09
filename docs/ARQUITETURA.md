@@ -70,6 +70,17 @@ o último superadministrador ativo não pode ser rebaixado nem desativado (verif
 - Placar é descartado em partidas agendadas, adiadas ou canceladas.
 - Toda alteração grava antes/depois na auditoria, exibida como histórico na tela da partida.
 
+**Lances e escalação** (`modules/matches/events.ts`)
+- Os lances são informativos: o placar oficial é o da partida. Se a soma dos gols lançados divergir do
+  placar, o painel avisa, mas não altera nada.
+- Gol contra é creditado ao adversário do jogador.
+- Jogadores do elenco só podem ser ligados a lances do nosso clube; para adversários, o nome é digitado.
+- Escalação: até 11 titulares, sem repetição. No portal aparecem só jogadores com divulgação autorizada.
+
+**Classificação manual** (`modules/competitions/manual.ts`)
+- Uma linha por participante, posições de 1 a N sem repetição e jogos = vitórias + empates + derrotas.
+- Só pode ser gravada quando a temporada está no modo manual; o portal identifica a tabela como manual.
+
 **Notícias** (`modules/news/rules.ts`)
 - Visível no portal somente se `PUBLISHED` e com data de publicação já alcançada. Data futura = agendamento.
 - Publicar, agendar e arquivar exigem a permissão `news:publish`.

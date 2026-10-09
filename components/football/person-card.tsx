@@ -1,9 +1,10 @@
+import Link from "next/link";
 import { ClubCrest } from "./club-crest";
 
-type Props = { name: string; caption: string; photoPath?: string | null; number?: number | null; description?: string | null };
+type Props = { name: string; caption: string; photoPath?: string | null; number?: number | null; description?: string | null; href?: string };
 
 /** Card de pessoa (jogador, diretoria, comissão). Sem foto, mostra as iniciais. */
-export function PersonCard({ name, caption, photoPath = null, number = null, description = null }: Props) {
+export function PersonCard({ name, caption, photoPath = null, number = null, description = null, href }: Props) {
   return (
     <article className="card flex h-full flex-col items-center p-5 text-center">
       <div className="relative">
@@ -14,7 +15,15 @@ export function PersonCard({ name, caption, photoPath = null, number = null, des
           </span>
         ) : null}
       </div>
-      <h3 className="mt-4 text-lg uppercase">{name}</h3>
+      <h3 className="mt-4 text-lg uppercase">
+        {href ? (
+          <Link href={href} className="hover:text-primary hover:underline">
+            {name}
+          </Link>
+        ) : (
+          name
+        )}
+      </h3>
       <p className="eyebrow mt-1">{caption}</p>
       {description ? <p className="mt-3 line-clamp-4 text-sm text-gray-600">{description}</p> : null}
     </article>

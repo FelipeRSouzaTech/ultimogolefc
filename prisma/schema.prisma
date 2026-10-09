@@ -33,6 +33,20 @@ enum MatchStatus {
   CANCELLED
 }
 
+enum MatchEventType {
+  GOAL
+  PENALTY_GOAL
+  OWN_GOAL
+  YELLOW_CARD
+  RED_CARD
+  SUBSTITUTION
+}
+
+enum LineupRole {
+  STARTER
+  SUBSTITUTE
+}
+
 enum StandingsMode {
   AUTO
   MANUAL
@@ -187,6 +201,7 @@ model Club {
   homeMatches Match[]            @relation("HomeTeam")
   awayMatches Match[]            @relation("AwayTeam")
   overrides   StandingOverride[]
+  matchEvents MatchEvent[]
 }
 
 model Competition {
@@ -250,9 +265,11 @@ model Match {
   createdAt  DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt  DateTime    @updatedAt @db.Timestamptz(3)
 
-  season   Season @relation(fields: [seasonId], references: [id], onDelete: Restrict)
-  homeTeam Club   @relation("HomeTeam", fields: [homeTeamId], references: [id], onDelete: Restrict)
-  awayTeam Club   @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  season   Season              @relation(fields: [seasonId], references: [id], onDelete: Restrict)
+  homeTeam Club                @relation("HomeTeam", fields: [homeTeamId], references: [id], onDelete: Restrict)
+  awayTeam Club                @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  events   MatchEvent[]
+  lineup   MatchLineupPlayer[]
 
   @@index([seasonId, status])
   @@index([status, kickoffAt])
@@ -293,6 +310,9 @@ model Athlete {
   isPublished Boolean         @default(false)
   createdAt   DateTime        @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime        @updatedAt @db.Timestamptz(3)
+
+  matchEvents MatchEvent[]
+  lineups     MatchLineupPlayer[]
 
   @@index([isPublished, status, position])
 }
@@ -395,4 +415,39 @@ model GalleryImage {
 
   @@index([galleryId, sortOrder])
   @@index([mediaId])
+}
+
+// Lances da partida. São informativos: o placar oficial é o registrado na própria partida.
+model MatchEvent {
+  id         String         @id @default(cuid())
+  matchId    String
+  clubId     String
+  type       MatchEventType
+  minute     Int?
+  // Jogador do nosso elenco (opcional) ou nome digitado (adversários e atletas não cadastrados).
+  athleteId  String?
+  playerName String?
+  note       String?
+  createdAt  DateTime       @default(now()) @db.Timestamptz(3)
+
+  match   Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  club    Club     @relation(fields: [clubId], references: [id], onDelete: Restrict)
+  athlete Athlete? @relation(fields: [athleteId], references: [id], onDelete: SetNull)
+
+  @@index([matchId, minute])
+  @@index([athleteId])
+}
+
+// Escalação do nosso clube em uma partida.
+model MatchLineupPlayer {
+  matchId   String
+  athleteId String
+  role      LineupRole
+  createdAt DateTime   @default(now()) @db.Timestamptz(3)
+
+  match   Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@id([matchId, athleteId])
+  @@index([athleteId])
 }

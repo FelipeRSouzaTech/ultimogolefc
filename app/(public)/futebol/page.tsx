@@ -39,7 +39,7 @@ export default async function FutebolPage() {
                       caption={POSITION_LABELS[athlete.position as Position]}
                       photoPath={athlete.photoPath}
                       number={athlete.shirtNumber}
-                      description={athlete.bio}
+                      href={`/futebol/jogador/${athlete.id}`}
                     />
                   </li>
                 ))}

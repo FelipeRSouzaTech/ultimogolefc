@@ -9,20 +9,41 @@ import { requirePagePermission } from "@/lib/auth/guard";
 import { can } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db/prisma";
 import { getSeasonStandings } from "@/modules/competitions/service";
-import { deleteSeasonAction, saveSeasonAction, setParticipantsAction } from "../../actions";
+import { deleteSeasonAction, saveManualStandingsAction, saveSeasonAction, setParticipantsAction } from "../../actions";
 import { SeasonForm } from "../../season-form";
+import { ManualStandingsForm } from "./manual-table";
 
 export const metadata: Metadata = { title: "Temporada" };
 
 export default async function SeasonAdminPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePagePermission("football:read");
   const { id } = await params;
-  const season = await prisma.season.findUnique({ where: { id }, include: { competition: true, teams: true } });
+  const season = await prisma.season.findUnique({ where: { id }, include: { competition: true, teams: { include: { club: true } }, overrides: true } });
   if (!season) notFound();
 
   const [clubs, standings] = await Promise.all([prisma.club.findMany({ orderBy: { name: "asc" } }), getSeasonStandings(season.id)]);
   const participantIds = new Set(season.teams.map((team) => team.clubId));
   const canWrite = can(user.role, "football:write");
+  const isManual = season.standingsMode === "MANUAL";
+  // Linhas do formulário manual: valores já digitados ou zeros, com posição inicial em ordem alfabética.
+  const manualRows = [...season.teams]
+    .sort((a, b) => a.club.name.localeCompare(b.club.name, "pt-BR"))
+    .map((team, index) => {
+      const saved = season.overrides.find((item) => item.clubId === team.clubId);
+      return {
+        clubId: team.clubId,
+        clubName: team.club.name,
+        position: saved?.position ?? index + 1,
+        played: saved?.played ?? 0,
+        wins: saved?.wins ?? 0,
+        draws: saved?.draws ?? 0,
+        losses: saved?.losses ?? 0,
+        goalsFor: saved?.goalsFor ?? 0,
+        goalsAgainst: saved?.goalsAgainst ?? 0,
+        points: saved?.points ?? 0,
+      };
+    })
+    .sort((a, b) => a.position - b.position);
 
   return (
     <>
@@ -73,15 +94,15 @@ export default async function SeasonAdminPage({ params }: { params: Promise<{ id
             )}
           </Panel>
 
-          <Panel title="Classificação atual">
-            {standings && standings.rows.length > 0 ? (
+          <Panel title={isManual ? "Classificação manual" : "Classificação atual"}>
+            {season.teams.length === 0 ? (
+              <p className="text-sm text-gray-600">Adicione participantes para ver a tabela.</p>
+            ) : isManual && canWrite ? (
+              <ManualStandingsForm action={saveManualStandingsAction.bind(null, season.id)} rows={manualRows} />
+            ) : standings && standings.rows.length > 0 ? (
               <StandingsTable rows={standings.rows} mode={standings.mode} caption="Classificação atual" />
             ) : (
-              <p className="text-sm text-gray-600">
-                {season.standingsMode === "MANUAL"
-                  ? "Modo manual: a digitação da tabela pelo painel ainda não está disponível nesta versão."
-                  : "Adicione participantes para ver a tabela."}
-              </p>
+              <p className="text-sm text-gray-600">A tabela manual ainda não foi preenchida.</p>
             )}
           </Panel>
         </div>

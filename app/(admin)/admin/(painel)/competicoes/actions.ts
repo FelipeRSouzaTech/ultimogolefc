@@ -6,6 +6,7 @@ import { audit } from "@/lib/audit";
 import { withPermission } from "@/lib/auth/guard";
 import { uniqueSlug } from "@/lib/slug";
 import { competitionSchema, seasonSchema } from "@/lib/validation/football";
+import { MANUAL_FIELDS, MANUAL_FIELD_LABELS, parseCount, validateManualTable, type ManualRow } from "@/modules/competitions/manual";
 
 export async function saveCompetitionAction(id: string | null, formData: FormData): Promise<ActionState> {
   return withPermission("football:write", async (user) => {
@@ -153,5 +154,49 @@ export async function setParticipantsAction(seasonId: string, formData: FormData
       );
       return { ok: true, message: "Participantes atualizados." };
     });
+  });
+}
+
+/** Grava a classificação digitada (modo manual). Substitui a tabela inteira em uma transação. */
+export async function saveManualStandingsAction(seasonId: string, formData: FormData): Promise<ActionState> {
+  return withPermission("football:write", async (user) => {
+    const season = await prisma.season.findUnique({ where: { id: seasonId }, include: { competition: true, teams: { include: { club: true } } } });
+    if (!season) return { error: "Temporada não encontrada." };
+    if (season.standingsMode !== "MANUAL") return { error: "Esta temporada usa classificação automática. Mude o modo para manual antes de digitar a tabela." };
+
+    const names: Record<string, string> = {};
+    const rows: ManualRow[] = [];
+    for (const team of season.teams) {
+      names[team.clubId] = team.club.name;
+      const row: ManualRow = { clubId: team.clubId, position: 0, played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0 };
+      for (const name of MANUAL_FIELDS) {
+        const value = parseCount(field(formData, `${team.clubId}.${name}`));
+        if (value === null) return { error: `${team.club.name}: o campo "${MANUAL_FIELD_LABELS[name]}" deve ser um número inteiro, zero ou maior.` };
+        row[name] = value;
+      }
+      rows.push(row);
+    }
+    const errors = validateManualTable(
+      rows,
+      season.teams.map((team) => team.clubId),
+      names,
+    );
+    if (errors.length > 0) return { error: errors.join(" ") };
+
+    await prisma.$transaction(async (tx) => {
+      await tx.standingOverride.deleteMany({ where: { seasonId } });
+      await tx.standingOverride.createMany({ data: rows.map((row) => ({ seasonId, ...row })) });
+      await audit(
+        {
+          userId: user.id,
+          action: "season.standings.manual",
+          entity: "Season",
+          entityId: seasonId,
+          summary: `Atualizou a classificação manual da temporada ${season.label} de "${season.competition.name}"`,
+        },
+        tx,
+      );
+    });
+    return { ok: true, message: "Classificação salva." };
   });
 }

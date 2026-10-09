@@ -31,4 +31,8 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test
+      - run: npm run test:integration
+        env:
+          TEST_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+          ALLOW_TEST_ON_MAIN_DB: "true"
       - run: npm run build

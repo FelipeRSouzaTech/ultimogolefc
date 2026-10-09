@@ -61,6 +61,7 @@ Os demais usuários são criados pelo painel, em **Usuários**.
 | `npm run lint` | ESLint |
 | `npm run typecheck` | Verificação de tipos |
 | `npm run test` | Testes unitários (Vitest) |
+| `npm run test:integration` | Testes com banco (exige `TEST_DATABASE_URL` apontando para um banco exclusivo de testes) |
 | `npm run test:e2e` | Testes de navegação (Playwright; exige `npm run build` e banco migrado) |
 | `npm run check` | Lint + tipos + testes + build |
 | `npm run db:migrate` | Cria/aplica migrations em desenvolvimento |

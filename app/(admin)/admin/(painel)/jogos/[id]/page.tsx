@@ -12,6 +12,7 @@ import { getMatch } from "@/modules/matches/service";
 import { deleteMatchAction, saveMatchAction } from "../actions";
 import { loadSeasonOptions } from "../data";
 import { MatchForm } from "../match-form";
+import { MatchDetails } from "./match-details";
 
 export const metadata: Metadata = { title: "Editar partida" };
 
@@ -104,6 +105,8 @@ export default async function EditMatchPage({ params }: { params: Promise<{ id: 
           )}
         </Panel>
       </div>
+
+      <MatchDetails match={match} canWrite={canWrite} />
     </>
   );
 }
