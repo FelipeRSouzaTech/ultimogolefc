@@ -3,6 +3,7 @@ import { ActionForm } from "@/components/ui/action-form";
 import { AdminHeading, Panel, ReadOnlyNotice } from "@/components/ui/admin";
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { Field } from "@/components/ui/field";
+import { ImageField } from "@/components/ui/image-field";
 import { requirePagePermission } from "@/lib/auth/guard";
 import { can } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db/prisma";
@@ -29,7 +30,10 @@ export default async function InstitutionalAdminPage() {
             <p className="-mt-2 mb-4 text-sm text-gray-600">{group.description}</p>
             {canWrite ? (
               <ActionForm action={saveSettingsAction.bind(null, group.id)} submitLabel="Salvar" className="space-y-4">
-                {group.settings.map((def) => (
+                {group.settings.map((def) =>
+                  def.kind === "imagePath" ? (
+                    <ImageField key={def.key} name={def.key} label={def.label} defaultValue={settings[def.key]} hint={def.hint} />
+                  ) : (
                   <Field key={def.key} name={def.key} label={def.label} hint={def.hint}>
                     {def.kind === "longtext" ? (
                       <textarea id={def.key} name={def.key} className="input" rows={6} defaultValue={settings[def.key]} maxLength={def.max} />
@@ -37,7 +41,8 @@ export default async function InstitutionalAdminPage() {
                       <input id={def.key} name={def.key} className="input" defaultValue={settings[def.key]} maxLength={def.max} />
                     )}
                   </Field>
-                ))}
+                  ),
+                )}
               </ActionForm>
             ) : (
               <dl className="space-y-3 text-sm">
@@ -77,7 +82,7 @@ export default async function InstitutionalAdminPage() {
               )}
             </div>
             {canWrite ? (
-              <ActionForm action={saveStaffAction.bind(null, null)} submitLabel="Adicionar pessoa" className="space-y-4">
+              <ActionForm action={saveStaffAction.bind(null, null)} submitLabel="Adicionar pessoa" className="space-y-4" resetOnSuccess>
                 <Field name="name" label="Nome">
                   <input id="name" name="name" className="input" required maxLength={120} />
                 </Field>

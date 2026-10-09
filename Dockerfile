@@ -17,7 +17,8 @@ RUN npm run build
 FROM base AS runner
 ENV NODE_ENV=production
 COPY --from=build /app /app
-RUN chown -R node:node /app
+# Pasta das imagens enviadas (driver local); deve ser montada como volume persistente.
+RUN mkdir -p /app/storage/uploads && chown -R node:node /app
 USER node
 EXPOSE 3000
 # Aplica as migrations pendentes e inicia o servidor.

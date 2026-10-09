@@ -25,25 +25,29 @@ type Props = {
   pendingLabel?: string;
   className?: string;
   submitClassName?: string;
+  /** Limpa os campos depois de um envio bem-sucedido (formulários de "adicionar"). */
+  resetOnSuccess?: boolean;
 };
 
 /**
  * Formulário ligado a uma Server Action.
  * Mantém os valores digitados quando o servidor devolve erro e exibe as mensagens de forma acessível.
  */
-export function ActionForm({ action, children, submitLabel, pendingLabel = "Salvando…", className, submitClassName }: Props) {
+export function ActionForm({ action, children, submitLabel, pendingLabel = "Salvando…", className, submitClassName, resetOnSuccess = false }: Props) {
   const router = useRouter();
   const [state, setState] = useState<ActionState>({});
   const [pending, startTransition] = useTransition();
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     startTransition(async () => {
       try {
         const result = await action(formData);
         setState(result ?? {});
         if (result?.ok) {
+          if (resetOnSuccess) form.reset();
           if (result.redirectTo) router.push(result.redirectTo);
           router.refresh();
         }

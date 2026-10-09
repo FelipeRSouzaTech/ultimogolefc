@@ -23,6 +23,12 @@ export const newsSchema = z.object({
   content: z.string().trim().min(20, "O conteúdo deve ter pelo menos 20 caracteres.").max(50_000, "Conteúdo muito longo."),
   categoryId: optionalText(40, "Categoria inválida."),
   authorName: optionalText(120, "Nome do autor muito longo."),
+  coverPath: z
+    .string()
+    .trim()
+    .max(200, "Caminho muito longo.")
+    .regex(/^(\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp))?$/, "Envie uma imagem PNG, JPG ou WebP.")
+    .transform((value) => (value === "" ? null : value)),
   seoTitle: optionalText(70, "O título SEO deve ter no máximo 70 caracteres."),
   seoDescription: optionalText(170, "A descrição SEO deve ter no máximo 170 caracteres."),
   status: z.enum(NEWS_STATUSES, { errorMap: () => ({ message: "Selecione um estado válido." }) }),

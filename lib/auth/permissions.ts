@@ -22,6 +22,7 @@ export const PERMISSIONS = [
   "football:delete",
   "content:read",
   "content:write",
+  "media:upload",
   "messages:manage",
   "audit:read",
   "users:manage",
@@ -33,8 +34,8 @@ const ALL: readonly Permission[] = PERMISSIONS;
 const MATRIX: Record<Role, readonly Permission[]> = {
   SUPERADMIN: ALL,
   ADMIN: ALL.filter((permission) => permission !== "users:manage"),
-  EDITOR: ["dashboard:view", "news:read", "news:write", "news:publish", "news:delete", "football:read", "content:read", "content:write"],
-  FOOTBALL_MANAGER: ["dashboard:view", "football:read", "football:write", "football:delete", "news:read", "content:read"],
+  EDITOR: ["dashboard:view", "news:read", "news:write", "news:publish", "news:delete", "football:read", "content:read", "content:write", "media:upload"],
+  FOOTBALL_MANAGER: ["dashboard:view", "football:read", "football:write", "football:delete", "news:read", "content:read", "media:upload"],
   VIEWER: ["dashboard:view", "news:read", "football:read", "content:read"],
 };
 

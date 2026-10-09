@@ -1,5 +1,6 @@
 import { ActionForm } from "@/components/ui/action-form";
 import { Field } from "@/components/ui/field";
+import { ImageField } from "@/components/ui/image-field";
 import type { FormAction } from "@/lib/action";
 import { utcToSaoPauloLocal } from "@/lib/datetime";
 import { SPONSOR_TIERS, SPONSOR_TIER_LABELS } from "@/modules/sponsors/rules";
@@ -51,9 +52,7 @@ export function SponsorForm({ action, values }: { action: FormAction; values?: V
           <input id="instagramUrl" name="instagramUrl" type="url" className="input" defaultValue={values?.instagramUrl ?? ""} maxLength={200} />
         </Field>
       </div>
-      <Field name="logoPath" label="Logotipo (caminho da imagem)" hint="Opcional. Ex.: /brand/patrocinador.png. Sem imagem, é exibido o nome.">
-        <input id="logoPath" name="logoPath" className="input" defaultValue={values?.logoPath ?? ""} maxLength={200} />
-      </Field>
+      <ImageField name="logoPath" label="Logotipo" defaultValue={values?.logoPath} hint="Opcional. PNG, JPG ou WebP, até 5 MB. Sem imagem, é exibido o nome." />
       <Field name="description" label="Descrição" hint="Opcional.">
         <textarea id="description" name="description" className="input" rows={3} defaultValue={values?.description ?? ""} />
       </Field>

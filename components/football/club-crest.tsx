@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SmartImage } from "@/components/ui/smart-image";
 
 type Props = { name: string; crestPath: string | null; size?: number };
 
@@ -12,7 +12,7 @@ function initials(name: string): string {
 export function ClubCrest({ name, crestPath, size = 56 }: Props) {
   if (crestPath) {
     return (
-      <Image
+      <SmartImage
         src={crestPath}
         alt=""
         width={size}

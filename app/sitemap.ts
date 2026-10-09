@@ -6,7 +6,7 @@ import { publicNewsWhere } from "@/modules/news/service";
 // Gerado a cada requisição: depende do conteúdo publicado e não deve exigir banco durante o build.
 export const dynamic = "force-dynamic";
 
-const STATIC_PATHS = ["", "/jogos", "/resultados", "/competicoes", "/noticias", "/futebol", "/clube", "/patrocinadores", "/apoie", "/contato", "/privacidade"];
+const STATIC_PATHS = ["", "/jogos", "/resultados", "/competicoes", "/noticias", "/futebol", "/galeria", "/clube", "/patrocinadores", "/apoie", "/contato", "/privacidade"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({ url: `${SITE_URL}${path}` }));

@@ -24,6 +24,12 @@ test.describe("portal público", () => {
       ["/resultados", "Resultados"],
       ["/competicoes", "Competições"],
       ["/noticias", "Notícias"],
+      ["/galeria", "Galeria"],
+      ["/futebol", "Futebol"],
+      ["/clube", "Clube"],
+      ["/patrocinadores", "Patrocinadores"],
+      ["/apoie", "Apoie o clube"],
+      ["/contato", "Contato"],
     ] as const) {
       await page.goto(path);
       await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
@@ -61,6 +67,13 @@ test.describe("proteção do painel", () => {
     await page.getByRole("button", { name: "Entrar" }).click();
     await expect(page.getByRole("alert")).toContainText("E-mail ou senha inválidos.");
     await expect(page).toHaveURL(/\/admin\/login$/);
+  });
+
+  test("caminhos de mídia inválidos não expõem arquivos do servidor", async ({ request }) => {
+    for (const path of ["/midia/qualquer.png", "/midia/2026/10/..%2F..%2F.env", "/midia/2026/10/0123456789abcdef01234567.svg"]) {
+      const response = await request.get(path);
+      expect(response.status()).toBe(404);
+    }
   });
 
   test("cookie de sessão forjado não dá acesso", async ({ page, context, baseURL }) => {

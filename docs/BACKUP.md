@@ -2,8 +2,9 @@
 
 > Comandos padrão do PostgreSQL; ainda não exercitados neste projeto (veja `docs/STATUS.md`).
 
-O banco guarda todo o conteúdo do portal. As imagens enviadas ficarão em armazenamento de objetos (fase de mídia)
-e terão backup próprio.
+O banco guarda todo o conteúdo do portal, mas **não** as imagens: elas ficam no armazenamento
+(pasta local ou bucket S3) e precisam de backup próprio. Um backup do banco sem as imagens restaura um
+portal com fotos quebradas.
 
 ## Backup
 
@@ -25,6 +26,18 @@ Recomendações:
 - Backup diário automático, guardando pelo menos 7 diários e 4 semanais.
 - Cópia fora do servidor (outro provedor ou bucket), com acesso restrito e criptografia.
 - O arquivo contém dados pessoais (nomes e e-mails de usuários do painel): trate-o conforme a LGPD.
+
+## Backup das imagens
+
+Driver local, com Docker (volume `ultimogole-uploads` ou o volume `uploads` do Compose):
+
+```bash
+docker run --rm -v ultimogole-uploads:/dados -v "$PWD/backups":/saida alpine \
+  tar czf /saida/uploads-$(date +%F).tar.gz -C /dados .
+```
+
+Em desenvolvimento, basta copiar a pasta `storage/uploads`. No driver S3, use o versionamento ou a
+replicação do próprio provedor. Faça o backup das imagens junto com o do banco, para ficarem coerentes.
 
 ## Restauração
 

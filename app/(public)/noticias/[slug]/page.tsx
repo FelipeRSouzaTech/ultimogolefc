@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NewsCard } from "@/components/news/news-card";
 import { ShareLink } from "@/components/news/share-link";
+import { SmartImage } from "@/components/ui/smart-image";
 import { formatDate, formatTime } from "@/lib/datetime";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { parseContent } from "@/modules/news/rules";
@@ -27,6 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `/noticias/${article.slug}`,
       publishedTime: article.publishedAt?.toISOString(),
       modifiedTime: article.updatedAt.toISOString(),
+      images: article.coverPath ? [{ url: article.coverPath }] : undefined,
     },
   };
 }
@@ -80,6 +82,9 @@ export default async function ArticlePage({ params }: Props) {
             ) : null}
           </p>
         </header>
+        {article.coverPath ? (
+          <SmartImage src={article.coverPath} alt="" width={1600} height={900} priority className="mt-8 aspect-video w-full rounded-lg object-cover" />
+        ) : null}
         <div className="prose-news mt-8">
           {parseContent(article.content).map((block, index) =>
             block.type === "heading" ? <h2 key={index}>{block.text}</h2> : <p key={index}>{block.text}</p>,

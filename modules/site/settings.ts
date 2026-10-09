@@ -21,6 +21,7 @@ export const SETTING_GROUPS: SettingGroup[] = [
       { key: "home.bannerTitle", label: "Título do banner", kind: "text", max: 80 },
       { key: "home.bannerDescription", label: "Descrição do banner", kind: "text", max: 200 },
       { key: "home.bannerLinkLabel", label: "Texto do botão", kind: "text", max: 30 },
+      { key: "home.bannerImagePath", label: "Imagem de fundo do banner", kind: "imagePath", max: 200, hint: "Opcional. Imagem larga (ex.: 1920×800), até 5 MB. O texto fica sobre uma camada azul-marinho." },
       { key: "home.bannerLinkUrl", label: "Link do botão", kind: "url", max: 200, hint: "Endereço interno (ex.: /jogos) ou completo com https://." },
     ],
   },
@@ -56,7 +57,7 @@ export const SETTING_GROUPS: SettingGroup[] = [
       { key: "support.purpose", label: "Finalidade das contribuições", kind: "longtext", max: 5000 },
       { key: "support.pixKey", label: "Chave Pix", kind: "text", max: 140 },
       { key: "support.pixHolder", label: "Titular da chave Pix", kind: "text", max: 120 },
-      { key: "support.qrCodePath", label: "QR Code (caminho da imagem)", kind: "imagePath", max: 200, hint: "Ex.: /brand/pix-qrcode.png." },
+      { key: "support.qrCodePath", label: "QR Code (caminho da imagem)", kind: "imagePath", max: 200, hint: "Opcional. PNG, JPG ou WebP, até 5 MB." },
     ],
   },
   {

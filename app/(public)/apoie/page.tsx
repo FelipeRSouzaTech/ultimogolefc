@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { CopyButton } from "@/components/ui/copy-button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageTitle } from "@/components/ui/page-title";
 import { Prose } from "@/components/ui/prose";
+import { SmartImage } from "@/components/ui/smart-image";
 import { getSettings } from "@/modules/site/service";
 
 export const metadata: Metadata = {
@@ -66,7 +66,7 @@ export default async function ApoiePage() {
                   Pix
                 </h2>
                 {qrCodePath ? (
-                  <Image src={qrCodePath} alt="QR Code do Pix do clube" width={240} height={240} className="mx-auto mt-4 size-56 object-contain" />
+                  <SmartImage src={qrCodePath} alt="QR Code do Pix do clube" width={240} height={240} className="mx-auto mt-4 size-56 object-contain" />
                 ) : null}
                 <dl className="mt-4 space-y-3 text-sm">
                   <div>

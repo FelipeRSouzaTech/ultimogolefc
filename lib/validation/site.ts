@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { GALLERY_CATEGORIES } from "@/modules/gallery/rules";
 import { isSafeUrl } from "@/modules/site/settings";
 import { SPONSOR_TIERS } from "@/modules/sponsors/rules";
 import { POSITIONS, STAFF_GROUPS } from "@/modules/squad/rules";
@@ -68,4 +69,19 @@ export const contactSchema = z.object({
   email: emailSchema,
   subject: z.string().trim().min(3, "Informe o assunto.").max(150, "Assunto muito longo."),
   message: z.string().trim().min(10, "A mensagem deve ter pelo menos 10 caracteres.").max(5000, "A mensagem deve ter no máximo 5.000 caracteres."),
+});
+
+export const gallerySchema = z.object({
+  title: z.string().trim().min(3, "Informe o título do álbum.").max(120, "Título muito longo."),
+  description: optionalText(2000, "Descrição muito longa."),
+  category: z.enum(GALLERY_CATEGORIES, { errorMap: () => ({ message: "Selecione a categoria." }) }),
+  eventDate: z.string().trim().regex(/^(\d{4}-\d{2}-\d{2})?$/, "Data inválida."),
+  isPublished: z.boolean(),
+});
+
+export const galleryImageSchema = z.object({
+  // O texto alternativo é obrigatório: descreve a foto para quem usa leitor de tela.
+  altText: z.string().trim().min(3, "Descreva a imagem em poucas palavras.").max(200, "Texto alternativo muito longo."),
+  caption: optionalText(300, "Legenda muito longa."),
+  sortOrder,
 });

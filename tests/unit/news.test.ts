@@ -70,6 +70,7 @@ describe("newsSchema", () => {
     content: "Conteúdo com tamanho suficiente para passar.",
     categoryId: "",
     authorName: "",
+    coverPath: "",
     seoTitle: "",
     seoDescription: "",
     status: "DRAFT",

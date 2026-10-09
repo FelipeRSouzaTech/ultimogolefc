@@ -1,5 +1,6 @@
 import { ActionForm } from "@/components/ui/action-form";
 import { Field } from "@/components/ui/field";
+import { ImageField } from "@/components/ui/image-field";
 import type { FormAction } from "@/lib/action";
 import { utcToSaoPauloLocal } from "@/lib/datetime";
 import { NEWS_STATUSES, NEWS_STATUS_LABELS } from "@/modules/news/rules";
@@ -13,6 +14,7 @@ type Values = {
   publishedAt: Date | null;
   categoryId: string | null;
   authorName: string | null;
+  coverPath: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
 };
@@ -38,6 +40,7 @@ export function NewsForm({ action, categories, canPublish, values, defaultAuthor
       <Field name="summary" label="Resumo" hint="Aparece nas listagens e como descrição padrão em buscadores.">
         <textarea id="summary" name="summary" className="input" rows={3} defaultValue={values?.summary} required maxLength={300} />
       </Field>
+      <ImageField name="coverPath" label="Imagem de capa" defaultValue={values?.coverPath} hint="Opcional. Imagem horizontal (ex.: 1600×900), PNG, JPG ou WebP, até 5 MB." />
       <Field name="content" label="Conteúdo" hint='Separe os parágrafos com uma linha em branco. Para subtítulos, comece a linha com "## ". HTML não é interpretado.'>
         <textarea id="content" name="content" className="input" rows={16} defaultValue={values?.content} required />
       </Field>

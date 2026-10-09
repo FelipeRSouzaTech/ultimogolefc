@@ -48,7 +48,7 @@ export default async function CategoriesPage() {
         </Panel>
         {can(user.role, "news:write") ? (
           <Panel title="Nova categoria">
-            <ActionForm action={createCategoryAction} submitLabel="Criar categoria">
+            <ActionForm action={createCategoryAction} submitLabel="Criar categoria" resetOnSuccess>
               <Field name="name" label="Nome">
                 <input id="name" name="name" className="input" required maxLength={60} />
               </Field>

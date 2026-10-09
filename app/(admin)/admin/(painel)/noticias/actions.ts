@@ -19,6 +19,7 @@ export async function saveNewsAction(id: string | null, formData: FormData): Pro
       content: field(formData, "content"),
       categoryId: field(formData, "categoryId"),
       authorName: field(formData, "authorName"),
+      coverPath: field(formData, "coverPath"),
       seoTitle: field(formData, "seoTitle"),
       seoDescription: field(formData, "seoDescription"),
       status: field(formData, "status"),
@@ -58,6 +59,7 @@ export async function saveNewsAction(id: string | null, formData: FormData): Pro
       publishedAt: resolvePublishedAt(data.status, requested, previous?.publishedAt ?? null),
       categoryId: data.categoryId,
       authorName: data.authorName,
+      coverPath: data.coverPath,
       seoTitle: data.seoTitle,
       seoDescription: data.seoDescription,
     };

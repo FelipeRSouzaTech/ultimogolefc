@@ -4,6 +4,7 @@ import { MatchCard, ResultCard } from "@/components/football/match-card";
 import { StandingsTable } from "@/components/football/standings-table";
 import { NewsCard } from "@/components/news/news-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { SmartImage } from "@/components/ui/smart-image";
 import { CREST_PATH, SITE_NAME } from "@/lib/site";
 import { getFeaturedSeason, getSeasonStandings } from "@/modules/competitions/service";
 import { getOwnClub, lastOwnResults, nextOwnMatch } from "@/modules/matches/service";
@@ -25,6 +26,7 @@ export default async function HomePage() {
   const bannerDescription = settings["home.bannerDescription"] || "Jogos, resultados, competições e notícias do clube em um só lugar.";
   const bannerLinkLabel = settings["home.bannerLinkLabel"] ?? "";
   const bannerLinkUrl = settings["home.bannerLinkUrl"] ?? "";
+  const bannerImagePath = settings["home.bannerImagePath"] ?? "";
   const hasBannerLink = bannerLinkLabel !== "" && bannerLinkUrl !== "" && isSafeUrl(bannerLinkUrl);
   const [nextMatch, results, standings] = await Promise.all([
     ownClub ? nextOwnMatch(ownClub.id) : null,
@@ -35,8 +37,15 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="border-b border-gray-100 bg-primary text-white">
-        <div className="container-page flex flex-col items-center gap-8 py-12 text-center md:flex-row md:py-16 md:text-left">
+      <section className="relative overflow-hidden border-b border-gray-100 bg-primary text-white">
+        {bannerImagePath ? (
+          <>
+            <SmartImage src={bannerImagePath} alt="" fill priority sizes="100vw" className="object-cover" />
+            {/* Camada azul-marinho sobre a foto para garantir o contraste do texto. */}
+            <div aria-hidden="true" className="absolute inset-0 bg-primary/85" />
+          </>
+        ) : null}
+        <div className="container-page relative flex flex-col items-center gap-8 py-12 text-center md:flex-row md:py-16 md:text-left">
           <div className="rounded-lg bg-white p-4">
             <Image src={CREST_PATH} alt={`Escudo do ${SITE_NAME}`} width={448} height={594} priority className="h-40 w-auto md:h-52" />
           </div>
@@ -173,7 +182,7 @@ export default async function HomePage() {
               {sponsors.slice(0, 12).map((sponsor) => (
                 <li key={sponsor.id} className="card flex h-24 w-44 items-center justify-center p-4 text-center">
                   {sponsor.logoPath ? (
-                    <Image src={sponsor.logoPath} alt={sponsor.name} width={160} height={80} className="max-h-full w-auto object-contain" />
+                    <SmartImage src={sponsor.logoPath} alt={sponsor.name} width={160} height={80} className="max-h-full w-auto object-contain" />
                   ) : (
                     <span className="text-sm font-bold uppercase">{sponsor.name}</span>
                   )}

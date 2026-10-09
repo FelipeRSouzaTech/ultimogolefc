@@ -23,7 +23,10 @@ as alterações passam por Server Actions. Três camadas, separadas por pasta:
 | Renderização | Páginas públicas dinâmicas (`force-dynamic`) | O conteúdo muda pelo painel e o build não precisa de banco. Cache pode ser adicionado depois, onde for seguro. |
 | Estilo | Tailwind CSS 4 com tokens em `@theme`; paleta padrão removida | Só existem as cores institucionais; impossível usar uma cor fora da paleta por engano. |
 | Fontes | Fontes do sistema | Evita download externo no build e no navegador. |
-| Schema | Só as entidades usadas nesta etapa | As demais (elenco, patrocinadores, galeria, mídia etc.) entram por migrations nas fases correspondentes. |
+| Mídia | Arquivos em pasta local ou S3; banco só com metadados; entrega por `/midia/<chave>` | Atende à regra de não gravar binários no banco e permite trocar de armazenamento por variável de ambiente. |
+| Cliente S3 | Assinatura SigV4 própria (`lib/storage/sigv4.ts`), sem o SDK da AWS | Evita uma dependência grande para duas operações (PUT e DELETE); coberta pelo vetor de teste oficial da AWS. |
+| Imagens enviadas | Entregues sem o otimizador do Next.js | O otimizador não foi validado com a rota `/midia`; fica como melhoria. |
+| Schema | Só as entidades usadas em cada etapa | As demais (elenco, patrocinadores, galeria, mídia etc.) entram por migrations nas fases correspondentes. |
 
 ## Permissões
 
@@ -36,6 +39,8 @@ as alterações passam por Server Actions. Três camadas, separadas por pasta:
 | Futebol: criar/editar, excluir | ✔ | ✔ | — | ✔ | — |
 | Institucional e patrocinadores: consultar | ✔ | ✔ | ✔ | ✔ | ✔ |
 | Institucional e patrocinadores: alterar | ✔ | ✔ | ✔ | — | — |
+| Enviar imagens | ✔ | ✔ | ✔ | ✔ | — |
+| Galeria e exclusão de mídia | ✔ | ✔ | ✔ | — | — |
 | Mensagens de contato | ✔ | ✔ | — | — | — |
 | Auditoria | ✔ | ✔ | — | — | — |
 | Usuários | ✔ | — | — | — | — |
@@ -77,6 +82,13 @@ o último superadministrador ativo não pode ser rebaixado nem desativado (verif
 **Patrocinadores, elenco e diretoria**
 - Patrocinador aparece se estiver ativo e dentro da vigência (`modules/sponsors/rules.ts`).
 - Pessoas só aparecem com "Divulgação autorizada" marcada.
+
+**Mídia** (`modules/media/rules.ts`)
+- O tipo é identificado pelos primeiros bytes do arquivo; a extensão precisa ser coerente com ele.
+- As chaves são geradas pelo sistema (`AAAA/MM/<24 hex>.<ext>`); qualquer outro formato é recusado na
+  gravação e na leitura, o que impede acesso a outras pastas do servidor.
+- Um arquivo só pode ser excluído se não estiver em uso (galeria, capa, escudo, foto, logotipo, configurações).
+- Fotos de galeria exigem texto alternativo.
 
 **Contato** (`modules/site/contact.ts`)
 - Validação no servidor, campo-armadilha contra robôs e limite de 3 mensagens por IP por hora (40 no total).

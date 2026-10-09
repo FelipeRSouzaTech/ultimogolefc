@@ -5,7 +5,7 @@ Portal público, painel administrativo e banco de dados do Último Gole FC.
 **Stack:** Next.js 15 (App Router) · React 19 · TypeScript estrito · Tailwind CSS 4 · PostgreSQL 16 · Prisma 6 · Zod · Vitest · Playwright · Docker.
 
 > **Estado atual:** fundação, futebol (jogos, resultados, competições, classificação, elenco), notícias,
-> institucional, patrocinadores, apoio e contato. Falta galeria e upload de mídia.
+> institucional, patrocinadores, apoio, contato, galeria e upload de imagens.
 > O que já foi verificado e o que ainda não foi está em [`docs/STATUS.md`](docs/STATUS.md).
 
 ## Requisitos

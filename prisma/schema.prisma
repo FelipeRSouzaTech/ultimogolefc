@@ -63,6 +63,14 @@ enum StaffGroup {
   TECHNICAL
 }
 
+enum GalleryCategory {
+  MATCH
+  EVENT
+  BACKSTAGE
+  FANS
+  SOCIAL
+}
+
 enum SponsorTier {
   MASTER
   OFFICIAL
@@ -81,9 +89,10 @@ model User {
   createdAt    DateTime  @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
 
-  sessions  Session[]
-  articles  NewsArticle[]
-  auditLogs AuditLog[]
+  sessions    Session[]
+  articles    NewsArticle[]
+  auditLogs   AuditLog[]
+  mediaAssets MediaAsset[]
 }
 
 model Session {
@@ -149,6 +158,7 @@ model NewsArticle {
   status         NewsStatus @default(DRAFT)
   publishedAt    DateTime?  @db.Timestamptz(3)
   authorName     String?
+  coverPath      String?
   seoTitle       String?
   seoDescription String?
   categoryId     String?
@@ -337,4 +347,52 @@ model ContactMessage {
 
   @@index([createdAt])
   @@index([ipAddress, createdAt])
+}
+
+// Metadados dos arquivos enviados. O binário fica no armazenamento (pasta local ou S3), nunca no banco.
+model MediaAsset {
+  id           String   @id @default(cuid())
+  key          String   @unique
+  mimeType     String
+  size         Int
+  originalName String?
+  uploadedById String?
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+
+  uploadedBy    User?          @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  galleryImages GalleryImage[]
+
+  @@index([createdAt])
+}
+
+model Gallery {
+  id          String          @id @default(cuid())
+  title       String
+  slug        String          @unique
+  description String?         @db.Text
+  category    GalleryCategory
+  eventDate   DateTime?       @db.Timestamptz(3)
+  isPublished Boolean         @default(false)
+  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime        @updatedAt @db.Timestamptz(3)
+
+  images GalleryImage[]
+
+  @@index([isPublished, eventDate])
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  galleryId String
+  mediaId   String
+  altText   String
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  gallery Gallery    @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  media   MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+
+  @@index([galleryId, sortOrder])
+  @@index([mediaId])
 }

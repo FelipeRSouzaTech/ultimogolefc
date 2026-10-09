@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageTitle } from "@/components/ui/page-title";
+import { SmartImage } from "@/components/ui/smart-image";
 import { groupByTier } from "@/modules/sponsors/rules";
 import { listVisibleSponsors } from "@/modules/sponsors/service";
 
@@ -31,7 +31,7 @@ export default async function PatrocinadoresPage() {
                 {group.sponsors.map((sponsor) => (
                   <li key={sponsor.id} className="card flex flex-col items-center p-6 text-center">
                     {sponsor.logoPath ? (
-                      <Image src={sponsor.logoPath} alt="" width={240} height={120} className="h-20 w-auto max-w-full object-contain" />
+                      <SmartImage src={sponsor.logoPath} alt="" width={240} height={120} className="h-20 w-auto max-w-full object-contain" />
                     ) : null}
                     <h3 className={`text-lg uppercase ${sponsor.logoPath ? "mt-4" : ""}`}>{sponsor.name}</h3>
                     {sponsor.description ? <p className="mt-2 text-sm text-gray-600">{sponsor.description}</p> : null}

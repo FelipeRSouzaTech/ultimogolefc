@@ -55,7 +55,7 @@ export default async function UsersPage() {
         </Panel>
 
         <Panel title="Novo usuário">
-          <ActionForm action={createUserAction} submitLabel="Criar usuário" className="space-y-4">
+          <ActionForm action={createUserAction} submitLabel="Criar usuário" className="space-y-4" resetOnSuccess>
             <Field name="name" label="Nome">
               <input id="name" name="name" className="input" required maxLength={120} />
             </Field>

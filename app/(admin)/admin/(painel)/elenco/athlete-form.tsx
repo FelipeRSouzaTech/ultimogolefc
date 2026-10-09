@@ -1,5 +1,6 @@
 import { ActionForm } from "@/components/ui/action-form";
 import { Field } from "@/components/ui/field";
+import { ImageField } from "@/components/ui/image-field";
 import type { FormAction } from "@/lib/action";
 import { POSITIONS, POSITION_LABELS } from "@/modules/squad/rules";
 
@@ -43,9 +44,7 @@ export function AthleteForm({ action, values }: { action: FormAction; values?: V
           </select>
         </Field>
       </div>
-      <Field name="photoPath" label="Foto (caminho da imagem)" hint="Opcional. Ex.: /brand/jogador.png. Sem foto, são exibidas as iniciais.">
-        <input id="photoPath" name="photoPath" className="input" defaultValue={values?.photoPath ?? ""} maxLength={200} />
-      </Field>
+      <ImageField name="photoPath" label="Foto" defaultValue={values?.photoPath} hint="Opcional. PNG, JPG ou WebP, até 5 MB. Sem foto, são exibidas as iniciais." />
       <Field name="bio" label="Biografia" hint="Opcional.">
         <textarea id="bio" name="bio" className="input" rows={5} defaultValue={values?.bio ?? ""} />
       </Field>

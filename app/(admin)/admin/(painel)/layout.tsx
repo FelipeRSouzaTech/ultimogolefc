@@ -21,6 +21,8 @@ const MENU: { href: string; label: string; permission: Permission | null }[] = [
   { href: "/admin/elenco", label: "Elenco", permission: "football:read" },
   { href: "/admin/patrocinadores", label: "Patrocinadores", permission: "content:read" },
   { href: "/admin/institucional", label: "Institucional", permission: "content:read" },
+  { href: "/admin/galeria", label: "Galeria", permission: "content:read" },
+  { href: "/admin/midia", label: "Mídia", permission: "content:read" },
   { href: "/admin/mensagens", label: "Mensagens", permission: "messages:manage" },
   { href: "/admin/usuarios", label: "Usuários", permission: "users:manage" },
   { href: "/admin/auditoria", label: "Auditoria", permission: "audit:read" },
