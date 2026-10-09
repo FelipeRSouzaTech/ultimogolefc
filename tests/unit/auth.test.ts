@@ -4,8 +4,12 @@ import { can, isRole, permissionsOf, PERMISSIONS, ROLES } from "@/lib/auth/permi
 import { checkUserChange, type UserSnapshot } from "@/modules/users/rules";
 import { createUserSchema, loginSchema } from "@/lib/validation/auth";
 
+// O hash de senha é lento de propósito (scrypt); com os testes rodando em paralelo, cada cálculo pode
+// levar alguns segundos em máquinas mais modestas. Por isso estes testes têm limite de tempo maior.
+const SLOW = { timeout: 60_000 };
+
 describe("senhas", () => {
-  it("gera hash diferente do texto e valida a senha correta", async () => {
+  it("gera hash diferente do texto e valida a senha correta", SLOW, async () => {
     const hash = await hashPassword("uma-senha-bem-longa");
     expect(hash.startsWith("scrypt$")).toBe(true);
     expect(hash.includes("uma-senha-bem-longa")).toBe(false);
@@ -13,12 +17,12 @@ describe("senhas", () => {
     expect(await verifyPassword("outra-senha-qualquer", hash)).toBe(false);
   });
 
-  it("usa sal aleatório: a mesma senha gera hashes diferentes", async () => {
+  it("usa sal aleatório: a mesma senha gera hashes diferentes", SLOW, async () => {
     const [a, b] = await Promise.all([hashPassword("senha-repetida-123"), hashPassword("senha-repetida-123")]);
     expect(a === b).toBe(false);
   });
 
-  it("recusa hash malformado sem lançar erro", async () => {
+  it("recusa hash malformado sem lançar erro", SLOW, async () => {
     expect(await verifyPassword("x", "")).toBe(false);
     expect(await verifyPassword("x", "texto-puro")).toBe(false);
     expect(await verifyPassword("x", "scrypt$0$8$1$$")).toBe(false);
