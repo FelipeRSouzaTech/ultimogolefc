@@ -13,11 +13,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   const now = new Date();
 
   const canAudit = can(user.role, "audit:read");
-  const [published, drafts, activeCompetitions, clubs, upcoming, results] = await Promise.all([
+  const [published, drafts, activeCompetitions, athletes, activeSponsors, unreadMessages, upcoming, results] = await Promise.all([
     prisma.newsArticle.count({ where: { status: "PUBLISHED", publishedAt: { lte: now } } }),
     prisma.newsArticle.count({ where: { status: "DRAFT" } }),
     prisma.competition.count({ where: { isActive: true } }),
-    prisma.club.count(),
+    prisma.athlete.count({ where: { status: "ACTIVE" } }),
+    prisma.sponsor.count({ where: { isActive: true } }),
+    can(user.role, "messages:manage") ? prisma.contactMessage.count({ where: { isRead: false } }) : Promise.resolve(null),
     listUpcomingMatches({}, 5),
     listResults({}, 5),
   ]);
@@ -31,7 +33,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     { label: "Notícias publicadas", value: published, href: "/admin/noticias" },
     { label: "Notícias em rascunho", value: drafts, href: "/admin/noticias?status=DRAFT" },
     { label: "Competições ativas", value: activeCompetitions, href: "/admin/competicoes" },
-    { label: "Clubes cadastrados", value: clubs, href: "/admin/clubes" },
+    { label: "Jogadores ativos", value: athletes, href: "/admin/elenco" },
+    { label: "Patrocinadores ativos", value: activeSponsors, href: "/admin/patrocinadores" },
+    ...(unreadMessages === null ? [] : [{ label: "Mensagens não lidas", value: unreadMessages, href: "/admin/mensagens" }]),
   ];
 
   return (
@@ -43,7 +47,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         </p>
       ) : null}
 
-      <ul className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <ul className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {stats.map((item) => (
           <li key={item.label}>
             <Link href={item.href} className="card block p-5 hover:border-primary">

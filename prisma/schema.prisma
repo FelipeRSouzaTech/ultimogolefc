@@ -46,6 +46,30 @@ enum Tiebreaker {
   HEAD_TO_HEAD
 }
 
+enum AthletePosition {
+  GOALKEEPER
+  DEFENDER
+  MIDFIELDER
+  FORWARD
+}
+
+enum AthleteStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum StaffGroup {
+  BOARD
+  TECHNICAL
+}
+
+enum SponsorTier {
+  MASTER
+  OFFICIAL
+  SUPPORTER
+  INSTITUTIONAL
+}
+
 model User {
   id           String    @id @default(cuid())
   name         String
@@ -244,4 +268,73 @@ model StandingOverride {
   club   Club   @relation(fields: [clubId], references: [id], onDelete: Restrict)
 
   @@unique([seasonId, clubId])
+}
+
+model Athlete {
+  id          String          @id @default(cuid())
+  name        String
+  nickname    String?
+  position    AthletePosition
+  shirtNumber Int?
+  bio         String?         @db.Text
+  photoPath   String?
+  status      AthleteStatus   @default(ACTIVE)
+  // Só aparece no portal quando a divulgação foi autorizada.
+  isPublished Boolean         @default(false)
+  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@index([isPublished, status, position])
+}
+
+model StaffMember {
+  id          String     @id @default(cuid())
+  name        String
+  role        String
+  group       StaffGroup
+  sortOrder   Int        @default(0)
+  isPublished Boolean    @default(false)
+  createdAt   DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime   @updatedAt @db.Timestamptz(3)
+
+  @@index([isPublished, group, sortOrder])
+}
+
+model Sponsor {
+  id           String      @id @default(cuid())
+  name         String
+  tier         SponsorTier
+  description  String?     @db.Text
+  logoPath     String?
+  websiteUrl   String?
+  instagramUrl String?
+  startsAt     DateTime?   @db.Timestamptz(3)
+  endsAt       DateTime?   @db.Timestamptz(3)
+  sortOrder    Int         @default(0)
+  isActive     Boolean     @default(false)
+  createdAt    DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime    @updatedAt @db.Timestamptz(3)
+
+  @@index([isActive, tier, sortOrder])
+}
+
+// Conteúdo institucional editável pelo painel (chave → texto). As chaves válidas ficam em modules/site/settings.ts.
+model SiteSetting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  ipAddress String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([createdAt])
+  @@index([ipAddress, createdAt])
 }

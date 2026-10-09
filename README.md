@@ -4,9 +4,9 @@ Portal público, painel administrativo e banco de dados do Último Gole FC.
 
 **Stack:** Next.js 15 (App Router) · React 19 · TypeScript estrito · Tailwind CSS 4 · PostgreSQL 16 · Prisma 6 · Zod · Vitest · Playwright · Docker.
 
-> **Estado atual:** Fase 1 (fundação) e base funcional (jogos, resultados, competições, classificação e notícias).
-> Este código foi escrito em um ambiente sem acesso ao npm, portanto **ainda não foi instalado, compilado nem executado por completo**.
-> O que foi e o que não foi verificado está em [`docs/STATUS.md`](docs/STATUS.md). Leia antes de usar.
+> **Estado atual:** fundação, futebol (jogos, resultados, competições, classificação, elenco), notícias,
+> institucional, patrocinadores, apoio e contato. Falta galeria e upload de mídia.
+> O que já foi verificado e o que ainda não foi está em [`docs/STATUS.md`](docs/STATUS.md).
 
 ## Requisitos
 
@@ -25,8 +25,9 @@ docker compose up -d db
 # 3. Dependências (gera também o package-lock.json — faça commit dele)
 npm install
 
-# 4. Primeira migration (só na primeira vez; gera prisma/migrations — faça commit da pasta)
-npm run db:migrate -- --name init
+# 4. Banco: aplica as migrations existentes e gera uma nova se o schema tiver mudado
+#    (quando ele pedir um nome, ou passando --name; faça commit de prisma/migrations)
+npm run db:migrate
 
 # 5. Dados de demonstração (opcional; todos fictícios e identificados como tal)
 npm run db:seed

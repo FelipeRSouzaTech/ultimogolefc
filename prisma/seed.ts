@@ -72,6 +72,18 @@ async function main() {
     },
   });
 
+  await prisma.athlete.createMany({
+    data: [
+      { name: "Jogador Demonstração 1", position: "GOALKEEPER", shirtNumber: 1, isPublished: true },
+      { name: "Jogador Demonstração 2", position: "DEFENDER", shirtNumber: 4, isPublished: true },
+      { name: "Jogador Demonstração 3", position: "MIDFIELDER", shirtNumber: 8, isPublished: true },
+      { name: "Jogador Demonstração 4", position: "FORWARD", shirtNumber: 9, isPublished: true },
+    ],
+  });
+  await prisma.sponsor.create({
+    data: { name: "Patrocinador de Demonstração", tier: "MASTER", description: "Parceiro fictício criado pelo seed.", isActive: true },
+  });
+
   console.log("Seed de demonstração aplicado. Crie o primeiro administrador com: npm run admin:create");
 }
 

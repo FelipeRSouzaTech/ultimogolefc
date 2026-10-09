@@ -8,9 +8,24 @@ import { CREST_PATH, SITE_NAME } from "@/lib/site";
 import { getFeaturedSeason, getSeasonStandings } from "@/modules/competitions/service";
 import { getOwnClub, lastOwnResults, nextOwnMatch } from "@/modules/matches/service";
 import { latestPublicNews } from "@/modules/news/service";
+import { getSettings } from "@/modules/site/service";
+import { isExternalUrl, isSafeUrl } from "@/modules/site/settings";
+import { listVisibleSponsors } from "@/modules/sponsors/service";
 
 export default async function HomePage() {
-  const [ownClub, news, featuredSeason] = await Promise.all([getOwnClub(), latestPublicNews(4), getFeaturedSeason()]);
+  const [ownClub, news, featuredSeason, settings, sponsors] = await Promise.all([
+    getOwnClub(),
+    latestPublicNews(4),
+    getFeaturedSeason(),
+    getSettings(),
+    listVisibleSponsors(),
+  ]);
+  // Banner configurável pelo painel; sem configuração, usa a apresentação padrão.
+  const bannerTitle = settings["home.bannerTitle"] || SITE_NAME;
+  const bannerDescription = settings["home.bannerDescription"] || "Jogos, resultados, competições e notícias do clube em um só lugar.";
+  const bannerLinkLabel = settings["home.bannerLinkLabel"] ?? "";
+  const bannerLinkUrl = settings["home.bannerLinkUrl"] ?? "";
+  const hasBannerLink = bannerLinkLabel !== "" && bannerLinkUrl !== "" && isSafeUrl(bannerLinkUrl);
   const [nextMatch, results, standings] = await Promise.all([
     ownClub ? nextOwnMatch(ownClub.id) : null,
     ownClub ? lastOwnResults(ownClub.id) : [],
@@ -27,12 +42,24 @@ export default async function HomePage() {
           </div>
           <div className="flex-1">
             <p className="text-xs font-bold uppercase tracking-[0.2em]">Portal oficial</p>
-            <h1 className="mt-2 text-4xl uppercase sm:text-5xl lg:text-6xl">{SITE_NAME}</h1>
-            <p className="mt-4 max-w-xl text-base sm:text-lg">Jogos, resultados, competições e notícias do clube em um só lugar.</p>
+            <h1 className="mt-2 text-4xl uppercase sm:text-5xl lg:text-6xl">{bannerTitle}</h1>
+            <p className="mt-4 max-w-xl text-base sm:text-lg">{bannerDescription}</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3 md:justify-start">
-              <Link href="/jogos" className="btn btn-secondary">
-                Próximos jogos
-              </Link>
+              {hasBannerLink ? (
+                isExternalUrl(bannerLinkUrl) ? (
+                  <a href={bannerLinkUrl} className="btn btn-secondary" target="_blank" rel="noopener noreferrer">
+                    {bannerLinkLabel}
+                  </a>
+                ) : (
+                  <Link href={bannerLinkUrl} className="btn btn-secondary">
+                    {bannerLinkLabel}
+                  </Link>
+                )
+              ) : (
+                <Link href="/jogos" className="btn btn-secondary">
+                  Próximos jogos
+                </Link>
+              )}
               <Link href="/noticias" className="btn border-white text-white hover:bg-white hover:text-primary">
                 Notícias
               </Link>
@@ -131,6 +158,45 @@ export default async function HomePage() {
             )}
           </section>
         </div>
+
+        {sponsors.length > 0 ? (
+          <section aria-labelledby="patrocinadores-home">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <h2 id="patrocinadores-home" className="section-title">
+                Patrocinadores
+              </h2>
+              <Link href="/patrocinadores" className="link text-sm">
+                Ver todos
+              </Link>
+            </div>
+            <ul className="flex flex-wrap items-center justify-center gap-4">
+              {sponsors.slice(0, 12).map((sponsor) => (
+                <li key={sponsor.id} className="card flex h-24 w-44 items-center justify-center p-4 text-center">
+                  {sponsor.logoPath ? (
+                    <Image src={sponsor.logoPath} alt={sponsor.name} width={160} height={80} className="max-h-full w-auto object-contain" />
+                  ) : (
+                    <span className="text-sm font-bold uppercase">{sponsor.name}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        <section className="card grid gap-6 border-t-4 border-t-primary p-6 sm:p-10 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <h2 className="text-2xl uppercase">Apoie o Último Gole FC</h2>
+            <p className="mt-2 max-w-xl text-gray-600">Conheça o clube e saiba como contribuir com as nossas atividades.</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/apoie" className="btn btn-primary">
+              Apoie o clube
+            </Link>
+            <Link href="/clube" className="btn btn-secondary">
+              Conheça o clube
+            </Link>
+          </div>
+        </section>
       </div>
     </>
   );

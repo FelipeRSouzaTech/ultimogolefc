@@ -20,6 +20,9 @@ export const PERMISSIONS = [
   "football:read",
   "football:write",
   "football:delete",
+  "content:read",
+  "content:write",
+  "messages:manage",
   "audit:read",
   "users:manage",
 ] as const;
@@ -30,9 +33,9 @@ const ALL: readonly Permission[] = PERMISSIONS;
 const MATRIX: Record<Role, readonly Permission[]> = {
   SUPERADMIN: ALL,
   ADMIN: ALL.filter((permission) => permission !== "users:manage"),
-  EDITOR: ["dashboard:view", "news:read", "news:write", "news:publish", "news:delete", "football:read"],
-  FOOTBALL_MANAGER: ["dashboard:view", "football:read", "football:write", "football:delete", "news:read"],
-  VIEWER: ["dashboard:view", "news:read", "football:read"],
+  EDITOR: ["dashboard:view", "news:read", "news:write", "news:publish", "news:delete", "football:read", "content:read", "content:write"],
+  FOOTBALL_MANAGER: ["dashboard:view", "football:read", "football:write", "football:delete", "news:read", "content:read"],
+  VIEWER: ["dashboard:view", "news:read", "football:read", "content:read"],
 };
 
 export function isRole(value: unknown): value is Role {

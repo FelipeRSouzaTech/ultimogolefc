@@ -34,6 +34,9 @@ as alterações passam por Server Actions. Três camadas, separadas por pasta:
 | Notícias: criar/editar, publicar, excluir | ✔ | ✔ | ✔ | — | — |
 | Futebol: consultar | ✔ | ✔ | ✔ | ✔ | ✔ |
 | Futebol: criar/editar, excluir | ✔ | ✔ | — | ✔ | — |
+| Institucional e patrocinadores: consultar | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Institucional e patrocinadores: alterar | ✔ | ✔ | ✔ | — | — |
+| Mensagens de contato | ✔ | ✔ | — | — | — |
 | Auditoria | ✔ | ✔ | — | — | — |
 | Usuários | ✔ | — | — | — | — |
 
@@ -65,6 +68,19 @@ o último superadministrador ativo não pode ser rebaixado nem desativado (verif
 **Notícias** (`modules/news/rules.ts`)
 - Visível no portal somente se `PUBLISHED` e com data de publicação já alcançada. Data futura = agendamento.
 - Publicar, agendar e arquivar exigem a permissão `news:publish`.
+
+**Conteúdo institucional** (`modules/site/settings.ts`)
+- Chaves fixas definidas no código; cada uma com tipo (texto, endereço, e-mail, caminho de imagem) e limite.
+- Endereços aceitam só caminho interno ou `https://`, o que bloqueia `javascript:` e similares.
+- Campo em branco não aparece no portal. Chave Pix e demais dados nunca têm valor padrão.
+
+**Patrocinadores, elenco e diretoria**
+- Patrocinador aparece se estiver ativo e dentro da vigência (`modules/sponsors/rules.ts`).
+- Pessoas só aparecem com "Divulgação autorizada" marcada.
+
+**Contato** (`modules/site/contact.ts`)
+- Validação no servidor, campo-armadilha contra robôs e limite de 3 mensagens por IP por hora (40 no total).
+- Nenhum e-mail é enviado; o portal informa apenas que a mensagem foi recebida.
 
 ## API
 
