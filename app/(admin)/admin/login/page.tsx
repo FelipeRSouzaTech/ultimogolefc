@@ -17,7 +17,7 @@ export default async function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
       <div className="card w-full max-w-sm p-8">
         <div className="mb-6 text-center">
-          <Image src={CREST_PATH} alt={`Escudo do ${SITE_NAME}`} width={448} height={594} priority className="mx-auto h-24 w-auto" />
+          <Image src={CREST_PATH} alt={`Escudo do ${SITE_NAME}`} width={448} height={505} priority className="mx-auto h-24 w-auto" />
           <h1 className="mt-4 text-xl uppercase">Painel administrativo</h1>
           <p className="mt-1 text-sm text-gray-600">{SITE_NAME}</p>
         </div>

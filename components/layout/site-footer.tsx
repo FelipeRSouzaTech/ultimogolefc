@@ -19,7 +19,7 @@ export async function SiteFooter() {
       <div className="container-page grid gap-8 py-10 md:grid-cols-[1.2fr_1.5fr_1fr] md:gap-12">
         <div>
           <div className="flex items-center gap-3">
-            <Image src={CREST_PATH} alt="" width={448} height={594} className="h-16 w-auto" />
+            <Image src={CREST_PATH} alt="" width={448} height={505} className="h-16 w-auto" />
             <p className="font-display text-lg font-extrabold uppercase text-primary">{SITE_NAME}</p>
           </div>
           {footerText ? <p className="mt-4 text-sm text-gray-600">{footerText}</p> : null}

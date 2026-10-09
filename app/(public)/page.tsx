@@ -46,9 +46,7 @@ export default async function HomePage() {
           </>
         ) : null}
         <div className="container-page relative flex flex-col items-center gap-8 py-12 text-center md:flex-row md:py-16 md:text-left">
-          <div className="rounded-lg bg-white p-4">
-            <Image src={CREST_PATH} alt={`Escudo do ${SITE_NAME}`} width={448} height={594} priority className="h-40 w-auto md:h-52" />
-          </div>
+          <Image src={CREST_PATH} alt={`Escudo do ${SITE_NAME}`} width={448} height={505} priority className="h-44 w-auto shrink-0 md:h-60" />
           <div className="flex-1">
             <p className="text-xs font-bold uppercase tracking-[0.2em]">Portal oficial</p>
             <h1 className="mt-2 text-4xl uppercase sm:text-5xl lg:text-6xl">{bannerTitle}</h1>

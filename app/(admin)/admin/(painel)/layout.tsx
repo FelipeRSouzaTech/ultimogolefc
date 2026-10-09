@@ -38,7 +38,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="min-h-screen bg-gray-50 lg:grid lg:grid-cols-[15rem_1fr]">
       <aside className="border-b border-gray-100 bg-white lg:border-b-0 lg:border-r">
         <Link href="/admin" className="flex items-center gap-3 border-b border-gray-100 px-4 py-3">
-          <Image src={CREST_PATH} alt="" width={448} height={594} className="h-10 w-auto" />
+          <Image src={CREST_PATH} alt="" width={448} height={505} className="h-10 w-auto" />
           <span className="font-display text-sm font-extrabold uppercase leading-tight text-primary">
             {SITE_NAME}
             <span className="block text-xs font-semibold text-gray-600">Painel</span>
