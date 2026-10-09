@@ -49,25 +49,25 @@ export default async function HomePage() {
           <Image src={CREST_PATH} alt={`Escudo do ${SITE_NAME}`} width={448} height={505} priority className="h-44 w-auto shrink-0 md:h-60" />
           <div className="flex-1">
             <p className="text-xs font-bold uppercase tracking-[0.2em]">Portal oficial</p>
-            <h1 className="mt-2 text-4xl uppercase sm:text-5xl lg:text-6xl">{bannerTitle}</h1>
+            <h1 className="mt-2 text-3xl uppercase sm:text-5xl lg:text-6xl">{bannerTitle}</h1>
             <p className="mt-4 max-w-xl text-base sm:text-lg">{bannerDescription}</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3 md:justify-start">
               {hasBannerLink ? (
                 isExternalUrl(bannerLinkUrl) ? (
-                  <a href={bannerLinkUrl} className="btn btn-secondary" target="_blank" rel="noopener noreferrer">
+                  <a href={bannerLinkUrl} className="btn btn-inverse btn-lg" target="_blank" rel="noopener noreferrer">
                     {bannerLinkLabel}
                   </a>
                 ) : (
-                  <Link href={bannerLinkUrl} className="btn btn-secondary">
+                  <Link href={bannerLinkUrl} className="btn btn-inverse btn-lg">
                     {bannerLinkLabel}
                   </Link>
                 )
               ) : (
-                <Link href="/jogos" className="btn btn-secondary">
+                <Link href="/jogos" className="btn btn-inverse btn-lg">
                   Próximos jogos
                 </Link>
               )}
-              <Link href="/noticias" className="btn border-white text-white hover:bg-white hover:text-primary">
+              <Link href="/noticias" className="btn btn-outline-inverse btn-lg">
                 Notícias
               </Link>
             </div>

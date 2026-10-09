@@ -42,6 +42,12 @@ O que foi executado na etapa 4:
 
 Depois de atualizar: `git pull`, `npm install`, `npm run db:migrate -- --name lances`, `npm run check`.
 
+**Ajuste visual (tipografia, botões e cabeçalho)** — feito em ambiente sem acesso ao npm, portanto
+**sem `npm run check` local**: lint, tipos, testes e build ficam a cargo do CI do pull request. O que foi
+conferido: sintaxe dos arquivos alterados, largura real dos textos do menu e dos títulos com a nova fonte e
+uma prévia estática dos estilos de `app/globals.css`. **Ainda sem confirmação:** as páginas reais no navegador
+(desktop e celular), em especial o cabeçalho entre 1024 e 1280 px e o cartão da notícia em destaque com foto.
+
 Para os testes de integração, crie um banco separado e rode:
 
 ```bash
@@ -54,7 +60,7 @@ npm run test:integration
 ## Implementado
 
 **Fundação**
-- Design system com tokens (`app/globals.css`), Dockerfile, Docker Compose, CI.
+- Design system com tokens (`app/globals.css`): fonte Montserrat servida pelo próprio site, botões por variante e tamanho. Dockerfile, Docker Compose, CI.
 - Autenticação com sessões em banco, senhas com scrypt, bloqueio após 5 falhas em 15 minutos.
 - RBAC com 5 funções verificado no servidor em toda página e operação. Auditoria das operações críticas.
 
