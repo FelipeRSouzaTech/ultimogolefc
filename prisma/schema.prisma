@@ -1,0 +1,247 @@
+// Schema do Último Gole FC.
+// Datas são armazenadas em UTC (timestamptz) e convertidas para America/Sao_Paulo na exibição.
+// A classificação NÃO é persistida: é calculada a partir das partidas encerradas (modo AUTO).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  EDITOR
+  FOOTBALL_MANAGER
+  VIEWER
+}
+
+enum NewsStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  FINISHED
+  POSTPONED
+  CANCELLED
+}
+
+enum StandingsMode {
+  AUTO
+  MANUAL
+}
+
+enum Tiebreaker {
+  WINS
+  GOAL_DIFFERENCE
+  GOALS_FOR
+  GOALS_AGAINST
+  HEAD_TO_HEAD
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(VIEWER)
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime? @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
+
+  sessions  Session[]
+  articles  NewsArticle[]
+  auditLogs AuditLog[]
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime  @db.Timestamptz(3)
+  revokedAt DateTime? @db.Timestamptz(3)
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ipAddress String?
+  success   Boolean
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([email, createdAt])
+  @@index([ipAddress, createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  summary   String?
+  before    Json?
+  after     Json?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+model NewsCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  articles NewsArticle[]
+}
+
+model NewsArticle {
+  id             String     @id @default(cuid())
+  title          String
+  slug           String     @unique
+  summary        String
+  content        String     @db.Text
+  status         NewsStatus @default(DRAFT)
+  publishedAt    DateTime?  @db.Timestamptz(3)
+  authorName     String?
+  seoTitle       String?
+  seoDescription String?
+  categoryId     String?
+  authorId       String?
+  createdAt      DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime   @updatedAt @db.Timestamptz(3)
+
+  category NewsCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  author   User?         @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+}
+
+model Club {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  shortName String?
+  slug      String   @unique
+  crestPath String?
+  isOwnClub Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  seasons     CompetitionTeam[]
+  homeMatches Match[]            @relation("HomeTeam")
+  awayMatches Match[]            @relation("AwayTeam")
+  overrides   StandingOverride[]
+}
+
+model Competition {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  seasons Season[]
+}
+
+model Season {
+  id            String        @id @default(cuid())
+  competitionId String
+  label         String
+  regulation    String?       @db.Text
+  pointsWin     Int           @default(3)
+  pointsDraw    Int           @default(1)
+  pointsLoss    Int           @default(0)
+  tiebreakers   Tiebreaker[]  @default([WINS, GOAL_DIFFERENCE, GOALS_FOR])
+  standingsMode StandingsMode @default(AUTO)
+  isCurrent     Boolean       @default(false)
+  createdAt     DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime      @updatedAt @db.Timestamptz(3)
+
+  competition Competition        @relation(fields: [competitionId], references: [id], onDelete: Restrict)
+  teams       CompetitionTeam[]
+  matches     Match[]
+  overrides   StandingOverride[]
+
+  @@unique([competitionId, label])
+}
+
+model CompetitionTeam {
+  seasonId  String
+  clubId    String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Restrict)
+
+  @@id([seasonId, clubId])
+  @@index([clubId])
+}
+
+model Match {
+  id         String      @id @default(cuid())
+  seasonId   String
+  homeTeamId String
+  awayTeamId String
+  kickoffAt  DateTime    @db.Timestamptz(3)
+  venue      String?
+  round      String?
+  status     MatchStatus @default(SCHEDULED)
+  homeScore  Int?
+  awayScore  Int?
+  notes      String?     @db.Text
+  createdAt  DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime    @updatedAt @db.Timestamptz(3)
+
+  season   Season @relation(fields: [seasonId], references: [id], onDelete: Restrict)
+  homeTeam Club   @relation("HomeTeam", fields: [homeTeamId], references: [id], onDelete: Restrict)
+  awayTeam Club   @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Restrict)
+
+  @@index([seasonId, status])
+  @@index([status, kickoffAt])
+  @@index([homeTeamId])
+  @@index([awayTeamId])
+}
+
+// Usado apenas quando Season.standingsMode = MANUAL.
+model StandingOverride {
+  id           String @id @default(cuid())
+  seasonId     String
+  clubId       String
+  position     Int
+  played       Int    @default(0)
+  wins         Int    @default(0)
+  draws        Int    @default(0)
+  losses       Int    @default(0)
+  goalsFor     Int    @default(0)
+  goalsAgainst Int    @default(0)
+  points       Int    @default(0)
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Restrict)
+
+  @@unique([seasonId, clubId])
+}

@@ -1,0 +1,137 @@
+import Image from "next/image";
+import Link from "next/link";
+import { MatchCard, ResultCard } from "@/components/football/match-card";
+import { StandingsTable } from "@/components/football/standings-table";
+import { NewsCard } from "@/components/news/news-card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { CREST_PATH, SITE_NAME } from "@/lib/site";
+import { getFeaturedSeason, getSeasonStandings } from "@/modules/competitions/service";
+import { getOwnClub, lastOwnResults, nextOwnMatch } from "@/modules/matches/service";
+import { latestPublicNews } from "@/modules/news/service";
+
+export default async function HomePage() {
+  const [ownClub, news, featuredSeason] = await Promise.all([getOwnClub(), latestPublicNews(4), getFeaturedSeason()]);
+  const [nextMatch, results, standings] = await Promise.all([
+    ownClub ? nextOwnMatch(ownClub.id) : null,
+    ownClub ? lastOwnResults(ownClub.id) : [],
+    featuredSeason ? getSeasonStandings(featuredSeason.id) : null,
+  ]);
+  const [mainNews, ...otherNews] = news;
+
+  return (
+    <>
+      <section className="border-b border-gray-100 bg-primary text-white">
+        <div className="container-page flex flex-col items-center gap-8 py-12 text-center md:flex-row md:py-16 md:text-left">
+          <div className="rounded-lg bg-white p-4">
+            <Image src={CREST_PATH} alt={`Escudo do ${SITE_NAME}`} width={448} height={594} priority className="h-40 w-auto md:h-52" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-bold uppercase tracking-[0.2em]">Portal oficial</p>
+            <h1 className="mt-2 text-4xl uppercase sm:text-5xl lg:text-6xl">{SITE_NAME}</h1>
+            <p className="mt-4 max-w-xl text-base sm:text-lg">Jogos, resultados, competições e notícias do clube em um só lugar.</p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3 md:justify-start">
+              <Link href="/jogos" className="btn btn-secondary">
+                Próximos jogos
+              </Link>
+              <Link href="/noticias" className="btn border-white text-white hover:bg-white hover:text-primary">
+                Notícias
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="container-page space-y-14 py-12">
+        <section aria-labelledby="proximo-jogo">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <h2 id="proximo-jogo" className="section-title">
+              Próximo jogo
+            </h2>
+            <Link href="/jogos" className="link text-sm">
+              Ver todos
+            </Link>
+          </div>
+          {nextMatch ? (
+            <MatchCard match={nextMatch} />
+          ) : (
+            <EmptyState title="Nenhum jogo agendado" description="Assim que a próxima partida for confirmada, ela aparecerá aqui." />
+          )}
+        </section>
+
+        <section aria-labelledby="ultimos-resultados">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <h2 id="ultimos-resultados" className="section-title">
+              Últimos resultados
+            </h2>
+            <Link href="/resultados" className="link text-sm">
+              Ver todos
+            </Link>
+          </div>
+          {results.length === 0 ? (
+            <EmptyState title="Nenhum resultado registrado" description="Os placares aparecerão aqui depois que as partidas forem encerradas." />
+          ) : (
+            <ul className="space-y-4">
+              {results.map((match) => (
+                <li key={match.id}>
+                  <ResultCard match={match} ownClubId={ownClub?.id} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr]">
+          <section aria-labelledby="noticias-destaque">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <h2 id="noticias-destaque" className="section-title">
+                Notícias
+              </h2>
+              <Link href="/noticias" className="link text-sm">
+                Ver todas
+              </Link>
+            </div>
+            {!mainNews ? (
+              <EmptyState title="Nenhuma notícia publicada" description="As notícias do clube aparecerão aqui assim que forem publicadas." />
+            ) : (
+              <div className="space-y-6">
+                <NewsCard article={mainNews} featured />
+                {otherNews.length > 0 ? (
+                  <ul className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                    {otherNews.map((article) => (
+                      <li key={article.id}>
+                        <NewsCard article={article} />
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            )}
+          </section>
+
+          <section aria-labelledby="classificacao-home">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <h2 id="classificacao-home" className="section-title">
+                Classificação
+              </h2>
+              {featuredSeason ? (
+                <Link href={`/competicoes/${featuredSeason.competition.slug}`} className="link text-sm">
+                  Tabela completa
+                </Link>
+              ) : null}
+            </div>
+            {featuredSeason && standings && standings.rows.length > 0 ? (
+              <div className="card p-4">
+                <p className="eyebrow mb-3">
+                  {featuredSeason.competition.name} · {featuredSeason.label}
+                </p>
+                <StandingsTable rows={standings.rows} mode={standings.mode} caption={`Classificação — ${featuredSeason.competition.name} ${featuredSeason.label}`} compact />
+              </div>
+            ) : (
+              <EmptyState title="Classificação indisponível" description="A tabela será exibida quando houver uma temporada em andamento cadastrada." />
+            )}
+          </section>
+        </div>
+      </div>
+    </>
+  );
+}
