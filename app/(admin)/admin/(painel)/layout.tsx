@@ -20,6 +20,7 @@ const MENU: { href: string; label: string; permission: Permission | null }[] = [
   { href: "/admin/competicoes", label: "Competições", permission: "football:read" },
   { href: "/admin/clubes", label: "Clubes", permission: "football:read" },
   { href: "/admin/elenco", label: "Elenco", permission: "football:read" },
+  { href: "/admin/diretores", label: "Diretores", permission: "content:read" },
   { href: "/admin/patrocinadores", label: "Patrocinadores", permission: "content:read" },
   { href: "/admin/institucional", label: "Institucional", permission: "content:read" },
   { href: "/admin/galeria", label: "Galeria", permission: "content:read" },

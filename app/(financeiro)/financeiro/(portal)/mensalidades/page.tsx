@@ -8,9 +8,8 @@ import { requireFinance } from "@/lib/auth/finance-guard";
 import { can } from "@/lib/auth/permissions";
 import { formatDate, utcToSaoPauloLocal } from "@/lib/datetime";
 import type { SearchParams } from "@/lib/params";
-import { centsToInput, DUE_STATUS_LABELS, dueStatus, monthLabel, PAYMENT_METHODS, PAYMENT_METHOD_LABELS, type DueStatus } from "@/modules/finance/rules";
+import { centsToInput, DIRECTOR_STATUS_LABELS, DUE_STATUS_LABELS, dueStatus, monthLabel, PAYMENT_METHODS, PAYMENT_METHOD_LABELS, type DirectorStatus, type DueStatus } from "@/modules/finance/rules";
 import { getDueSettings, listDues } from "@/modules/finance/service";
-import { displayName } from "@/modules/squad/rules";
 import { generateDuesAction, payDueAction, saveDueSettingsAction, unwaiveDueAction, waiveDueAction } from "../actions";
 import { MonthNav } from "../finance-nav";
 import { Money } from "../money";
@@ -37,7 +36,7 @@ export default async function DuesPage({ searchParams }: { searchParams: SearchP
 
   return (
     <>
-      <AdminHeading title="Mensalidades" description="Cobrança mensal dos jogadores ativos." />
+      <AdminHeading title="Mensalidades" description="Mensalidade paga pelos diretores do clube. Os diretores são cadastrados no painel administrativo." />
       {canWrite ? null : <ReadOnlyNotice />}
       <MonthNav basePath="/financeiro/mensalidades" month={month} />
 
@@ -46,7 +45,7 @@ export default async function DuesPage({ searchParams }: { searchParams: SearchP
           {dues.length === 0 ? (
             <EmptyState
               title="Nenhuma mensalidade neste mês"
-              description={settings.amountCents === null ? "Defina o valor da mensalidade ao lado e depois gere as cobranças." : "Gere as cobranças para os jogadores ativos."}
+              description={settings.amountCents === null ? "Defina o valor da mensalidade ao lado e depois gere as cobranças." : "Gere as cobranças para os diretores ativos."}
             />
           ) : (
             <>
@@ -71,7 +70,10 @@ export default async function DuesPage({ searchParams }: { searchParams: SearchP
                     <li key={due.id} className="py-3">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <p className="font-semibold">{displayName(due.athlete)}</p>
+                          <p className="font-semibold">{due.director.name}</p>
+                          <p className="text-sm text-gray-600">
+                            {due.director.role} · {DIRECTOR_STATUS_LABELS[due.director.status as DirectorStatus]}
+                          </p>
                           <p className="text-sm text-gray-600">
                             <Money cents={due.amountCents} /> · vence em {formatDate(due.dueDate)}
                             {status === "PAID" && due.entry ? ` · paga em ${formatDate(due.entry.occurredOn)}` : ""}
@@ -128,7 +130,7 @@ export default async function DuesPage({ searchParams }: { searchParams: SearchP
           <div className="space-y-6">
             <Panel title="Gerar cobranças">
               <p className="mb-4 text-sm text-gray-600">
-                Cria a mensalidade de {monthLabel(month)} para cada jogador ativo que ainda não tem. Pode ser repetido sem duplicar.
+                Cria a mensalidade de {monthLabel(month)} para cada diretor com situação "Ativo" que ainda não tem. Pode ser repetido sem duplicar.
               </p>
               {settings.amountCents === null ? (
                 <p className="alert alert-info">Defina o valor da mensalidade abaixo para liberar a geração.</p>

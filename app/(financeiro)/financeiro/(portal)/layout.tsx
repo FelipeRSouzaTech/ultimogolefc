@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 const MENU = [
   { href: "/financeiro", label: "Resumo" },
   { href: "/financeiro/lancamentos", label: "Lançamentos" },
+  { href: "/financeiro/folha", label: "Folha de pagamento" },
   { href: "/financeiro/mensalidades", label: "Mensalidades" },
   { href: "/financeiro/acordos", label: "Patrocínios e doações" },
   { href: "/financeiro/jogos", label: "Custos por jogo" },

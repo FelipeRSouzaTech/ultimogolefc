@@ -6,7 +6,7 @@ export type EntryType = (typeof ENTRY_TYPES)[number];
 export const ENTRY_TYPE_LABELS: Record<EntryType, string> = { INCOME: "Receita", EXPENSE: "Despesa" };
 
 export const INCOME_CATEGORIES = ["MEMBERSHIP", "SPONSORSHIP", "DONATION", "EVENT", "OTHER_INCOME"] as const;
-export const EXPENSE_CATEGORIES = ["REFEREE", "FIELD", "UNIFORM", "EQUIPMENT", "TRANSPORT", "REGISTRATION", "OTHER_EXPENSE"] as const;
+export const EXPENSE_CATEGORIES = ["PLAYER_PAYMENT", "REFEREE", "FIELD", "UNIFORM", "EQUIPMENT", "TRANSPORT", "REGISTRATION", "OTHER_EXPENSE"] as const;
 export const CATEGORIES = [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES] as const;
 export type Category = (typeof CATEGORIES)[number];
 
@@ -22,6 +22,7 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   EQUIPMENT: "Material esportivo",
   TRANSPORT: "Transporte",
   REGISTRATION: "Inscrição em competição",
+  PLAYER_PAYMENT: "Jogadores",
   OTHER_EXPENSE: "Outras despesas",
 };
 
@@ -147,10 +148,44 @@ export function dueStatus(due: DueLike, now: Date = new Date()): DueStatus {
   return due.dueDate.getTime() < now.getTime() ? "OVERDUE" : "OPEN";
 }
 
-/** Jogadores que ainda não têm mensalidade no mês (gerar duas vezes não duplica). */
-export function athletesWithoutDue(activeAthleteIds: readonly string[], existingAthleteIds: readonly string[]): string[] {
-  const existing = new Set(existingAthleteIds);
-  return [...new Set(activeAthleteIds)].filter((id) => !existing.has(id));
+/** Diretores que ainda não têm mensalidade no mês (gerar duas vezes não duplica). */
+export function membersWithoutDue(activeIds: readonly string[], existingIds: readonly string[]): string[] {
+  const existing = new Set(existingIds);
+  return [...new Set(activeIds)].filter((id) => !existing.has(id));
+}
+
+// ---------- Diretores ----------
+
+export const DIRECTOR_STATUSES = ["ACTIVE", "AWAY", "ON_LEAVE", "INACTIVE", "DISMISSED"] as const;
+export type DirectorStatus = (typeof DIRECTOR_STATUSES)[number];
+export const DIRECTOR_STATUS_LABELS: Record<DirectorStatus, string> = {
+  ACTIVE: "Ativo",
+  AWAY: "Afastado",
+  ON_LEAVE: "Licenciado",
+  INACTIVE: "Inativo",
+  DISMISSED: "Desligado",
+};
+
+/** Só diretores ativos recebem cobrança de mensalidade; afastados, licenciados, inativos e desligados ficam de fora. */
+export function paysDues(status: string): boolean {
+  return status === "ACTIVE";
+}
+
+// ---------- Folha de pagamento ----------
+
+type PayrollEntry = { athleteId: string | null; amountCents: number; voidedAt: Date | null };
+
+/** Total pago a cada jogador (sem os estornos), do maior para o menor. */
+export function totalsByAthlete(entries: readonly PayrollEntry[]): { athleteId: string; totalCents: number; count: number }[] {
+  const totals = new Map<string, { totalCents: number; count: number }>();
+  for (const entry of entries) {
+    if (entry.voidedAt !== null || entry.athleteId === null) continue;
+    const current = totals.get(entry.athleteId) ?? { totalCents: 0, count: 0 };
+    current.totalCents += entry.amountCents;
+    current.count += 1;
+    totals.set(entry.athleteId, current);
+  }
+  return [...totals.entries()].map(([athleteId, value]) => ({ athleteId, ...value })).sort((a, b) => b.totalCents - a.totalCents);
 }
 
 // ---------- Resumo do caixa ----------

@@ -60,12 +60,12 @@ npm run test:integration
 **Portal financeiro (`/financeiro`, separado do painel)** — escrito em ambiente sem acesso ao npm, portanto **sem `npm run check`
 local**: lint, tipos, build e testes com Vitest ficam a cargo do CI do pull request. O que foi executado:
 
-1. **Testes unitários — 123 de 123 passaram** (98 anteriores + 25 novos), com `tsx` e o executor nativo do
+1. **Testes unitários — 126 de 126 passaram** (98 anteriores + 28 novos), com `tsx` e o executor nativo do
    Node, usando um substituto mínimo de `describe/it/expect`. Os novos cobrem: conversão de valores para
    centavos sem erro de arredondamento, meses e vencimentos no horário de Brasília, situação das mensalidades,
    resumo do caixa ignorando estornos, exportação CSV (inclusive proteção contra fórmulas) e permissões.
 2. **Migrations em banco limpo**: as cinco migrations, incluindo a nova `financeiro` (escrita à mão, no
-   formato do Prisma), aplicaram em sequência a um PostgreSQL 16 vazio, sem erros (25 tabelas).
+   formato do Prisma), aplicaram em sequência a um PostgreSQL 16 vazio, sem erros (26 tabelas).
 3. **Checagem parcial de tipos com `tsc`**, com declarações substitutas para Next.js, React e Prisma.
 
 **Ainda sem confirmação:** as telas no navegador, os testes de integração do financeiro
@@ -107,7 +107,9 @@ diferença e ela deve ser gerada e versionada.
 
 **Portal financeiro (`/financeiro`, área própria com login e menu próprios)**
 - Caixa com receitas e despesas por categoria, estorno com motivo e exportação CSV.
-- Mensalidades dos jogadores: geração mensal, baixa de pagamento, isenção e situação (paga, em aberto, atrasada).
+- Folha de pagamento: pagamentos aos jogadores, ligados ao elenco, à competição e à partida, lançados como despesa.
+- Mensalidades dos diretores: geração mensal, baixa de pagamento, isenção e situação (paga, em aberto, atrasada).
+- Cadastro de diretores no painel administrativo (nome, função, situação e foto).
 - Patrocínios e doações: valor combinado e recebido. Custos por jogo.
 - Nova função Tesoureiro. Detalhes em [`FINANCEIRO.md`](FINANCEIRO.md).
 
@@ -118,7 +120,7 @@ diferença e ela deve ser gerada e versionada.
 - Redimensionamento e otimização das imagens enviadas: hoje elas são entregues no tamanho original.
 - Envio de várias fotos de uma vez na galeria (hoje é uma por envio) e reordenação por arrastar.
 - Pagamento pela plataforma (Pix ou cartão): a estrutura está preparada, a integração não foi feita.
-- Financeiro: edição de acordos, categorias personalizadas, relatório anual e acesso do jogador às próprias mensalidades.
+- Financeiro: edição de acordos, categorias personalizadas, relatório anual e unificação do cadastro de Diretores com a diretoria exibida na página Clube.
 - Linha do tempo e documentos do clube; escalação do adversário.
 - Execução dos testes de integração e dos testes E2E.
 - Envio de e-mail do formulário de contato: hoje a mensagem fica registrada no painel e o portal informa

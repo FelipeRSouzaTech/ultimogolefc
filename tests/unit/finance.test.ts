@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { can, homePathFor, ROLES } from "@/lib/auth/permissions";
 import {
-  athletesWithoutDue,
+  membersWithoutDue,
   categoryType,
   centsToInput,
   csvCell,
@@ -14,9 +14,11 @@ import {
   monthLabel,
   monthRange,
   parseMoney,
+  paysDues,
   shiftMonth,
   summarize,
   toCsv,
+  totalsByAthlete,
 } from "@/modules/finance/rules";
 
 describe("valores em dinheiro", () => {
@@ -115,9 +117,35 @@ describe("mensalidades", () => {
   });
 
   it("gerar mensalidades de novo não duplica as existentes", () => {
-    expect(athletesWithoutDue(["a", "b", "c"], ["b"])).toEqual(["a", "c"]);
-    expect(athletesWithoutDue(["a", "a", "b"], [])).toEqual(["a", "b"]);
-    expect(athletesWithoutDue(["a"], ["a"])).toEqual([]);
+    expect(membersWithoutDue(["a", "b", "c"], ["b"])).toEqual(["a", "c"]);
+    expect(membersWithoutDue(["a", "a", "b"], [])).toEqual(["a", "b"]);
+    expect(membersWithoutDue(["a"], ["a"])).toEqual([]);
+  });
+
+  it("só diretores ativos são cobrados", () => {
+    expect(paysDues("ACTIVE")).toBe(true);
+    for (const status of ["AWAY", "ON_LEAVE", "INACTIVE", "DISMISSED"]) {
+      expect(paysDues(status)).toBe(false);
+    }
+  });
+});
+
+describe("folha de pagamento", () => {
+  const payment = (athleteId: string | null, amountCents: number, voided = false) => ({ athleteId, amountCents, voidedAt: voided ? new Date() : null });
+
+  it("pagamento a jogador é despesa na categoria Jogadores", () => {
+    expect(categoryType("PLAYER_PAYMENT")).toBe("EXPENSE");
+    const summary = summarize([{ type: "EXPENSE", category: "PLAYER_PAYMENT", amountCents: 15000, voidedAt: null }]);
+    expect(summary).toMatchObject({ incomeCents: 0, expenseCents: 15000, balanceCents: -15000 });
+  });
+
+  it("soma por jogador, do maior para o menor, sem contar estornos", () => {
+    const totals = totalsByAthlete([payment("a", 10000), payment("b", 30000), payment("a", 5000), payment("a", 99999, true), payment(null, 7000)]);
+    expect(totals).toEqual([
+      { athleteId: "b", totalCents: 30000, count: 1 },
+      { athleteId: "a", totalCents: 15000, count: 2 },
+    ]);
+    expect(totalsByAthlete([])).toEqual([]);
   });
 });
 

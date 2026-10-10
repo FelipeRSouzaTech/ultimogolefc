@@ -115,6 +115,12 @@ export default async function EntriesPage({ searchParams }: { searchParams: Sear
                               Partida: {entry.match.homeTeam.name} x {entry.match.awayTeam.name}
                             </p>
                           ) : null}
+                          {entry.athlete ? (
+                            <p className="text-sm text-gray-600">
+                              Jogador: {entry.athlete.nickname?.trim() || entry.athlete.name}
+                              {entry.competition ? ` · ${entry.competition.name}` : ""}
+                            </p>
+                          ) : null}
                           {entry.agreement ? <p className="text-sm text-gray-600">Acordo: {entry.agreement.name}</p> : null}
                           {entry.notes ? <p className="text-sm text-gray-600">{entry.notes}</p> : null}
                           {voided ? (

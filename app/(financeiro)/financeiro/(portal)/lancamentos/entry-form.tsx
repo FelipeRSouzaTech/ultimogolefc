@@ -12,8 +12,9 @@ type Props = { action: FormAction; today: string; matches: Option[]; agreements:
 /** Formulário de lançamento. As categorias mudam conforme o tipo (receita ou despesa). */
 export function EntryForm({ action, today, matches, agreements, defaultMatchId }: Props) {
   const [type, setType] = useState<EntryType>(defaultMatchId ? "EXPENSE" : "INCOME");
-  // Mensalidade fica de fora: ela é registrada na tela de mensalidades.
-  const categories = type === "INCOME" ? INCOME_CATEGORIES.filter((category) => category !== "MEMBERSHIP") : EXPENSE_CATEGORIES;
+  // Mensalidade e pagamento a jogadores ficam de fora: têm telas próprias (Mensalidades e Folha de pagamento).
+  const categories =
+    type === "INCOME" ? INCOME_CATEGORIES.filter((category) => category !== "MEMBERSHIP") : EXPENSE_CATEGORIES.filter((category) => category !== "PLAYER_PAYMENT");
 
   return (
     <ActionForm action={action} submitLabel="Registrar lançamento" className="space-y-4" resetOnSuccess>

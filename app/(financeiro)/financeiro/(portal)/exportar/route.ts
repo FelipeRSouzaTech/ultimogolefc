@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const entries = await listEntries({ month });
 
   const csv = toCsv(
-    ["Data", "Tipo", "Categoria", "Descrição", "Valor (R$)", "Forma", "Partida", "Acordo", "Situação", "Motivo do estorno", "Lançado por"],
+    ["Data", "Tipo", "Categoria", "Descrição", "Valor (R$)", "Forma", "Jogador", "Competição", "Partida", "Acordo", "Situação", "Motivo do estorno", "Lançado por"],
     entries.map((entry) => [
       formatDate(entry.occurredOn),
       ENTRY_TYPE_LABELS[entry.type as EntryType],
@@ -28,6 +28,8 @@ export async function GET(request: NextRequest) {
       // Despesa sai negativa, para a coluna poder ser somada direto na planilha.
       centsToInput(entry.type === "EXPENSE" ? -entry.amountCents : entry.amountCents),
       PAYMENT_METHOD_LABELS[entry.method as PaymentMethod],
+      entry.athlete ? entry.athlete.nickname?.trim() || entry.athlete.name : "",
+      entry.competition?.name ?? "",
       entry.match ? `${entry.match.homeTeam.name} x ${entry.match.awayTeam.name}` : "",
       entry.agreement?.name ?? "",
       entry.voidedAt ? "Estornado" : "Válido",

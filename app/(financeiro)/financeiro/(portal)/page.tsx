@@ -45,7 +45,7 @@ export default async function FinanceOverviewPage({ searchParams }: { searchPara
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <Panel title="Mensalidades do mês">
+        <Panel title="Mensalidades dos diretores">
           {dues.length === 0 ? (
             <p className="text-sm text-gray-600">Nenhuma mensalidade gerada para este mês.</p>
           ) : (

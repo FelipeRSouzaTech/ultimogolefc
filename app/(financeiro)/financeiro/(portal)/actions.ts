@@ -5,7 +5,7 @@ import { field, zodErrorState, type ActionState } from "@/lib/action";
 import { audit } from "@/lib/audit";
 import { withPermission } from "@/lib/auth/guard";
 import { saoPauloLocalToUtc } from "@/lib/datetime";
-import { agreementSchema, dueSettingsSchema, entrySchema, payDueSchema, voidSchema, waiveSchema } from "@/lib/validation/finance";
+import { agreementSchema, dueSettingsSchema, entrySchema, payDueSchema, payrollSchema, voidSchema, waiveSchema } from "@/lib/validation/finance";
 import { entryDate, formatMoney, isMonthKey, monthLabel } from "@/modules/finance/rules";
 import { createEntry, generateDues, payDue, saveDueSettings, setDueWaived, voidEntry } from "@/modules/finance/service";
 
@@ -36,6 +36,11 @@ export async function createEntryAction(formData: FormData): Promise<ActionState
       return { error: "Revise os campos destacados.", fieldErrors: { category: ['Registre mensalidades em "Mensalidades", para dar baixa no jogador certo.'] } };
     }
 
+    // Pagamentos a jogadores passam pela folha, para ficarem ligados ao jogador e à competição.
+    if (parsed.data.category === "PLAYER_PAYMENT") {
+      return { error: "Revise os campos destacados.", fieldErrors: { category: ['Registre pagamentos a jogadores em "Folha de pagamento".'] } };
+    }
+
     const data = parsed.data;
     await prisma.$transaction((tx) =>
       createEntry(
@@ -55,6 +60,54 @@ export async function createEntryAction(formData: FormData): Promise<ActionState
       ),
     );
     return { ok: true, message: `Lançamento de ${formatMoney(data.amount)} registrado.` };
+  });
+}
+
+/** Folha de pagamento: registra um pagamento a um jogador como despesa na categoria "Jogadores". */
+export async function createPayrollAction(formData: FormData): Promise<ActionState> {
+  return withPermission("finance:write", async (user) => {
+    const parsed = payrollSchema.safeParse({
+      athleteId: field(formData, "athleteId"),
+      competitionId: field(formData, "competitionId"),
+      matchId: field(formData, "matchId"),
+      amount: field(formData, "amount"),
+      occurredOn: field(formData, "occurredOn"),
+      method: field(formData, "method"),
+      description: field(formData, "description"),
+      notes: field(formData, "notes"),
+    });
+    if (!parsed.success) return zodErrorState(parsed.error);
+    const data = parsed.data;
+    const occurredOn = entryDate(data.occurredOn);
+    if (!occurredOn) return INVALID_DATE;
+    if (occurredOn.getTime() > Date.now() + 24 * 60 * 60 * 1000) {
+      return { error: "Revise os campos destacados.", fieldErrors: { occurredOn: ["A data não pode estar no futuro."] } };
+    }
+
+    const athlete = await prisma.athlete.findUnique({ where: { id: data.athleteId }, select: { name: true, nickname: true } });
+    if (!athlete) return { error: "Revise os campos destacados.", fieldErrors: { athleteId: ["Jogador não encontrado."] } };
+    const shown = athlete.nickname?.trim() || athlete.name;
+
+    await prisma.$transaction((tx) =>
+      createEntry(
+        {
+          type: "EXPENSE",
+          category: "PLAYER_PAYMENT",
+          description: data.description ?? `Pagamento a ${shown}`,
+          amountCents: data.amount,
+          occurredOn,
+          method: data.method,
+          notes: data.notes,
+          matchId: data.matchId,
+          agreementId: null,
+          athleteId: data.athleteId,
+          competitionId: data.competitionId,
+        },
+        user.id,
+        tx,
+      ),
+    );
+    return { ok: true, message: `Pagamento de ${formatMoney(data.amount)} a ${shown} registrado.` };
   });
 }
 

@@ -37,7 +37,16 @@ enum FinanceCategory {
   EQUIPMENT
   TRANSPORT
   REGISTRATION
+  PLAYER_PAYMENT
   OTHER_EXPENSE
+}
+
+enum DirectorStatus {
+  ACTIVE
+  AWAY
+  ON_LEAVE
+  INACTIVE
+  DISMISSED
 }
 
 enum PaymentMethod {
@@ -253,7 +262,8 @@ model Competition {
   createdAt   DateTime @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime @updatedAt @db.Timestamptz(3)
 
-  seasons Season[]
+  seasons  Season[]
+  payments FinanceEntry[]
 }
 
 model Season {
@@ -354,7 +364,7 @@ model Athlete {
 
   matchEvents MatchEvent[]
   lineups     MatchLineupPlayer[]
-  dues        MembershipDue[]
+  payments    FinanceEntry[]
 
   @@index([isPublished, status, position])
 }
@@ -515,27 +525,34 @@ model FinanceEntry {
   notes             String?       @db.Text
   matchId           String?
   agreementId       String?
+  // Folha de pagamento: jogador que recebeu e competição a que o pagamento se refere.
+  athleteId         String?
+  competitionId     String?
   createdById       String?
   voidedAt          DateTime?     @db.Timestamptz(3)
   voidReason        String?
   createdAt         DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt         DateTime      @updatedAt @db.Timestamptz(3)
 
-  match     Match?            @relation(fields: [matchId], references: [id], onDelete: SetNull)
-  agreement FinanceAgreement? @relation(fields: [agreementId], references: [id], onDelete: Restrict)
-  createdBy User?             @relation(fields: [createdById], references: [id], onDelete: SetNull)
-  due       MembershipDue?
+  match       Match?            @relation(fields: [matchId], references: [id], onDelete: SetNull)
+  agreement   FinanceAgreement? @relation(fields: [agreementId], references: [id], onDelete: Restrict)
+  athlete     Athlete?          @relation(fields: [athleteId], references: [id], onDelete: Restrict)
+  competition Competition?      @relation(fields: [competitionId], references: [id], onDelete: SetNull)
+  createdBy   User?             @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  due         MembershipDue?
 
   @@index([occurredOn])
   @@index([type, category])
   @@index([matchId])
   @@index([agreementId])
+  @@index([athleteId])
+  @@index([competitionId])
 }
 
-// Mensalidade de um jogador em um mês ("AAAA-MM"). Paga quando tem um lançamento válido ligado.
+// Mensalidade de um diretor em um mês ("AAAA-MM"). Paga quando tem um lançamento válido ligado.
 model MembershipDue {
   id             String    @id @default(cuid())
-  athleteId      String
+  directorId     String
   referenceMonth String
   amountCents    Int
   dueDate        DateTime  @db.Timestamptz(3)
@@ -545,10 +562,10 @@ model MembershipDue {
   createdAt      DateTime  @default(now()) @db.Timestamptz(3)
   updatedAt      DateTime  @updatedAt @db.Timestamptz(3)
 
-  athlete Athlete       @relation(fields: [athleteId], references: [id], onDelete: Restrict)
-  entry   FinanceEntry? @relation(fields: [entryId], references: [id], onDelete: SetNull)
+  director Director      @relation(fields: [directorId], references: [id], onDelete: Restrict)
+  entry    FinanceEntry? @relation(fields: [entryId], references: [id], onDelete: SetNull)
 
-  @@unique([athleteId, referenceMonth])
+  @@unique([directorId, referenceMonth])
   @@index([referenceMonth])
 }
 
@@ -570,4 +587,19 @@ model FinanceAgreement {
   entries FinanceEntry[]
 
   @@index([isActive, kind])
+}
+
+// Cadastro de diretores (painel administrativo). São eles que pagam a mensalidade do clube.
+model Director {
+  id        String         @id @default(cuid())
+  name      String
+  role      String
+  status    DirectorStatus @default(ACTIVE)
+  photoPath String?
+  createdAt DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime       @updatedAt @db.Timestamptz(3)
+
+  dues MembershipDue[]
+
+  @@index([status, name])
 }

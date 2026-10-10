@@ -41,6 +41,18 @@ export const entrySchema = z
     }
   });
 
+/** Folha de pagamento: pagamento a um jogador, sempre despesa na categoria "Jogadores". */
+export const payrollSchema = z.object({
+  athleteId: z.string().trim().min(1, "Selecione o jogador.").max(40, "Jogador inválido."),
+  competitionId: optionalText(40, "Competição inválida."),
+  matchId: optionalText(40, "Partida inválida."),
+  amount: money,
+  occurredOn: day("Informe a data."),
+  method: z.enum(PAYMENT_METHODS, { errorMap: () => ({ message: "Selecione a forma de pagamento." }) }),
+  description: optionalText(160, "Descrição muito longa."),
+  notes: optionalText(1000, "Observação muito longa."),
+});
+
 export const voidSchema = z.object({
   reason: z.string().trim().min(5, "Explique o motivo do estorno.").max(200, "Motivo muito longo."),
 });

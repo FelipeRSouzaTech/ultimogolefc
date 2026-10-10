@@ -4,7 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { BusinessError } from "@/lib/action";
 import { audit } from "@/lib/audit";
-import { athletesWithoutDue, type Category, dueDateFor, type EntryType, formatMoney, monthLabel, monthRange, type PaymentMethod, summarize } from "./rules";
+import { membersWithoutDue, type Category, dueDateFor, type EntryType, formatMoney, monthLabel, monthRange, type PaymentMethod, summarize } from "./rules";
 
 const SETTING_DUE_AMOUNT = "finance.dueAmountCents";
 const SETTING_DUE_DAY = "finance.dueDay";
@@ -47,17 +47,32 @@ export type EntryInput = {
   notes: string | null;
   matchId: string | null;
   agreementId: string | null;
+  athleteId?: string | null;
+  competitionId?: string | null;
 };
 
 /** Cria um lançamento e o registro de auditoria. Pode participar de uma transação já aberta. */
 export async function createEntry(input: EntryInput, userId: string, tx: Prisma.TransactionClient) {
-  if (input.matchId && !(await tx.match.findUnique({ where: { id: input.matchId }, select: { id: true } }))) {
-    throw new BusinessError("Partida não encontrada.");
+  if (input.athleteId && !(await tx.athlete.findUnique({ where: { id: input.athleteId }, select: { id: true } }))) {
+    throw new BusinessError("Jogador não encontrado.");
+  }
+  if (input.competitionId && !(await tx.competition.findUnique({ where: { id: input.competitionId }, select: { id: true } }))) {
+    throw new BusinessError("Competição não encontrada.");
+  }
+  if (input.matchId) {
+    const match = await tx.match.findUnique({ where: { id: input.matchId }, select: { season: { select: { competitionId: true } } } });
+    if (!match) throw new BusinessError("Partida não encontrada.");
+    // A partida escolhida precisa ser da competição informada.
+    if (input.competitionId && match.season.competitionId !== input.competitionId) {
+      throw new BusinessError("A partida selecionada não pertence à competição escolhida.");
+    }
   }
   if (input.agreementId && !(await tx.financeAgreement.findUnique({ where: { id: input.agreementId }, select: { id: true } }))) {
     throw new BusinessError("Acordo não encontrado.");
   }
-  const entry = await tx.financeEntry.create({ data: { ...input, createdById: userId } });
+  const entry = await tx.financeEntry.create({
+    data: { ...input, athleteId: input.athleteId ?? null, competitionId: input.competitionId ?? null, createdById: userId },
+  });
   await audit(
     {
       userId,
@@ -99,7 +114,7 @@ export async function voidEntry(entryId: string, reason: string, userId: string)
   });
 }
 
-/** Gera as mensalidades do mês para os jogadores ativos que ainda não têm. Devolve quantas criou. */
+/** Gera as mensalidades do mês para os diretores ativos que ainda não têm. Devolve quantas criou. */
 export async function generateDues(month: string, userId: string): Promise<number> {
   const settings = await getDueSettings();
   if (settings.amountCents === null) throw new BusinessError("Defina o valor da mensalidade antes de gerar as cobranças.");
@@ -107,18 +122,19 @@ export async function generateDues(month: string, userId: string): Promise<numbe
   const dueDate = dueDateFor(month, settings.dueDay);
 
   return prisma.$transaction(async (tx) => {
-    const [athletes, existing] = await Promise.all([
-      tx.athlete.findMany({ where: { status: "ACTIVE" }, select: { id: true } }),
-      tx.membershipDue.findMany({ where: { referenceMonth: month }, select: { athleteId: true } }),
+    // Só diretores ativos são cobrados (veja paysDues em rules.ts).
+    const [directors, existing] = await Promise.all([
+      tx.director.findMany({ where: { status: "ACTIVE" }, select: { id: true } }),
+      tx.membershipDue.findMany({ where: { referenceMonth: month }, select: { directorId: true } }),
     ]);
-    const missing = athletesWithoutDue(
-      athletes.map((athlete) => athlete.id),
-      existing.map((due) => due.athleteId),
+    const missing = membersWithoutDue(
+      directors.map((director) => director.id),
+      existing.map((due) => due.directorId),
     );
     if (missing.length === 0) return 0;
-    // skipDuplicates protege contra dois cliques simultâneos: a chave única (jogador, mês) evita duplicar.
+    // skipDuplicates protege contra dois cliques simultâneos: a chave única (diretor, mês) evita duplicar.
     const created = await tx.membershipDue.createMany({
-      data: missing.map((athleteId) => ({ athleteId, referenceMonth: month, amountCents, dueDate })),
+      data: missing.map((directorId) => ({ directorId, referenceMonth: month, amountCents, dueDate })),
       skipDuplicates: true,
     });
     await audit(
@@ -132,7 +148,7 @@ export async function generateDues(month: string, userId: string): Promise<numbe
 /** Registra o pagamento de uma mensalidade: cria a receita e liga à mensalidade, tudo ou nada. */
 export async function payDue(dueId: string, method: PaymentMethod, paidOn: Date, userId: string): Promise<void> {
   await prisma.$transaction(async (tx) => {
-    const due = await tx.membershipDue.findUnique({ where: { id: dueId }, include: { athlete: true } });
+    const due = await tx.membershipDue.findUnique({ where: { id: dueId }, include: { director: true } });
     if (!due) throw new BusinessError("Mensalidade não encontrada.");
     if (due.waivedAt) throw new BusinessError("Esta mensalidade está isenta. Desfaça a isenção antes de registrar o pagamento.");
     if (due.entryId) throw new BusinessError("Esta mensalidade já está paga.");
@@ -141,7 +157,7 @@ export async function payDue(dueId: string, method: PaymentMethod, paidOn: Date,
       {
         type: "INCOME",
         category: "MEMBERSHIP",
-        description: `Mensalidade de ${monthLabel(due.referenceMonth)} — ${due.athlete.name}`,
+        description: `Mensalidade de ${monthLabel(due.referenceMonth)} — ${due.director.name}`,
         amountCents: due.amountCents,
         occurredOn: paidOn,
         method,
@@ -160,7 +176,7 @@ export async function payDue(dueId: string, method: PaymentMethod, paidOn: Date,
 
 export async function setDueWaived(dueId: string, reason: string | null, userId: string): Promise<void> {
   await prisma.$transaction(async (tx) => {
-    const due = await tx.membershipDue.findUnique({ where: { id: dueId }, include: { athlete: true } });
+    const due = await tx.membershipDue.findUnique({ where: { id: dueId }, include: { director: true } });
     if (!due) throw new BusinessError("Mensalidade não encontrada.");
     if (due.entryId) throw new BusinessError("Esta mensalidade já está paga. Estorne o pagamento antes de isentar.");
     await tx.membershipDue.update({ where: { id: dueId }, data: reason === null ? { waivedAt: null, waivedReason: null } : { waivedAt: new Date(), waivedReason: reason } });
@@ -170,7 +186,7 @@ export async function setDueWaived(dueId: string, reason: string | null, userId:
         action: reason === null ? "finance.dues.unwaive" : "finance.dues.waive",
         entity: "MembershipDue",
         entityId: dueId,
-        summary: `${reason === null ? "Desfez a isenção" : "Isentou"} a mensalidade de ${monthLabel(due.referenceMonth)} de ${due.athlete.name}${reason ? `: ${reason}` : ""}`,
+        summary: `${reason === null ? "Desfez a isenção" : "Isentou"} a mensalidade de ${monthLabel(due.referenceMonth)} de ${due.director.name}${reason ? `: ${reason}` : ""}`,
       },
       tx,
     );
@@ -180,13 +196,15 @@ export async function setDueWaived(dueId: string, reason: string | null, userId:
 export const entryInclude = {
   match: { include: { homeTeam: true, awayTeam: true } },
   agreement: true,
+  athlete: { select: { id: true, name: true, nickname: true } },
+  competition: { select: { id: true, name: true } },
   createdBy: { select: { name: true } },
   due: { select: { id: true } },
 } satisfies Prisma.FinanceEntryInclude;
 
 export type EntryWithLinks = Prisma.FinanceEntryGetPayload<{ include: typeof entryInclude }>;
 
-export type EntryFilters = { month: string; type?: EntryType; matchId?: string; agreementId?: string };
+export type EntryFilters = { month: string; type?: EntryType; category?: Category; matchId?: string; agreementId?: string };
 
 export async function listEntries(filters: EntryFilters): Promise<EntryWithLinks[]> {
   const { start, end } = monthRange(filters.month);
@@ -196,6 +214,7 @@ export async function listEntries(filters: EntryFilters): Promise<EntryWithLinks
     where: {
       ...(scoped ? {} : { occurredOn: { gte: start, lt: end } }),
       ...(filters.type ? { type: filters.type } : {}),
+      ...(filters.category ? { category: filters.category } : {}),
       ...(filters.matchId ? { matchId: filters.matchId } : {}),
       ...(filters.agreementId ? { agreementId: filters.agreementId } : {}),
     },
@@ -223,9 +242,9 @@ export async function monthSummary(month: string) {
   return summarize(entries);
 }
 
-export const dueInclude = { athlete: true, entry: true } satisfies Prisma.MembershipDueInclude;
+export const dueInclude = { director: true, entry: true } satisfies Prisma.MembershipDueInclude;
 export type DueWithLinks = Prisma.MembershipDueGetPayload<{ include: typeof dueInclude }>;
 
 export async function listDues(month: string): Promise<DueWithLinks[]> {
-  return prisma.membershipDue.findMany({ where: { referenceMonth: month }, include: dueInclude, orderBy: { athlete: { name: "asc" } } });
+  return prisma.membershipDue.findMany({ where: { referenceMonth: month }, include: dueInclude, orderBy: { director: { name: "asc" } } });
 }
