@@ -17,7 +17,7 @@ export function SiteNav({ items }: { items: readonly Item[] }) {
   const [open, setOpen] = useState(false);
 
   const linkClass = (href: string) =>
-    `block px-3 py-2 text-[0.8125rem] font-bold uppercase tracking-wider border-b-2 transition-colors ${
+    `block px-2 py-2 text-xs font-bold uppercase tracking-[0.04em] border-b-2 transition-colors ${
       isActive(pathname, href) ? "border-primary text-primary" : "border-transparent text-black hover:text-primary"
     }`;
 
@@ -57,7 +57,7 @@ export function SiteNav({ items }: { items: readonly Item[] }) {
               <li key={item.href} className="border-b border-gray-100 last:border-b-0">
                 <Link
                   href={item.href}
-                  className={`block py-3 text-sm font-bold uppercase tracking-wider ${isActive(pathname, item.href) ? "text-primary" : "text-black"}`}
+                  className={`block py-3 text-sm font-bold uppercase tracking-[0.04em] ${isActive(pathname, item.href) ? "text-primary" : "text-black"}`}
                   aria-current={isActive(pathname, item.href) ? "page" : undefined}
                   onClick={() => setOpen(false)}
                 >

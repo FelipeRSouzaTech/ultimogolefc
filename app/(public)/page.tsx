@@ -12,6 +12,7 @@ import { latestPublicNews } from "@/modules/news/service";
 import { getSettings } from "@/modules/site/service";
 import { isExternalUrl, isSafeUrl } from "@/modules/site/settings";
 import { listVisibleSponsors } from "@/modules/sponsors/service";
+import { groupByTier } from "@/modules/sponsors/rules";
 
 export default async function HomePage() {
   const [ownClub, news, featuredSeason, settings, sponsors] = await Promise.all([
@@ -21,6 +22,7 @@ export default async function HomePage() {
     getSettings(),
     listVisibleSponsors(),
   ]);
+  const sponsorGroups = groupByTier(sponsors);
   // Banner configurável pelo painel; sem configuração, usa a apresentação padrão.
   const bannerTitle = settings["home.bannerTitle"] || SITE_NAME;
   const bannerDescription = settings["home.bannerDescription"] || "Jogos, resultados, competições e notícias do clube em um só lugar.";
@@ -49,25 +51,25 @@ export default async function HomePage() {
           <Image src={CREST_PATH} alt={`Escudo do ${SITE_NAME}`} width={448} height={505} priority className="h-44 w-auto shrink-0 md:h-60" />
           <div className="flex-1">
             <p className="text-xs font-bold uppercase tracking-[0.2em]">Portal oficial</p>
-            <h1 className="mt-2 text-4xl uppercase sm:text-5xl lg:text-6xl">{bannerTitle}</h1>
+            <h1 className="mt-2 text-3xl uppercase sm:text-5xl lg:text-6xl">{bannerTitle}</h1>
             <p className="mt-4 max-w-xl text-base sm:text-lg">{bannerDescription}</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3 md:justify-start">
               {hasBannerLink ? (
                 isExternalUrl(bannerLinkUrl) ? (
-                  <a href={bannerLinkUrl} className="btn btn-secondary" target="_blank" rel="noopener noreferrer">
+                  <a href={bannerLinkUrl} className="btn btn-inverse btn-lg" target="_blank" rel="noopener noreferrer">
                     {bannerLinkLabel}
                   </a>
                 ) : (
-                  <Link href={bannerLinkUrl} className="btn btn-secondary">
+                  <Link href={bannerLinkUrl} className="btn btn-inverse btn-lg">
                     {bannerLinkLabel}
                   </Link>
                 )
               ) : (
-                <Link href="/jogos" className="btn btn-secondary">
+                <Link href="/jogos" className="btn btn-inverse btn-lg">
                   Próximos jogos
                 </Link>
               )}
-              <Link href="/noticias" className="btn border-white text-white hover:bg-white hover:text-primary">
+              <Link href="/noticias" className="btn btn-outline-inverse btn-lg">
                 Notícias
               </Link>
             </div>
@@ -166,7 +168,7 @@ export default async function HomePage() {
           </section>
         </div>
 
-        {sponsors.length > 0 ? (
+        {sponsorGroups.length > 0 ? (
           <section aria-labelledby="patrocinadores-home">
             <div className="mb-5 flex items-center justify-between gap-4">
               <h2 id="patrocinadores-home" className="section-title">
@@ -176,17 +178,22 @@ export default async function HomePage() {
                 Ver todos
               </Link>
             </div>
-            <ul className="flex flex-wrap items-center justify-center gap-4">
-              {sponsors.slice(0, 12).map((sponsor) => (
-                <li key={sponsor.id} className="card flex h-24 w-44 items-center justify-center p-4 text-center">
-                  {sponsor.logoPath ? (
-                    <SmartImage src={sponsor.logoPath} alt={sponsor.name} width={160} height={80} className="max-h-full w-auto object-contain" />
-                  ) : (
-                    <span className="text-sm font-bold uppercase">{sponsor.name}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
+            {sponsorGroups.map((group) => (
+              <div key={group.tier} className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-700 mb-4 uppercase tracking-wide">{group.label}</h3>
+                <ul className="flex flex-wrap items-center justify-center gap-4">
+                  {group.sponsors.slice(0, group.tier === "MASTER" ? 2 : 4).map((sponsor) => (
+                    <li key={sponsor.id} className="card flex h-24 w-44 items-center justify-center p-4 text-center">
+                      {sponsor.logoPath ? (
+                        <SmartImage src={sponsor.logoPath} alt={sponsor.name} width={160} height={80} className="max-h-full w-auto object-contain" />
+                      ) : (
+                        <span className="text-sm font-bold uppercase">{sponsor.name}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </section>
         ) : null}
 
