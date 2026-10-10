@@ -23,6 +23,7 @@ const MENU: { href: string; label: string; permission: Permission | null }[] = [
   { href: "/admin/institucional", label: "Institucional", permission: "content:read" },
   { href: "/admin/galeria", label: "Galeria", permission: "content:read" },
   { href: "/admin/midia", label: "Mídia", permission: "content:read" },
+  { href: "/admin/financeiro", label: "Financeiro", permission: "finance:read" },
   { href: "/admin/mensagens", label: "Mensagens", permission: "messages:manage" },
   { href: "/admin/usuarios", label: "Usuários", permission: "users:manage" },
   { href: "/admin/auditoria", label: "Auditoria", permission: "audit:read" },

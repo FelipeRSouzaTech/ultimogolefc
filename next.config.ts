@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
     // Uploads de imagem passam por Server Actions; o limite cobre um arquivo de até 5 MB mais os campos do formulário.
     serverActions: { bodySizeLimit: "6mb" },
   },
+  async redirects() {
+    // O financeiro fica dentro do painel; /financeiro é só um atalho (exige login do mesmo jeito).
+    return [{ source: "/financeiro", destination: "/admin/financeiro", permanent: false }];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

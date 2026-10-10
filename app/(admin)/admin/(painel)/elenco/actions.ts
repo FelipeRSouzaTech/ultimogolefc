@@ -37,6 +37,10 @@ export async function deleteAthleteAction(id: string): Promise<ActionState> {
   return withPermission("football:delete", async (user) => {
     const athlete = await prisma.athlete.findUnique({ where: { id } });
     if (!athlete) return { error: "Jogador não encontrado." };
+    // O histórico financeiro é preservado: jogador com mensalidades não é apagado, só inativado.
+    if ((await prisma.membershipDue.count({ where: { athleteId: id } })) > 0) {
+      return { error: "Este jogador tem mensalidades registradas e não pode ser removido. Marque-o como inativo." };
+    }
     await prisma.athlete.delete({ where: { id } });
     await audit({ userId: user.id, action: "athlete.delete", entity: "Athlete", entityId: id, summary: `Removeu o jogador "${athlete.name}"` });
     return { ok: true, redirectTo: "/admin/elenco" };

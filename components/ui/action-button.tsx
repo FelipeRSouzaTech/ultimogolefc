@@ -8,6 +8,7 @@ import type { ActionState } from "@/lib/action";
 export function ActionButton({ action, label, className = "btn btn-secondary btn-sm" }: { action: () => Promise<ActionState>; label: string; className?: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function onClick() {
@@ -15,6 +16,7 @@ export function ActionButton({ action, label, className = "btn btn-secondary btn
       try {
         const result = await action();
         setError(result?.error ?? null);
+        setMessage(result?.error ? null : (result?.message ?? null));
         if (!result?.error) router.refresh();
       } catch {
         setError("Não foi possível concluir a operação.");
@@ -30,6 +32,11 @@ export function ActionButton({ action, label, className = "btn btn-secondary btn
       {error ? (
         <span className="field-error" role="alert">
           {error}
+        </span>
+      ) : null}
+      {message ? (
+        <span className="text-sm text-gray-600" role="status">
+          {message}
         </span>
       ) : null}
     </span>
