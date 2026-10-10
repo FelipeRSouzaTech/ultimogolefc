@@ -20,14 +20,17 @@
   --color-transparent: transparent;
   --color-current: currentColor;
 
-  /* Tipografia */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Arial Narrow", "Roboto Condensed", "Helvetica Neue", Arial, ui-sans-serif, sans-serif;
+  /*
+   * Tipografia: Montserrat variável (100–900) em todo o site, carregada em app/layout.tsx a partir de
+   * app/fonts (sem download externo). Pesos em uso: 500 no texto, 700 em rótulos e botões, 800 em títulos.
+   */
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-montserrat), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   /* Bordas e sombras */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.625rem;
+  --radius-sm: 0.25rem; /* botões e etiquetas retas */
+  --radius-md: 0.5rem; /* campos e alertas */
+  --radius-lg: 1rem; /* cartões */
   --shadow-card: 0 1px 2px rgb(15 33 69 / 0.06), 0 4px 12px rgb(15 33 69 / 0.06);
   --shadow-header: 0 1px 0 var(--color-gray-100), 0 2px 8px rgb(15 33 69 / 0.05);
 }
@@ -35,6 +38,10 @@
 :root {
   --focus-ring: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-primary);
   --transition-fast: 150ms ease;
+  /* Brilho dos botões no hover, na cor do próprio botão. */
+  --glow-primary: 0 0 8px rgb(15 33 69 / 0.45);
+  --glow-white: 0 0 8px rgb(255 255 255 / 0.7);
+  --glow-danger: 0 0 8px rgb(180 35 24 / 0.4);
   --page-max-width: 72rem;
   --page-gutter: 1rem;
 }
@@ -54,6 +61,7 @@
     background-color: var(--color-white);
     color: var(--color-black);
     font-family: var(--font-sans);
+    font-weight: 500;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
@@ -63,8 +71,14 @@
   h3 {
     font-family: var(--font-display);
     font-weight: 800;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
     line-height: 1.15;
+    overflow-wrap: break-word;
+  }
+
+  strong,
+  b {
+    font-weight: 700;
   }
 
   :focus-visible {
@@ -91,7 +105,11 @@
     padding-inline: var(--page-gutter);
   }
 
-  /* Botões */
+  /*
+   * Botões: variante (cor) + tamanho, combináveis. Ex.: "btn btn-primary btn-lg".
+   * Variantes: primary (cheio), secondary (contorno), danger, inverse e outline-inverse (para fundo azul-marinho).
+   * Tamanhos: sm, padrão, lg e xl. A altura mínima do padrão é 44px para toque.
+   */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -99,18 +117,21 @@
     gap: 0.5rem;
     min-height: 2.75rem;
     padding: 0.625rem 1.25rem;
-    border: 1px solid transparent;
-    border-radius: var(--radius-md);
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
     font-size: 0.8125rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    line-height: 1.25;
+    letter-spacing: 0.04em;
+    text-align: center;
     text-transform: uppercase;
     text-decoration: none;
     cursor: pointer;
     transition:
       background-color var(--transition-fast),
       color var(--transition-fast),
-      border-color var(--transition-fast);
+      border-color var(--transition-fast),
+      box-shadow 200ms ease;
   }
 
   .btn-primary {
@@ -121,16 +142,18 @@
   .btn-primary:hover {
     background-color: var(--color-primary-dark);
     border-color: var(--color-primary-dark);
+    box-shadow: var(--glow-primary);
   }
 
   .btn-secondary {
     background-color: var(--color-white);
     border-color: var(--color-primary);
-    color: var(--color-black);
+    color: var(--color-primary);
   }
   .btn-secondary:hover {
     background-color: var(--color-primary);
     color: var(--color-white);
+    box-shadow: var(--glow-primary);
   }
 
   .btn-danger {
@@ -141,6 +164,30 @@
   .btn-danger:hover {
     background-color: var(--color-danger);
     color: var(--color-white);
+    box-shadow: var(--glow-danger);
+  }
+
+  /* Para uso sobre fundo azul-marinho (banner, faixas). */
+  .btn-inverse {
+    background-color: var(--color-white);
+    border-color: var(--color-white);
+    color: var(--color-primary);
+  }
+  .btn-inverse:hover {
+    background-color: var(--color-primary-soft);
+    border-color: var(--color-primary-soft);
+    box-shadow: var(--glow-white);
+  }
+
+  .btn-outline-inverse {
+    background-color: transparent;
+    border-color: var(--color-white);
+    color: var(--color-white);
+  }
+  .btn-outline-inverse:hover {
+    background-color: var(--color-white);
+    color: var(--color-primary);
+    box-shadow: var(--glow-white);
   }
 
   .btn-sm {
@@ -148,12 +195,28 @@
     padding: 0.375rem 0.875rem;
     font-size: 0.75rem;
   }
+  .btn-lg {
+    min-height: 3.25rem;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.875rem;
+  }
+  .btn-xl {
+    min-height: 3.75rem;
+    padding: 1.125rem 2rem;
+    font-size: 1rem;
+  }
+
+  /* O anel de foco tem prioridade sobre o brilho do hover. */
+  .btn:focus-visible {
+    box-shadow: var(--focus-ring);
+  }
 
   .btn:disabled,
   .btn[aria-disabled="true"] {
     background-color: var(--color-gray-100);
     border-color: var(--color-gray-100);
     color: var(--color-gray-600);
+    box-shadow: none;
     cursor: not-allowed;
   }
 
@@ -169,20 +232,21 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    font-size: 1.5rem;
+    font-size: clamp(1.125rem, 0.9rem + 1.2vw, 1.5rem);
     text-transform: uppercase;
   }
   .section-title::before {
     content: "";
+    flex-shrink: 0;
     width: 0.3rem;
-    height: 1.5rem;
+    height: 1.2em;
     background-color: var(--color-primary);
     border-radius: 1px;
   }
 
   .eyebrow {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-primary);
@@ -339,6 +403,8 @@
   }
   .prose-news h2 {
     margin: 2rem 0 0.75rem;
-    font-size: 1.375rem;
+    font-size: 1.5rem;
+    line-height: 1.3;
+    color: var(--color-primary);
   }
 }

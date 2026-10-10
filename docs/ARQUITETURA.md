@@ -22,7 +22,7 @@ as alterações passam por Server Actions. Três camadas, separadas por pasta:
 | Datas | `timestamptz` em UTC; conversão para America/Sao_Paulo só na exibição e na leitura de formulários | Requisito da especificação; `lib/datetime.ts` concentra a conversão. |
 | Renderização | Páginas públicas dinâmicas (`force-dynamic`) | O conteúdo muda pelo painel e o build não precisa de banco. Cache pode ser adicionado depois, onde for seguro. |
 | Estilo | Tailwind CSS 4 com tokens em `@theme`; paleta padrão removida | Só existem as cores institucionais; impossível usar uma cor fora da paleta por engano. |
-| Fontes | Fontes do sistema | Evita download externo no build e no navegador. |
+| Fontes | Montserrat variável (recorte latino, ~40 KB) em `app/fonts`, via `next/font/local` | Uma família para todo o site, servida pelo próprio portal: continua sem download externo no build e no navegador. Licença OFL em `app/fonts/OFL.txt`. |
 | Mídia | Arquivos em pasta local ou S3; banco só com metadados; entrega por `/midia/<chave>` | Atende à regra de não gravar binários no banco e permite trocar de armazenamento por variável de ambiente. |
 | Cliente S3 | Assinatura SigV4 própria (`lib/storage/sigv4.ts`), sem o SDK da AWS | Evita uma dependência grande para duas operações (PUT e DELETE); coberta pelo vetor de teste oficial da AWS. |
 | Imagens enviadas | Entregues sem o otimizador do Next.js | O otimizador não foi validado com a rota `/midia`; fica como melhoria. |
