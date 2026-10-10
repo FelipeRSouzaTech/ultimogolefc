@@ -1,7 +1,14 @@
 # Financeiro
 
-Controle do caixa do clube, dentro do painel: `/admin/financeiro` (o atalho `/financeiro` leva ao mesmo lugar e
-também exige login). Nada do financeiro aparece no portal público.
+Portal financeiro do clube, em `/financeiro`. É uma área própria, separada do painel administrativo (`/admin`),
+com menu, tela de entrada e cabeçalho próprios. Por baixo, usa os mesmos recursos do painel: as mesmas contas
+de usuário, o mesmo login e sessão, as mesmas permissões, a mesma auditoria e os mesmos componentes de tela.
+Nada do financeiro aparece no portal público.
+
+- Entrada: `/financeiro/login` (a mesma conta e senha do painel).
+- Os usuários continuam sendo criados no painel, em Usuários, por um superadministrador.
+- Quem tem acesso aos dois portais alterna pelos botões "Financeiro" (no painel) e "Painel" (no financeiro),
+  sem precisar entrar de novo.
 
 ## Quem acessa
 
@@ -12,7 +19,8 @@ também exige login). Nada do financeiro aparece no portal público.
 | Administrador | ✔ | — |
 | Editor, Gestor de futebol, Consulta | — | — |
 
-O tesoureiro só vê o financeiro; não altera notícias, futebol, conteúdo nem usuários.
+O tesoureiro usa só o portal financeiro: não entra no painel administrativo e, se tentar, é levado ao financeiro.
+Quem não tem permissão e tenta abrir `/financeiro` vê um aviso de falta de acesso.
 As permissões são verificadas no servidor em cada página, em cada operação e na exportação.
 
 ## Telas

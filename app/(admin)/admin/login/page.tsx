@@ -5,13 +5,15 @@ import { redirect } from "next/navigation";
 import { ActionForm } from "@/components/ui/action-form";
 import { Field } from "@/components/ui/field";
 import { getCurrentUser } from "@/lib/auth/guard";
+import { homePathFor } from "@/lib/auth/permissions";
 import { CREST_PATH, SITE_NAME } from "@/lib/site";
 import { loginAction } from "../actions";
 
 export const metadata: Metadata = { title: "Entrar no painel", robots: { index: false, follow: false } };
 
 export default async function LoginPage() {
-  if (await getCurrentUser()) redirect("/admin");
+  const current = await getCurrentUser();
+  if (current) redirect(homePathFor(current.role, "admin"));
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
@@ -21,7 +23,7 @@ export default async function LoginPage() {
           <h1 className="mt-4 text-xl uppercase">Painel administrativo</h1>
           <p className="mt-1 text-sm text-gray-600">{SITE_NAME}</p>
         </div>
-        <ActionForm action={loginAction} submitLabel="Entrar" pendingLabel="Entrando…" submitClassName="btn btn-primary w-full" className="space-y-4">
+        <ActionForm action={loginAction.bind(null, "admin")} submitLabel="Entrar" pendingLabel="Entrando…" submitClassName="btn btn-primary w-full" className="space-y-4">
           <Field name="email" label="E-mail">
             <input id="email" name="email" type="email" autoComplete="username" required className="input" />
           </Field>

@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminHeading, Panel, ReadOnlyNotice } from "@/components/ui/admin";
-import { requirePagePermission } from "@/lib/auth/guard";
+import { requireFinance } from "@/lib/auth/finance-guard";
 import { can } from "@/lib/auth/permissions";
 import { formatDate } from "@/lib/datetime";
 import type { SearchParams } from "@/lib/params";
 import { CATEGORY_LABELS, dueStatus, ENTRY_TYPE_LABELS, monthLabel, type Category, type DueStatus } from "@/modules/finance/rules";
 import { listDues, listEntries, monthSummary, overallBalance } from "@/modules/finance/service";
-import { FinanceNav, MonthNav } from "./finance-nav";
+import { MonthNav } from "./finance-nav";
 import { Money, StatCard } from "./money";
 import { monthFromParams } from "./params";
 
 export const metadata: Metadata = { title: "Financeiro" };
 
 export default async function FinanceOverviewPage({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requirePagePermission("finance:read");
+  const user = await requireFinance();
   const month = monthFromParams(await searchParams);
   const [overall, summary, dues, entries] = await Promise.all([overallBalance(), monthSummary(month), listDues(month), listEntries({ month })]);
 
@@ -30,13 +30,12 @@ export default async function FinanceOverviewPage({ searchParams }: { searchPara
   return (
     <>
       <AdminHeading title="Financeiro" description="Caixa do clube: receitas, despesas, mensalidades e acordos.">
-        <Link href={`/admin/financeiro/exportar?mes=${month}`} className="btn btn-secondary btn-sm" prefetch={false}>
+        <Link href={`/financeiro/exportar?mes=${month}`} className="btn btn-secondary btn-sm" prefetch={false}>
           Exportar o mês (CSV)
         </Link>
       </AdminHeading>
       {can(user.role, "finance:write") ? null : <ReadOnlyNotice />}
-      <FinanceNav active="resumo" month={month} />
-      <MonthNav basePath="/admin/financeiro" month={month} />
+      <MonthNav basePath="/financeiro" month={month} />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Saldo em caixa" cents={overall.balanceCents} hint="Todo o período, sem os estornos." />
@@ -74,7 +73,7 @@ export default async function FinanceOverviewPage({ searchParams }: { searchPara
               </p>
             </>
           )}
-          <Link href={`/admin/financeiro/mensalidades?mes=${month}`} className="link mt-4 inline-block text-sm">
+          <Link href={`/financeiro/mensalidades?mes=${month}`} className="link mt-4 inline-block text-sm">
             Abrir mensalidades
           </Link>
         </Panel>
@@ -130,7 +129,7 @@ export default async function FinanceOverviewPage({ searchParams }: { searchPara
               ))}
             </ul>
           )}
-          <Link href={`/admin/financeiro/lancamentos?mes=${month}`} className="link mt-4 inline-block text-sm">
+          <Link href={`/financeiro/lancamentos?mes=${month}`} className="link mt-4 inline-block text-sm">
             Ver todos os lançamentos
           </Link>
         </Panel>

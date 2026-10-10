@@ -2,17 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminHeading, Panel, ReadOnlyNotice } from "@/components/ui/admin";
 import { EmptyState } from "@/components/ui/empty-state";
-import { requirePagePermission } from "@/lib/auth/guard";
+import { requireFinance } from "@/lib/auth/finance-guard";
 import { can } from "@/lib/auth/permissions";
 import { formatDate } from "@/lib/datetime";
 import { prisma } from "@/lib/db/prisma";
-import { FinanceNav } from "../finance-nav";
 import { Money } from "../money";
 
 export const metadata: Metadata = { title: "Custos por jogo" };
 
 export default async function MatchCostsPage() {
-  const user = await requirePagePermission("finance:read");
+  const user = await requireFinance();
   const [matches, totals] = await Promise.all([
     prisma.match.findMany({ orderBy: { kickoffAt: "desc" }, take: 60, include: { homeTeam: true, awayTeam: true, season: { include: { competition: true } } } }),
     prisma.financeEntry.groupBy({ by: ["matchId"], where: { matchId: { not: null }, voidedAt: null, type: "EXPENSE" }, _sum: { amountCents: true }, _count: { _all: true } }),
@@ -28,7 +27,6 @@ export default async function MatchCostsPage() {
     <>
       <AdminHeading title="Custos por jogo" description="Despesas ligadas a cada partida: arbitragem, campo, transporte e outras." />
       {can(user.role, "finance:write") ? null : <ReadOnlyNotice />}
-      <FinanceNav active="jogos" />
 
       {matches.length === 0 ? (
         <EmptyState title="Nenhuma partida cadastrada" description="As partidas cadastradas em Jogos aparecem aqui." />
@@ -82,7 +80,7 @@ export default async function MatchCostsPage() {
                       <td>{cost?.count ?? 0}</td>
                       <td className="font-bold">{cost ? <Money cents={cost.cents} /> : "—"}</td>
                       <td>
-                        <Link href={`/admin/financeiro/lancamentos?jogo=${match.id}`} className="link whitespace-nowrap text-sm">
+                        <Link href={`/financeiro/lancamentos?jogo=${match.id}`} className="link whitespace-nowrap text-sm">
                           {cost ? "Ver e lançar" : "Lançar despesa"}
                         </Link>
                       </td>

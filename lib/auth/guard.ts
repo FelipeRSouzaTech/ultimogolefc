@@ -4,7 +4,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { BusinessError, type ActionState } from "@/lib/action";
-import { can, type Permission, type Role } from "./permissions";
+import { can, homePathFor, type Permission, type Role } from "./permissions";
 import { hashToken, readSessionToken } from "./session";
 
 export type CurrentUser = { id: string; name: string; email: string; role: Role };
@@ -32,7 +32,10 @@ export async function requireUser(): Promise<CurrentUser> {
 /** Para páginas: exige a permissão, senão volta ao painel com aviso. */
 export async function requirePagePermission(permission: Permission): Promise<CurrentUser> {
   const user = await requireUser();
-  if (!can(user.role, permission)) redirect("/admin?negado=1");
+  if (!can(user.role, permission)) {
+    // Quem não tem acesso ao painel (ex.: tesoureiro) vai para o próprio portal, e não para um aviso dentro do painel.
+    redirect(can(user.role, "dashboard:view") ? "/admin?negado=1" : homePathFor(user.role));
+  }
   return user;
 }
 

@@ -4,7 +4,7 @@ import { ActionForm } from "@/components/ui/action-form";
 import { AdminHeading, Panel, ReadOnlyNotice } from "@/components/ui/admin";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field } from "@/components/ui/field";
-import { requirePagePermission } from "@/lib/auth/guard";
+import { requireFinance } from "@/lib/auth/finance-guard";
 import { can } from "@/lib/auth/permissions";
 import { formatDate, utcToSaoPauloLocal } from "@/lib/datetime";
 import type { SearchParams } from "@/lib/params";
@@ -12,7 +12,7 @@ import { centsToInput, DUE_STATUS_LABELS, dueStatus, monthLabel, PAYMENT_METHODS
 import { getDueSettings, listDues } from "@/modules/finance/service";
 import { displayName } from "@/modules/squad/rules";
 import { generateDuesAction, payDueAction, saveDueSettingsAction, unwaiveDueAction, waiveDueAction } from "../actions";
-import { FinanceNav, MonthNav } from "../finance-nav";
+import { MonthNav } from "../finance-nav";
 import { Money } from "../money";
 import { monthFromParams } from "../params";
 
@@ -21,7 +21,7 @@ export const metadata: Metadata = { title: "Mensalidades" };
 const BADGE: Record<DueStatus, string> = { PAID: "badge badge-solid", WAIVED: "badge", OVERDUE: "badge badge-strong", OPEN: "badge" };
 
 export default async function DuesPage({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requirePagePermission("finance:read");
+  const user = await requireFinance();
   const month = monthFromParams(await searchParams);
   const [dues, settings] = await Promise.all([listDues(month), getDueSettings()]);
   const canWrite = can(user.role, "finance:write");
@@ -39,8 +39,7 @@ export default async function DuesPage({ searchParams }: { searchParams: SearchP
     <>
       <AdminHeading title="Mensalidades" description="Cobrança mensal dos jogadores ativos." />
       {canWrite ? null : <ReadOnlyNotice />}
-      <FinanceNav active="mensalidades" month={month} />
-      <MonthNav basePath="/admin/financeiro/mensalidades" month={month} />
+      <MonthNav basePath="/financeiro/mensalidades" month={month} />
 
       <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
         <Panel title={`Mensalidades de ${monthLabel(month)}`}>

@@ -4,7 +4,7 @@ import { ActionForm } from "@/components/ui/action-form";
 import { AdminHeading, Panel, ReadOnlyNotice } from "@/components/ui/admin";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field } from "@/components/ui/field";
-import { requirePagePermission } from "@/lib/auth/guard";
+import { requireFinance } from "@/lib/auth/finance-guard";
 import { can } from "@/lib/auth/permissions";
 import { formatDate, utcToSaoPauloLocal } from "@/lib/datetime";
 import { prisma } from "@/lib/db/prisma";
@@ -12,7 +12,7 @@ import { param, type SearchParams } from "@/lib/params";
 import { CATEGORY_LABELS, ENTRY_TYPES, ENTRY_TYPE_LABELS, monthLabel, PAYMENT_METHOD_LABELS, summarize, type Category, type EntryType, type PaymentMethod } from "@/modules/finance/rules";
 import { listEntries } from "@/modules/finance/service";
 import { createEntryAction, voidEntryAction } from "../actions";
-import { FinanceNav, MonthNav } from "../finance-nav";
+import { MonthNav } from "../finance-nav";
 import { Money } from "../money";
 import { monthFromParams } from "../params";
 import { EntryForm } from "./entry-form";
@@ -20,7 +20,7 @@ import { EntryForm } from "./entry-form";
 export const metadata: Metadata = { title: "Lançamentos" };
 
 export default async function EntriesPage({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requirePagePermission("finance:read");
+  const user = await requireFinance();
   const params = await searchParams;
   const month = monthFromParams(params);
   const typeParam = param(params, "tipo");
@@ -48,24 +48,23 @@ export default async function EntriesPage({ searchParams }: { searchParams: Sear
     <>
       <AdminHeading title="Lançamentos" description="Receitas e despesas do caixa. Um lançamento errado é corrigido por estorno, nunca apagado." />
       {canWrite ? null : <ReadOnlyNotice />}
-      <FinanceNav active="lancamentos" month={month} />
 
       {scope ? (
         <p className="alert alert-info mb-6">
           {scope}. Mostrando todo o histórico.{" "}
-          <Link href={`/admin/financeiro/lancamentos?mes=${month}`} className="link">
+          <Link href={`/financeiro/lancamentos?mes=${month}`} className="link">
             Voltar ao mês
           </Link>
         </p>
       ) : (
         <>
-          <MonthNav basePath="/admin/financeiro/lancamentos" month={month} extraQuery={typeQuery} />
+          <MonthNav basePath="/financeiro/lancamentos" month={month} extraQuery={typeQuery} />
           <nav aria-label="Filtrar por tipo" className="mb-6 flex flex-wrap gap-2">
-            <Link href={`/admin/financeiro/lancamentos?mes=${month}`} className={`btn btn-sm ${type ? "btn-secondary" : "btn-primary"}`}>
+            <Link href={`/financeiro/lancamentos?mes=${month}`} className={`btn btn-sm ${type ? "btn-secondary" : "btn-primary"}`}>
               Tudo
             </Link>
             {ENTRY_TYPES.map((item) => (
-              <Link key={item} href={`/admin/financeiro/lancamentos?mes=${month}&tipo=${item}`} className={`btn btn-sm ${type === item ? "btn-primary" : "btn-secondary"}`}>
+              <Link key={item} href={`/financeiro/lancamentos?mes=${month}&tipo=${item}`} className={`btn btn-sm ${type === item ? "btn-primary" : "btn-secondary"}`}>
                 {ENTRY_TYPE_LABELS[item]}s
               </Link>
             ))}

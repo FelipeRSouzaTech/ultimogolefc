@@ -57,10 +57,10 @@ docker compose exec db sh -c 'createdb -U "$POSTGRES_USER" ultimogole_test'
 npm run test:integration
 ```
 
-**Financeiro (`/admin/financeiro`)** — escrito em ambiente sem acesso ao npm, portanto **sem `npm run check`
+**Portal financeiro (`/financeiro`, separado do painel)** — escrito em ambiente sem acesso ao npm, portanto **sem `npm run check`
 local**: lint, tipos, build e testes com Vitest ficam a cargo do CI do pull request. O que foi executado:
 
-1. **Testes unitários — 120 de 120 passaram** (98 anteriores + 22 novos), com `tsx` e o executor nativo do
+1. **Testes unitários — 123 de 123 passaram** (98 anteriores + 25 novos), com `tsx` e o executor nativo do
    Node, usando um substituto mínimo de `describe/it/expect`. Os novos cobrem: conversão de valores para
    centavos sem erro de arredondamento, meses e vencimentos no horário de Brasília, situação das mensalidades,
    resumo do caixa ignorando estornos, exportação CSV (inclusive proteção contra fórmulas) e permissões.
@@ -105,7 +105,7 @@ diferença e ela deve ser gerada e versionada.
 - Armazenamento em pasta local ou em serviço compatível com S3, escolhido por `STORAGE_DRIVER`.
   O banco guarda só os metadados.
 
-**Financeiro (só no painel)**
+**Portal financeiro (`/financeiro`, área própria com login e menu próprios)**
 - Caixa com receitas e despesas por categoria, estorno com motivo e exportação CSV.
 - Mensalidades dos jogadores: geração mensal, baixa de pagamento, isenção e situação (paga, em aberto, atrasada).
 - Patrocínios e doações: valor combinado e recebido. Custos por jogo.

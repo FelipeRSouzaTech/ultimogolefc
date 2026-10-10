@@ -108,8 +108,10 @@ o último superadministrador ativo não pode ser rebaixado nem desativado (verif
 - Nenhum e-mail é enviado; o portal informa apenas que a mensagem foi recebida.
 
 **Financeiro** (`modules/finance/`) — regras em [`FINANCEIRO.md`](FINANCEIRO.md). Valores em centavos,
-lançamentos nunca apagados (estorno), baixa de mensalidade transacional. A função Tesoureiro (sexta função,
-fora da tabela acima) consulta e lança no financeiro e não tem nenhuma outra permissão de escrita.
+lançamentos nunca apagados (estorno), baixa de mensalidade transacional. É um portal próprio em `/financeiro`
+(`app/(financeiro)`), com layout e tela de entrada próprios, que reaproveita do painel o login, a sessão, as
+permissões, a auditoria e os componentes. A função Tesoureiro (sexta função, fora da tabela acima) usa só esse
+portal: não tem acesso ao painel administrativo.
 
 ## API
 

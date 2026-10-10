@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { can, ROLES } from "@/lib/auth/permissions";
+import { can, homePathFor, ROLES } from "@/lib/auth/permissions";
 import {
   athletesWithoutDue,
   categoryType,
@@ -189,6 +189,28 @@ describe("permissões do financeiro", () => {
     for (const role of ["EDITOR", "FOOTBALL_MANAGER", "VIEWER"] as const) {
       expect(can(role, "finance:read")).toBe(false);
       expect(can(role, "finance:write")).toBe(false);
+    }
+  });
+
+  it("o tesoureiro não entra no painel administrativo", () => {
+    expect(can("TREASURER", "dashboard:view")).toBe(false);
+    expect(can("TREASURER", "finance:read")).toBe(true);
+  });
+
+  it("depois do login cada função vai para um portal a que tem acesso", () => {
+    expect(homePathFor("TREASURER", "admin")).toBe("/financeiro");
+    expect(homePathFor("TREASURER", "finance")).toBe("/financeiro");
+    expect(homePathFor("SUPERADMIN", "admin")).toBe("/admin");
+    expect(homePathFor("SUPERADMIN", "finance")).toBe("/financeiro");
+    expect(homePathFor("ADMIN", "finance")).toBe("/financeiro");
+    // Quem entra pelo financeiro sem ter acesso a ele cai no painel, nunca no financeiro.
+    expect(homePathFor("EDITOR", "finance")).toBe("/admin");
+    expect(homePathFor("VIEWER", "finance")).toBe("/admin");
+  });
+
+  it("toda função tem acesso a pelo menos um dos portais (evita redirecionamento em círculo)", () => {
+    for (const role of ROLES) {
+      expect(can(role, "dashboard:view") || can(role, "finance:read")).toBe(true);
     }
   });
 

@@ -8,7 +8,7 @@ import { listEntries } from "@/modules/finance/service";
 
 export const dynamic = "force-dynamic";
 
-/** GET /admin/financeiro/exportar?mes=AAAA-MM — lançamentos do mês em CSV. Exige sessão e permissão. */
+/** GET /financeiro/exportar?mes=AAAA-MM — lançamentos do mês em CSV. Exige sessão e permissão. */
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return new NextResponse("Sessão expirada.", { status: 401 });

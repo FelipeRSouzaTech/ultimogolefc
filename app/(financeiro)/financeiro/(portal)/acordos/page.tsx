@@ -4,19 +4,18 @@ import { ActionButton } from "@/components/ui/action-button";
 import { ActionForm } from "@/components/ui/action-form";
 import { AdminHeading, Panel, ReadOnlyNotice } from "@/components/ui/admin";
 import { Field } from "@/components/ui/field";
-import { requirePagePermission } from "@/lib/auth/guard";
+import { requireFinance } from "@/lib/auth/finance-guard";
 import { can } from "@/lib/auth/permissions";
 import { formatDate } from "@/lib/datetime";
 import { prisma } from "@/lib/db/prisma";
 import { AGREEMENT_KINDS, AGREEMENT_KIND_LABELS, type AgreementKind } from "@/modules/finance/rules";
 import { createAgreementAction, toggleAgreementAction } from "../actions";
-import { FinanceNav } from "../finance-nav";
 import { Money } from "../money";
 
 export const metadata: Metadata = { title: "Patrocínios e doações" };
 
 export default async function AgreementsPage() {
-  const user = await requirePagePermission("finance:read");
+  const user = await requireFinance();
   const canWrite = can(user.role, "finance:write");
   const [agreements, received, sponsors] = await Promise.all([
     prisma.financeAgreement.findMany({ orderBy: [{ isActive: "desc" }, { name: "asc" }], include: { sponsor: { select: { name: true } } } }),
@@ -33,7 +32,6 @@ export default async function AgreementsPage() {
     <>
       <AdminHeading title="Patrocínios e doações" description="Valores combinados e o quanto já entrou no caixa." />
       {canWrite ? null : <ReadOnlyNotice />}
-      <FinanceNav active="acordos" />
 
       <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
         <Panel title="Acordos">
@@ -84,7 +82,7 @@ export default async function AgreementsPage() {
                       <div className="h-full bg-primary" style={{ width: `${percent}%` }} />
                     </div>
                     <div className="mt-3 flex flex-wrap items-center gap-4">
-                      <Link href={`/admin/financeiro/lancamentos?acordo=${agreement.id}`} className="link text-sm">
+                      <Link href={`/financeiro/lancamentos?acordo=${agreement.id}`} className="link text-sm">
                         Ver recebimentos
                       </Link>
                       {canWrite ? <ActionButton action={toggleAgreementAction.bind(null, agreement.id)} label={agreement.isActive ? "Encerrar" : "Reativar"} /> : null}

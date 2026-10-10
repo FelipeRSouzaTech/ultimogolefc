@@ -60,6 +60,14 @@ test.describe("proteção do painel", () => {
     await expect(page.getByRole("heading", { name: "Painel administrativo" })).toBeVisible();
   });
 
+  test("o portal financeiro exige login próprio", async ({ page }) => {
+    for (const path of ["/financeiro", "/financeiro/lancamentos", "/financeiro/mensalidades", "/financeiro/exportar"]) {
+      await page.goto(path);
+      await expect(page).toHaveURL(/\/financeiro\/login$/);
+    }
+    await expect(page.getByRole("heading", { name: "Financeiro" })).toBeVisible();
+  });
+
   test("login com credenciais inválidas mostra erro e não entra", async ({ page }) => {
     await page.goto("/admin/login");
     await page.getByLabel("E-mail").fill("ninguem@exemplo.com");
