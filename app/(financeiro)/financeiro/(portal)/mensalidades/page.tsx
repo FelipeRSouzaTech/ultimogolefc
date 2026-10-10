@@ -130,7 +130,7 @@ export default async function DuesPage({ searchParams }: { searchParams: SearchP
           <div className="space-y-6">
             <Panel title="Gerar cobranças">
               <p className="mb-4 text-sm text-gray-600">
-                Cria a mensalidade de {monthLabel(month)} para cada diretor com situação "Ativo" que ainda não tem. Pode ser repetido sem duplicar.
+                Cria a mensalidade de {monthLabel(month)} para cada diretor com situação Ativo que ainda não tem. Pode ser repetido sem duplicar.
               </p>
               {settings.amountCents === null ? (
                 <p className="alert alert-info">Defina o valor da mensalidade abaixo para liberar a geração.</p>
