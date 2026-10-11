@@ -152,6 +152,27 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Ano "1990" do escudo**: não é usado como data de fundação em nenhum texto, por não ter sido confirmado.
 - **Senhas antigas no histórico**: um commit antigo incluiu senhas de banco local no `.env.example` (já revertido). São de desenvolvimento; não reutilizar.
 
+## ✅ Tarefas concluídas (histórico)
+
+### 6. `feat/athlete-categories` (PR #7 merged)
+- **Branch**: `feat/athlete-categories` → `main` (`48b1511`)
+- **Mudança**: Adiciona campo **Categoria** aos atletas (12 categorias: Base, Adulto, Veterano, Master, Super Master, Sessentão)
+- **Arquivos**:
+  - `prisma/schema.prisma` — enum `AthleteCategory` + campo `category` no `Athlete`
+  - `modules/squad/rules.ts` — `ATHLETE_CATEGORIES`, `ATHLETE_CATEGORY_LABELS`, `ATHLETE_CATEGORY_GROUPS`, `sortCategoriesByGroup()`, `getCategoryGroup()`
+  - `app/(admin)/admin/(painel)/elenco/athlete-form.tsx` — `<select>` "Categoria"
+  - `app/(admin)/admin/(painel)/elenco/page.tsx` — lista agrupada: Categoria → Posição
+  - `app/(public)/futebol/page.tsx` — página pública agrupada por Categoria → Posição
+  - `lib/validation/site.ts` — `category` no `athleteSchema` (Zod)
+  - `app/(admin)/admin/(painel)/elenco/actions.ts` — `category` no `saveAthleteAction`
+- **Fix posterior** (`8a9d3e8`): `saveAthleteAction` não estava salvando a categoria — corrigido adicionando `category` no parse do form
+
+### 7. `fix/athlete-category-save` (commit direto na main)
+- **Commit**: `8a9d3e8`
+- **Problema**: Apenas categoria "Principal / Adulto (livre)" era salva — as outras não
+- **Causa**: `saveAthleteAction` não incluía `category` no `athleteSchema` parse
+- **Solução**: Adicionado `category: field(formData, "category")` no `athleteSchema` e no `saveAthleteAction`
+
 ## 🎯 Próximas tarefas planejadas
 
 - [ ] Aguardar próxima instrução do usuário
@@ -172,11 +193,11 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 
 ```markdown
 **Contexto atual:**
-- Branch atual: `claude/agents-md` (ou main se já merged)
-- Main está em: `7447cd1` (PR #6 merged)
-- Última tarefa: histórico do agente Claude acrescentado ao agents.md
+- Branch atual: `main` (último commit `8a9d3e8`)
+- Main está em: `8a9d3e8` (fix categoria atleta salva)
+- Última tarefa: fix saveAthleteAction para salvar categoria selecionada
 - Próxima tarefa: [a definir]
-- Arquivos relevantes: agents.md
+- Arquivos relevantes: lib/validation/site.ts, app/(admin)/admin/(painel)/elenco/actions.ts
 ```
 
 ---
