@@ -50,6 +50,12 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
     [filteredGroups]
   );
 
+  // Determina se a comissão técnica já foi exibida após Atacantes em alguma categoria
+  const staffShownAfterForward = useMemo(() => {
+    if (staff.length === 0) return true;
+    return filteredGroups.some((cat) => cat.groups.some((g) => g.position === "FORWARD"));
+  }, [staff.length, filteredGroups]);
+
   return (
     <div className="container-page space-y-12 py-10">
       <div className="mb-8">
@@ -72,14 +78,14 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
         <p className="mt-2 text-sm text-gray-500" aria-live="polite">
           {filteredGroups.length === 1
             ? `Exibindo ${filteredGroups[0]?.label} (${filteredGroups[0]?.groups.reduce((sum, g) => sum + g.athletes.length, 0)} jogador${filteredGroups[0]?.groups.reduce((sum, g) => sum + g.athletes.length, 0) !== 1 ? "es" : ""})`
-            : `Exibindo ${filteredGroups.length} categor${filteredGroups.length === 1 ? "ia" : "ias"} com ${totalPlayers} jogador${totalPlayers !== 1 ? "es" : ""} no total`}
+            : `Exibindo ${filteredGroups.length} categor${filteredGroups.length === 1 ? "ia" : "ias"} com ${totalPlayers} jogador${totalPlayers !== 1 ? "es" : ""} no total}`}
         </p>
       </div>
 
       {filteredGroups.length === 0 ? (
         <EmptyState title="Nenhum jogador encontrado" description="Nenhum jogador cadastrado nesta categoria." />
       ) : (
-        filteredGroups.map(({ category, label, groups }) => (
+        filteredGroups.map(({ category, label, groups }, index) => (
           <section key={category} aria-labelledby={`categoria-${category}`}>
             <h2 id={`categoria-${category}`} className="section-title mb-5">
               {label}
@@ -102,8 +108,12 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
                 </ul>
               </div>
             ))}
-            {/* Exibe a comissão técnica após os Atacantes (FORWARD) de cada categoria */}
-            {staff.length > 0 && groups.some((g) => g.position === "FORWARD") ? (
+            {/* Exibe a comissão técnica após os Atacantes (FORWARD):
+                - Se vendo "all": apenas na primeira categoria que tiver FORWARD (geralmente Adulto)
+                - Se filtrando por categoria: nessa categoria se tiver FORWARD */}
+            {staff.length > 0 && groups.some((g) => g.position === "FORWARD") && (
+              selectedCategory === "all" ? index === 0 : true
+            ) ? (
               <section aria-labelledby={`comissao-${category}`} className="mt-12">
                 <h2 id={`comissao-${category}`} className="section-title mb-5">
                   Comissão técnica
@@ -121,8 +131,8 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
         ))
       )}
 
-      {/* Fallback: mostra comissão técnica no final da página se existir staff mas não foi exibida após Atacantes */ }
-      {staff.length > 0 && filteredGroups.length > 0 ? (
+      {/* Fallback: mostra comissão técnica no final se não foi exibida após Atacantes */ }
+      {staff.length > 0 && filteredGroups.length > 0 && !staffShownAfterForward ? (
         <section aria-labelledby="comissao-fim" className="mt-12">
           <h2 id="comissao-fim" className="section-title mb-5">
             Comissão técnica
