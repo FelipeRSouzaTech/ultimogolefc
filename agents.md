@@ -173,6 +173,26 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Causa**: `saveAthleteAction` não incluía `category` no `athleteSchema` parse
 - **Solução**: Adicionado `category: field(formData, "category")` no `athleteSchema` e no `saveAthleteAction`
 
+### 8. `fix/remove-diretoria-institucional` (PR #8 merged)
+- **Branch**: `fix/remove-diretoria-institucional` → `main`
+- **Mudança**: Remove seção "Diretoria" da página institucional pública `/clube` e painel "Diretoria e comissão técnica" de `/admin/institucional`
+- **Arquivos**:
+  - `app/(public)/clube/page.tsx` — remove query `StaffMember` (BOARD) e seção Diretoria
+  - `app/(admin)/admin/(painel)/institucional/page.tsx` — remove painel completo com listagem e formulário
+
+### 9. `feat/technical-staff` (PR #9 — aguardando revisão)
+- **Branch**: `feat/technical-staff`
+- **Mudança**: Nova aba **Comissão Técnica** em `/admin/comissao-tecnica` com CRUD completo
+- **Banco**: migration `20261011032514_technical_staff` — enum `TechnicalStaffRole` + models `TechnicalStaff` e `TechnicalStaffSeason` (N:N com Season)
+- **Arquivos**:
+  - `prisma/schema.prisma` — novos enum e models
+  - `modules/squad/rules.ts` — `TECHNICAL_STAFF_ROLES`, `TECHNICAL_STAFF_ROLE_LABELS`
+  - `lib/validation/site.ts` — `technicalStaffSchema` (Zod com arrays)
+  - `app/(admin)/admin/(painel)/comissao-tecnica/actions.ts` — `saveTechnicalStaffAction`, `deleteTechnicalStaffAction`
+  - `app/(admin)/admin/(painel)/comissao-tecnica/technical-staff-form.tsx` — formulário com multi-selects
+  - `app/(admin)/admin/(painel)/comissao-tecnica/page.tsx` — lista + painel "Novo membro"
+- **Campos**: Nome, Apelido, Função (10 opções), Competições/Temporadas (multi-select), Situação (Ativo/Inativo), Categorias (multi-select, usa `AthleteCategory`), Ordem, Divulgação autorizada
+
 ## 🎯 Próximas tarefas planejadas
 
 - [ ] Aguardar próxima instrução do usuário
@@ -193,11 +213,11 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 
 ```markdown
 **Contexto atual:**
-- Branch atual: `main` (último commit `8a9d3e8`)
-- Main está em: `8a9d3e8` (fix categoria atleta salva)
-- Última tarefa: fix saveAthleteAction para salvar categoria selecionada
+- Branch atual: `feat/technical-staff` (PR #9 aguardando merge)
+- Main está em: último commit com fix categoria atleta
+- Última tarefa: cria aba Comissão Técnica (/admin/comissao-tecnica) com cadastro completo
 - Próxima tarefa: [a definir]
-- Arquivos relevantes: lib/validation/site.ts, app/(admin)/admin/(painel)/elenco/actions.ts
+- Arquivos relevantes: prisma/schema.prisma, modules/squad/rules.ts, app/(admin)/admin/(painel)/comissao-tecnica/
 ```
 
 ---
