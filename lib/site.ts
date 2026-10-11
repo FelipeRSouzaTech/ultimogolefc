@@ -11,7 +11,6 @@ export const PUBLIC_NAV = [
     type: "dropdown" as const,
     item: { href: "/futebol", label: "Futebol" },
     children: [
-      { href: "/futebol", label: "Elenco", parentHref: "/futebol" },
       { href: "/jogos", label: "Jogos", parentHref: "/futebol" },
       { href: "/campeonatos", label: "Campeonatos", parentHref: "/futebol" },
       { href: "/equipes", label: "Equipes", parentHref: "/futebol" },
