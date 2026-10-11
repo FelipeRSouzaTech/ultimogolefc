@@ -150,7 +150,7 @@ export default async function HomePage() {
                 Classificação
               </h2>
               {featuredSeason ? (
-                <Link href={`/competicoes/${featuredSeason.competition.slug}`} className="link text-sm">
+                <Link href={`/campeonatos/${featuredSeason.competition.slug}`} className="link text-sm">
                   Tabela completa
                 </Link>
               ) : null}

@@ -43,7 +43,7 @@ export function TechnicalStaffForm({
         </select>
       </Field>
 
-      <Field name="seasonIds" label="Competições/Temporadas" hint="Selecione uma ou mais (Ctrl+clique para múltipla seleção).">
+      <Field name="seasonIds" label="Campeonatos/Temporadas" hint="Selecione uma ou mais (Ctrl+clique para múltipla seleção).">
         <select id="seasonIds" name="seasonIds" className="input" multiple defaultValue={values?.seasonIds} required>
           {seasonOptions.map((season) => (
             <option key={season.id} value={season.id}>

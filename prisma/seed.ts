@@ -32,7 +32,7 @@ async function main() {
     data: {
       name: "Campeonato de Demonstração",
       slug: "campeonato-de-demonstracao",
-      description: "Competição fictícia criada pelo seed para demonstrar o portal. Substitua pelos dados reais no painel.",
+      description: "Campeonato fictício criado pelo seed para demonstrar o portal. Substitua pelos dados reais no painel.",
     },
   });
   const season = await prisma.season.create({

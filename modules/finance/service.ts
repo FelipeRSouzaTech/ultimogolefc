@@ -57,14 +57,14 @@ export async function createEntry(input: EntryInput, userId: string, tx: Prisma.
     throw new BusinessError("Jogador não encontrado.");
   }
   if (input.competitionId && !(await tx.competition.findUnique({ where: { id: input.competitionId }, select: { id: true } }))) {
-    throw new BusinessError("Competição não encontrada.");
+    throw new BusinessError("Campeonato não encontrado.");
   }
   if (input.matchId) {
     const match = await tx.match.findUnique({ where: { id: input.matchId }, select: { season: { select: { competitionId: true } } } });
     if (!match) throw new BusinessError("Partida não encontrada.");
-    // A partida escolhida precisa ser da competição informada.
+    // A partida escolhida precisa ser do campeonato informado.
     if (input.competitionId && match.season.competitionId !== input.competitionId) {
-      throw new BusinessError("A partida selecionada não pertence à competição escolhida.");
+      throw new BusinessError("A partida selecionada não pertence ao campeonato escolhido.");
     }
   }
   if (input.agreementId && !(await tx.financeAgreement.findUnique({ where: { id: input.agreementId }, select: { id: true } }))) {

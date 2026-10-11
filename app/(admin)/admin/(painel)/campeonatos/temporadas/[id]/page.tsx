@@ -48,10 +48,10 @@ export default async function SeasonAdminPage({ params }: { params: Promise<{ id
   return (
     <>
       <AdminHeading title={`${season.competition.name} · ${season.label}`} description="Regras de classificação e participantes da temporada.">
-        <Link href={`/admin/competicoes/${season.competitionId}`} className="btn btn-secondary btn-sm">
+        <Link href={`/admin/campeonatos/${season.competitionId}`} className="btn btn-secondary btn-sm">
           Voltar
         </Link>
-        <Link href={`/competicoes/${season.competition.slug}?temporada=${encodeURIComponent(season.label)}`} className="btn btn-secondary btn-sm">
+        <Link href={`/campeonatos/${season.competition.slug}?temporada=${encodeURIComponent(season.label)}`} className="btn btn-secondary btn-sm">
           Ver no portal
         </Link>
         {can(user.role, "football:delete") ? (

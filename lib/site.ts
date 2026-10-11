@@ -7,9 +7,16 @@ export const BRAND_COLOR = "#0f2145";
 
 export const PUBLIC_NAV = [
   { href: "/clube", label: "Clube" },
-  { href: "/futebol", label: "Futebol" },
-  { href: "/jogos", label: "Jogos" },
-  { href: "/competicoes", label: "Competições" },
+  {
+    type: "dropdown" as const,
+    item: { href: "/futebol", label: "Futebol" },
+    children: [
+      { href: "/futebol", label: "Elenco", parentHref: "/futebol" },
+      { href: "/jogos", label: "Jogos", parentHref: "/futebol" },
+      { href: "/campeonatos", label: "Campeonatos", parentHref: "/futebol" },
+      { href: "/equipes", label: "Equipes", parentHref: "/futebol" },
+    ],
+  },
   { href: "/noticias", label: "Notícias" },
   { href: "/galeria", label: "Galeria" },
   { href: "/patrocinadores", label: "Patrocinadores" },
