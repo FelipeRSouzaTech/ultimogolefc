@@ -314,6 +314,8 @@ model Competition {
   name        String   @unique
   slug        String   @unique
   description String?  @db.Text
+  /// Imagem do cartão em /campeonatos (retrato 5:6, recomendado 500×600 px).
+  coverPath   String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime @updatedAt @db.Timestamptz(3)

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageTitle } from "@/components/ui/page-title";
+import { SmartImage } from "@/components/ui/smart-image";
 import { prisma } from "@/lib/db/prisma";
 
 export const metadata: Metadata = {
@@ -13,7 +14,6 @@ export const metadata: Metadata = {
 export default async function CampeonatosPage() {
   const competitions = await prisma.competition.findMany({
     orderBy: [{ isActive: "desc" }, { name: "asc" }],
-    include: { seasons: { orderBy: { label: "desc" }, select: { id: true, label: true, isCurrent: true } } },
   });
 
   return (
@@ -23,22 +23,16 @@ export default async function CampeonatosPage() {
         {competitions.length === 0 ? (
           <EmptyState title="Nenhum campeonato cadastrado" description="Os campeonatos disputados pelo clube aparecerão aqui." />
         ) : (
-          <ul className="grid gap-6 md:grid-cols-2">
+          <ul className="grid grid-cols-2 gap-4 lg:grid-cols-3">
             {competitions.map((competition) => (
-              <li key={competition.id} className="card flex flex-col p-6">
-                <div className="flex items-start justify-between gap-3">
-                  <h2 className="text-xl uppercase">{competition.name}</h2>
-                  {competition.isActive ? <span className="badge badge-solid">Ativa</span> : <span className="badge">Encerrada</span>}
-                </div>
-                {competition.description ? <p className="mt-3 line-clamp-3 text-sm text-gray-600">{competition.description}</p> : null}
-                <p className="mt-4 text-sm text-gray-600">
-                  {competition.seasons.length === 0
-                    ? "Nenhuma temporada cadastrada."
-                    : `Temporadas: ${competition.seasons.map((season) => season.label).join(", ")}`}
-                </p>
-                <div className="mt-5 flex-1" />
-                <Link href={`/campeonatos/${competition.slug}`} className="btn btn-primary self-start">
-                  Ver campeonato
+              <li key={competition.id}>
+                <Link href={`/campeonatos/${competition.slug}`} className="competition-tile" aria-label={competition.isActive ? competition.name : `${competition.name} (encerrada)`}>
+                  {competition.coverPath ? (
+                    <SmartImage src={competition.coverPath} alt="" fill sizes="(min-width: 1024px) 23rem, 50vw" className="object-cover" />
+                  ) : (
+                    <span className="px-4 font-display text-lg font-extrabold uppercase leading-tight sm:text-2xl">{competition.name}</span>
+                  )}
+                  {competition.isActive ? null : <span className="badge absolute left-3 top-3 border-white bg-primary-dark text-white">Encerrada</span>}
                 </Link>
               </li>
             ))}

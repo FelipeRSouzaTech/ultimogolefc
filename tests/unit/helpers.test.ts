@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { formatDate, formatTime, saoPauloLocalToUtc, utcToSaoPauloLocal } from "@/lib/datetime";
 import { slugify, uniqueSlug } from "@/lib/slug";
-import { clubSchema, matchSchema, seasonSchema } from "@/lib/validation/football";
+import { clubSchema, competitionSchema, matchSchema, seasonSchema } from "@/lib/validation/football";
 
 describe("datas no fuso de São Paulo", () => {
   it("formata data como DD/MM/AAAA e hora em 24h", () => {
@@ -51,6 +51,17 @@ describe("validação de futebol", () => {
     expect(clubSchema.safeParse({ ...base, crestPath: "/brand/escudo.png" }).success).toBe(true);
     expect(clubSchema.safeParse({ ...base, crestPath: "https://exemplo.com/a.png" }).success).toBe(false);
     expect(clubSchema.safeParse({ ...base, crestPath: "javascript:alert(1)" }).success).toBe(false);
+  });
+
+  it("aceita a imagem do cartão do campeonato só como caminho local, e vazia vira null", () => {
+    const base = { name: "Copa Teste", description: "", isActive: true };
+    const empty = competitionSchema.safeParse({ ...base, coverPath: "" });
+    expect(empty.success).toBe(true);
+    if (empty.success) expect(empty.data.coverPath).toBeNull();
+    const uploaded = competitionSchema.safeParse({ ...base, coverPath: "/midia/2026/10/capa.webp" });
+    expect(uploaded.success).toBe(true);
+    if (uploaded.success) expect(uploaded.data.coverPath).toBe("/midia/2026/10/capa.webp");
+    expect(competitionSchema.safeParse({ ...base, coverPath: "https://exemplo.com/capa.png" }).success).toBe(false);
   });
 
   it("converte placar vazio em null e recusa valores inválidos", () => {

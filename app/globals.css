@@ -228,6 +228,46 @@
     box-shadow: var(--shadow-card);
   }
 
+  /*
+   * Cartão de campeonato (/campeonatos): retrato 5:6 (500×600), fundo azul-marinho com luz no centro e
+   * arcos discretos no canto inferior direito. A imagem enviada pelo painel cobre o cartão inteiro.
+   */
+  .competition-tile {
+    position: relative;
+    display: flex;
+    aspect-ratio: 5 / 6;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background-color: var(--color-primary-dark);
+    background-image:
+      repeating-radial-gradient(circle at 115% 125%, transparent 0 2.25rem, rgb(255 255 255 / 0.05) 2.25rem 2.5rem),
+      radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--color-primary) 78%, var(--color-white)) 0%, var(--color-primary) 45%, var(--color-primary-dark) 100%);
+    box-shadow: var(--shadow-card);
+    color: var(--color-white);
+    text-align: center;
+    transition:
+      transform var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+  .competition-tile:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--glow-primary), var(--shadow-card);
+  }
+  .competition-tile:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .competition-tile {
+      transition: none;
+    }
+    .competition-tile:hover {
+      transform: none;
+    }
+  }
+
   .section-title {
     display: flex;
     align-items: center;
