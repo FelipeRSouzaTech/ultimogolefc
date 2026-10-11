@@ -34,7 +34,7 @@ export const ATHLETE_CATEGORIES = [
 export type AthleteCategory = (typeof ATHLETE_CATEGORIES)[number];
 
 export const ATHLETE_CATEGORY_LABELS: Record<AthleteCategory, string> = {
-  ADULT: "Principal / Adulto (livre)",
+  ADULT: "Principal / Adulto",
   BASE_U7: "Base — Sub-7",
   BASE_U9: "Base — Sub-9",
   BASE_U11: "Base — Sub-11",
