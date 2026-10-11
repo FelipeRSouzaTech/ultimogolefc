@@ -19,8 +19,8 @@
 1. **Nunca commit direto na `main`**
 2. Crie branch: `feat/...` | `fix/...` | `chore/...`
 3. Implemente → `git add` → `git commit` → `git push`
-4. Passe **link compare/PR**: `https://github.com/FelipeRSouzaTech/ultimogolefc/pull/new/<branch>`
-5. **Não** crie PR via CLI — usuário cria + aprova + merge no GitHub
+4. **Crie PR via `gh pr create`** (title, body, base=main, head=branch)
+5. Usuário revisa + aprova + merge no GitHub
 6. Após merge: `git checkout main && git pull origin main`
 
 ---
@@ -122,5 +122,5 @@
 
 - **Repo em produção = privado** (não gasta tokens, não afeta chat)
 - **Contexto do chat ≈ 200k tokens** — use leitura seletiva
-- **PRs sempre via link compare** — não uso `gh pr create`
+- **PRs criados via `gh pr create`** — title, body, base=main, head=branch
 - **Build/test**: `npm run build`, `npm run typecheck`, `npm run lint` — todos passando
