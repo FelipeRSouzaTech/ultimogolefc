@@ -57,8 +57,15 @@ export default async function CompetitionPage({ params, searchParams }: Props) {
     listUpcomingMatches(filters),
     listResults(filters),
     getOwnClub(),
-    prisma.competitionTeam.findMany({ where: { seasonId: season.id }, include: { club: true }, orderBy: { club: { name: "asc" } } }),
+    prisma.competitionTeam.findMany({ where: { seasonId: season.id }, include: { club: true } }),
   ]);
+
+  // Coloca nosso clube em primeiro na lista de participantes
+  participants.sort((a, b) => {
+    if (ownClub && a.clubId === ownClub.id) return -1;
+    if (ownClub && b.clubId === ownClub.id) return 1;
+    return a.club.name.localeCompare(b.club.name, "pt-BR");
+  });
 
   return (
     <>
