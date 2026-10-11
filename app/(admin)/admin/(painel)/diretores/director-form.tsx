@@ -2,7 +2,7 @@ import { ActionForm } from "@/components/ui/action-form";
 import { Field } from "@/components/ui/field";
 import { ImageField } from "@/components/ui/image-field";
 import type { FormAction } from "@/lib/action";
-import { DIRECTOR_STATUSES, DIRECTOR_STATUS_LABELS } from "@/modules/finance/rules";
+import { DIRECTOR_ROLES, DIRECTOR_ROLE_LABELS, DIRECTOR_STATUSES, DIRECTOR_STATUS_LABELS } from "@/modules/finance/rules";
 
 type Values = { name: string; role: string; status: string; photoPath: string | null };
 
@@ -13,7 +13,14 @@ export function DirectorForm({ action, values }: { action: FormAction; values?: 
         <input id="name" name="name" className="input" defaultValue={values?.name} required maxLength={120} />
       </Field>
       <Field name="role" label="Função">
-        <input id="role" name="role" className="input" defaultValue={values?.role} required maxLength={80} placeholder="Ex.: Presidente, Diretor de futebol" />
+        <select id="role" name="role" className="input" defaultValue={values?.role} required>
+          <option value="">Selecione a função</option>
+          {DIRECTOR_ROLES.map((role) => (
+            <option key={role} value={role}>
+              {DIRECTOR_ROLE_LABELS[role]}
+            </option>
+          ))}
+        </select>
       </Field>
       <Field name="status" label="Situação" hint="Só diretores com situação Ativo entram na geração das mensalidades.">
         <select id="status" name="status" className="input" defaultValue={values?.status ?? "ACTIVE"}>
