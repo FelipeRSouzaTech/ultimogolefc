@@ -1,3 +1,5 @@
+"use server";
+
 import { prisma } from "@/lib/db/prisma";
 import { field, zodErrorState, type ActionState } from "@/lib/action";
 import { audit } from "@/lib/audit";
