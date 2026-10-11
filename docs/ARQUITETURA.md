@@ -42,6 +42,8 @@ as alterações passam por Server Actions. Três camadas, separadas por pasta:
 | Enviar imagens | ✔ | ✔ | ✔ | ✔ | — |
 | Galeria e exclusão de mídia | ✔ | ✔ | ✔ | — | — |
 | Mensagens de contato | ✔ | ✔ | — | — | — |
+| Financeiro: consultar | ✔ | ✔ | — | — | — |
+| Financeiro: lançar e estornar | ✔ | — | — | — | — |
 | Auditoria | ✔ | ✔ | — | — | — |
 | Usuários | ✔ | — | — | — | — |
 
@@ -104,6 +106,12 @@ o último superadministrador ativo não pode ser rebaixado nem desativado (verif
 **Contato** (`modules/site/contact.ts`)
 - Validação no servidor, campo-armadilha contra robôs e limite de 3 mensagens por IP por hora (40 no total).
 - Nenhum e-mail é enviado; o portal informa apenas que a mensagem foi recebida.
+
+**Financeiro** (`modules/finance/`) — regras em [`FINANCEIRO.md`](FINANCEIRO.md). Valores em centavos,
+lançamentos nunca apagados (estorno), baixa de mensalidade transacional. É um portal próprio em `/financeiro`
+(`app/(financeiro)`), com layout e tela de entrada próprios, que reaproveita do painel o login, a sessão, as
+permissões, a auditoria e os componentes. A função Tesoureiro (sexta função, fora da tabela acima) usa só esse
+portal: não tem acesso ao painel administrativo.
 
 ## API
 

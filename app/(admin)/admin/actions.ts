@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import { field, zodErrorState, type ActionState } from "@/lib/action";
 import { audit } from "@/lib/audit";
 import { getCurrentUser } from "@/lib/auth/guard";
+import { homePathFor } from "@/lib/auth/permissions";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { isLoginBlocked, recordLoginAttempt, WINDOW_MINUTES } from "@/lib/auth/rate-limit";
 import { clientInfo, createSession, destroyCurrentSession, revokeUserSessions } from "@/lib/auth/session";
@@ -16,7 +17,11 @@ const INVALID = "E-mail ou senha inválidos.";
 let dummyHash: Promise<string> | null = null;
 const getDummyHash = () => (dummyHash ??= hashPassword("senha-inexistente-apenas-para-tempo"));
 
-export async function loginAction(formData: FormData): Promise<ActionState> {
+/**
+ * Login único para os dois portais. `portal` indica onde a pessoa entrou; o destino final é decidido
+ * aqui no servidor, conforme a função dela (nunca a partir de um endereço enviado pelo navegador).
+ */
+export async function loginAction(portal: "admin" | "finance", formData: FormData): Promise<ActionState> {
   const parsed = loginSchema.safeParse({ email: field(formData, "email"), password: formData.get("password") ?? "" });
   if (!parsed.success) return zodErrorState(parsed.error);
   const { email, password } = parsed.data;
@@ -38,18 +43,28 @@ export async function loginAction(formData: FormData): Promise<ActionState> {
     await createSession(user.id);
     await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
     await audit({ userId: user.id, action: "auth.login", entity: "User", entityId: user.id });
-    return { ok: true, redirectTo: "/admin" };
+    return { ok: true, redirectTo: homePathFor(user.role, portal === "finance" ? "finance" : "admin") };
   } catch (error) {
     console.error("[auth] falha no login", error);
     return { error: "Não foi possível entrar agora. Tente novamente em instantes." };
   }
 }
 
-export async function logoutAction(): Promise<void> {
+async function endSession(): Promise<void> {
   const user = await getCurrentUser();
   await destroyCurrentSession();
   if (user) await audit({ userId: user.id, action: "auth.logout", entity: "User", entityId: user.id });
+}
+
+export async function logoutAction(): Promise<void> {
+  await endSession();
   redirect("/admin/login");
+}
+
+/** Sair pelo portal financeiro: volta para a tela de entrada do próprio financeiro. */
+export async function logoutFinanceAction(): Promise<void> {
+  await endSession();
+  redirect("/financeiro/login");
 }
 
 /** Troca da própria senha: exige a senha atual e encerra as demais sessões. */

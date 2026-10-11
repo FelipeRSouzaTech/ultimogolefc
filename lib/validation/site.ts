@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DIRECTOR_STATUSES } from "@/modules/finance/rules";
 import { GALLERY_CATEGORIES } from "@/modules/gallery/rules";
 import { isSafeUrl } from "@/modules/site/settings";
 import { SPONSOR_TIERS } from "@/modules/sponsors/rules";
@@ -69,6 +70,13 @@ export const contactSchema = z.object({
   email: emailSchema,
   subject: z.string().trim().min(3, "Informe o assunto.").max(150, "Assunto muito longo."),
   message: z.string().trim().min(10, "A mensagem deve ter pelo menos 10 caracteres.").max(5000, "A mensagem deve ter no máximo 5.000 caracteres."),
+});
+
+export const directorSchema = z.object({
+  name: z.string().trim().min(2, "Informe o nome.").max(120, "Nome muito longo."),
+  role: z.string().trim().min(2, "Informe a função.").max(80, "Função muito longa."),
+  status: z.enum(DIRECTOR_STATUSES, { errorMap: () => ({ message: "Selecione a situação." }) }),
+  photoPath: imagePath,
 });
 
 export const gallerySchema = z.object({

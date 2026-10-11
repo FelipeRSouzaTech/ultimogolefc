@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { AdminNav } from "@/components/layout/admin-nav";
 import { requireUser } from "@/lib/auth/guard";
 import { can, ROLE_LABELS, type Permission } from "@/lib/auth/permissions";
@@ -19,6 +20,7 @@ const MENU: { href: string; label: string; permission: Permission | null }[] = [
   { href: "/admin/competicoes", label: "Competições", permission: "football:read" },
   { href: "/admin/clubes", label: "Clubes", permission: "football:read" },
   { href: "/admin/elenco", label: "Elenco", permission: "football:read" },
+  { href: "/admin/diretores", label: "Diretores", permission: "content:read" },
   { href: "/admin/patrocinadores", label: "Patrocinadores", permission: "content:read" },
   { href: "/admin/institucional", label: "Institucional", permission: "content:read" },
   { href: "/admin/galeria", label: "Galeria", permission: "content:read" },
@@ -32,6 +34,8 @@ const MENU: { href: string; label: string; permission: Permission | null }[] = [
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // Toda página do painel passa por aqui: sem sessão válida, redireciona para o login.
   const user = await requireUser();
+  // Funções sem acesso ao painel (hoje, o tesoureiro) são levadas ao portal a que pertencem.
+  if (!can(user.role, "dashboard:view")) redirect(can(user.role, "finance:read") ? "/financeiro" : "/admin/login");
   const items = MENU.filter((item) => item.permission === null || can(user.role, item.permission)).map(({ href, label }) => ({ href, label }));
 
   return (
@@ -53,6 +57,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span className="text-gray-600"> · {ROLE_LABELS[user.role]}</span>
           </p>
           <div className="flex items-center gap-2">
+            {can(user.role, "finance:read") ? (
+              <Link href="/financeiro" className="btn btn-secondary btn-sm">
+                Financeiro
+              </Link>
+            ) : null}
             <Link href="/" className="btn btn-secondary btn-sm">
               Ver portal
             </Link>

@@ -17,6 +17,54 @@ enum Role {
   EDITOR
   FOOTBALL_MANAGER
   VIEWER
+  TREASURER
+}
+
+enum FinanceEntryType {
+  INCOME
+  EXPENSE
+}
+
+enum FinanceCategory {
+  MEMBERSHIP
+  SPONSORSHIP
+  DONATION
+  EVENT
+  OTHER_INCOME
+  REFEREE
+  FIELD
+  UNIFORM
+  EQUIPMENT
+  TRANSPORT
+  REGISTRATION
+  PLAYER_PAYMENT
+  OTHER_EXPENSE
+}
+
+enum DirectorStatus {
+  ACTIVE
+  AWAY
+  ON_LEAVE
+  INACTIVE
+  DISMISSED
+}
+
+enum PaymentMethod {
+  PIX
+  CASH
+  TRANSFER
+  CARD
+  OTHER
+}
+
+enum FinanceSource {
+  MANUAL
+  GATEWAY
+}
+
+enum AgreementKind {
+  SPONSORSHIP
+  DONATION
 }
 
 enum NewsStatus {
@@ -105,8 +153,9 @@ model User {
 
   sessions    Session[]
   articles    NewsArticle[]
-  auditLogs   AuditLog[]
-  mediaAssets MediaAsset[]
+  auditLogs      AuditLog[]
+  mediaAssets    MediaAsset[]
+  financeEntries FinanceEntry[]
 }
 
 model Session {
@@ -213,7 +262,8 @@ model Competition {
   createdAt   DateTime @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime @updatedAt @db.Timestamptz(3)
 
-  seasons Season[]
+  seasons  Season[]
+  payments FinanceEntry[]
 }
 
 model Season {
@@ -270,6 +320,7 @@ model Match {
   awayTeam Club                @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Restrict)
   events   MatchEvent[]
   lineup   MatchLineupPlayer[]
+  expenses FinanceEntry[]
 
   @@index([seasonId, status])
   @@index([status, kickoffAt])
@@ -313,6 +364,7 @@ model Athlete {
 
   matchEvents MatchEvent[]
   lineups     MatchLineupPlayer[]
+  payments    FinanceEntry[]
 
   @@index([isPublished, status, position])
 }
@@ -344,6 +396,8 @@ model Sponsor {
   isActive     Boolean     @default(false)
   createdAt    DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime    @updatedAt @db.Timestamptz(3)
+
+  agreements FinanceAgreement[]
 
   @@index([isActive, tier, sortOrder])
 }
@@ -450,4 +504,102 @@ model MatchLineupPlayer {
 
   @@id([matchId, athleteId])
   @@index([athleteId])
+}
+
+// ---------- Financeiro ----------
+// Valores sempre em centavos (inteiros). Lançamentos nunca são apagados: um erro é corrigido por estorno
+// (voidedAt), para preservar o histórico do caixa.
+
+model FinanceEntry {
+  id          String           @id @default(cuid())
+  type        FinanceEntryType
+  category    FinanceCategory
+  description String
+  amountCents Int
+  occurredOn  DateTime         @db.Timestamptz(3)
+  method      PaymentMethod
+  // Preparado para pagamento pela plataforma: lançamentos criados por um serviço de pagamento
+  // terão source = GATEWAY e o identificador da transação em externalReference (único).
+  source            FinanceSource @default(MANUAL)
+  externalReference String?       @unique
+  notes             String?       @db.Text
+  matchId           String?
+  agreementId       String?
+  // Folha de pagamento: jogador que recebeu e competição a que o pagamento se refere.
+  athleteId         String?
+  competitionId     String?
+  createdById       String?
+  voidedAt          DateTime?     @db.Timestamptz(3)
+  voidReason        String?
+  createdAt         DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime      @updatedAt @db.Timestamptz(3)
+
+  match       Match?            @relation(fields: [matchId], references: [id], onDelete: SetNull)
+  agreement   FinanceAgreement? @relation(fields: [agreementId], references: [id], onDelete: Restrict)
+  athlete     Athlete?          @relation(fields: [athleteId], references: [id], onDelete: Restrict)
+  competition Competition?      @relation(fields: [competitionId], references: [id], onDelete: SetNull)
+  createdBy   User?             @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  due         MembershipDue?
+
+  @@index([occurredOn])
+  @@index([type, category])
+  @@index([matchId])
+  @@index([agreementId])
+  @@index([athleteId])
+  @@index([competitionId])
+}
+
+// Mensalidade de um diretor em um mês ("AAAA-MM"). Paga quando tem um lançamento válido ligado.
+model MembershipDue {
+  id             String    @id @default(cuid())
+  directorId     String
+  referenceMonth String
+  amountCents    Int
+  dueDate        DateTime  @db.Timestamptz(3)
+  waivedAt       DateTime? @db.Timestamptz(3)
+  waivedReason   String?
+  entryId        String?   @unique
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @db.Timestamptz(3)
+
+  director Director      @relation(fields: [directorId], references: [id], onDelete: Restrict)
+  entry    FinanceEntry? @relation(fields: [entryId], references: [id], onDelete: SetNull)
+
+  @@unique([directorId, referenceMonth])
+  @@index([referenceMonth])
+}
+
+// Valor combinado com um patrocinador ou doador. O recebido é a soma dos lançamentos ligados.
+model FinanceAgreement {
+  id          String        @id @default(cuid())
+  kind        AgreementKind
+  name        String
+  sponsorId   String?
+  agreedCents Int
+  startsOn    DateTime?     @db.Timestamptz(3)
+  endsOn      DateTime?     @db.Timestamptz(3)
+  notes       String?       @db.Text
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(3)
+
+  sponsor Sponsor?       @relation(fields: [sponsorId], references: [id], onDelete: SetNull)
+  entries FinanceEntry[]
+
+  @@index([isActive, kind])
+}
+
+// Cadastro de diretores (painel administrativo). São eles que pagam a mensalidade do clube.
+model Director {
+  id        String         @id @default(cuid())
+  name      String
+  role      String
+  status    DirectorStatus @default(ACTIVE)
+  photoPath String?
+  createdAt DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime       @updatedAt @db.Timestamptz(3)
+
+  dues MembershipDue[]
+
+  @@index([status, name])
 }

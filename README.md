@@ -85,6 +85,7 @@ docs/            documentação                scripts/            utilitários 
 
 - [`docs/STATUS.md`](docs/STATUS.md) — o que está pronto, o que foi verificado e o que falta
 - [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) — decisões de arquitetura, permissões e regras
+- [`docs/FINANCEIRO.md`](docs/FINANCEIRO.md) — controle financeiro: telas, regras e preparação para pagamentos
 - [`docs/IMPLANTACAO.md`](docs/IMPLANTACAO.md) — implantação com Docker
 - [`docs/BACKUP.md`](docs/BACKUP.md) — backup e restauração do banco
 
