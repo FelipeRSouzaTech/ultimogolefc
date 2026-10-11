@@ -16,20 +16,24 @@ const score = z
   .regex(/^\d{0,2}$/, "Informe um número entre 0 e 99.")
   .transform((value) => (value === "" ? null : Number(value)));
 
+/** Caminho local de imagem (enviada pelo painel ou estática do projeto); vazio vira null. */
+const imagePath = z
+  .string()
+  .trim()
+  .max(200, "Caminho muito longo.")
+  .regex(/^(\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp|svg))?$/, "Use um caminho local de imagem, por exemplo /brand/escudo.png.")
+  .transform((value) => (value === "" ? null : value));
+
 export const clubSchema = z.object({
   name: z.string().trim().min(2, "Informe o nome do clube.").max(80, "Nome muito longo."),
   shortName: optionalText(20, "Nome curto muito longo."),
-  crestPath: z
-    .string()
-    .trim()
-    .max(200, "Caminho muito longo.")
-    .regex(/^(\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp|svg))?$/, "Use um caminho local de imagem, por exemplo /brand/escudo.png.")
-    .transform((value) => (value === "" ? null : value)),
+  crestPath: imagePath,
 });
 
 export const competitionSchema = z.object({
   name: z.string().trim().min(3, "Informe o nome da competição.").max(100, "Nome muito longo."),
   description: optionalText(2000, "Descrição muito longa."),
+  coverPath: imagePath,
   isActive: z.boolean(),
 });
 

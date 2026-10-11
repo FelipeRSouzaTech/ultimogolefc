@@ -204,6 +204,17 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Para aparecer**: membro com "Divulgação autorizada", situação Ativo e a categoria marcada
 - **Não verificado**: tela não foi aberta em navegador (ambiente do agente não instala dependências); validação = CI do PR
 
+### 11. `claude/campeonatos-cards` (PR aberto — Claude)
+- **Pedido**: trocar os cartões de `/campeonatos` pelo modelo de cartão-retrato da referência (imagem enviada pelo usuário), nas cores do projeto, e permitir upload de imagem 500×600 em `/admin/campeonatos`
+- **Banco**: migration `20261011230000_competition_cover` — `Competition.coverPath` (TEXT, opcional)
+- **Mudança**:
+  - `app/globals.css` — classe `.competition-tile` (retrato 5:6, gradiente azul-marinho só com tokens, hover e foco)
+  - `app/(public)/campeonatos/page.tsx` — grade de cartões (2 colunas; 3 a partir de `lg`); o cartão inteiro é o link; com imagem ela cobre o cartão, sem imagem aparece o nome; selo "Encerrada" nos inativos. Descrição e lista de temporadas saíram do cartão (continuam na página do campeonato)
+  - `app/(admin)/admin/(painel)/campeonatos/{competition-form.tsx,actions.ts}` — campo "Imagem do cartão" (`ImageField`)
+  - `lib/validation/football.ts` — `imagePath` compartilhado; `competitionSchema.coverPath`
+- **Decisão**: 500×600 é tamanho **recomendado** (texto de ajuda); o envio não recusa outras medidas — a imagem é recortada para preencher (`object-cover`). Não há redimensionamento no servidor
+- **Não verificado**: tela não foi aberta em navegador; validação = CI do PR
+
 ## 🎯 Próximas tarefas planejadas
 
 - [ ] Aguardar próxima instrução do usuário
