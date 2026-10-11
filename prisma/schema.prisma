@@ -140,6 +140,21 @@ enum SponsorTier {
   INSTITUTIONAL
 }
 
+enum AthleteCategory {
+  ADULT
+  BASE_U7
+  BASE_U9
+  BASE_U11
+  BASE_U13
+  BASE_U15
+  BASE_U17
+  BASE_U20
+  VETERAN
+  MASTER
+  SUPER_MASTER
+  SIXTY
+}
+
 model User {
   id           String    @id @default(cuid())
   name         String
@@ -349,24 +364,26 @@ model StandingOverride {
 }
 
 model Athlete {
-  id          String          @id @default(cuid())
+  id          String           @id @default(cuid())
   name        String
   nickname    String?
   position    AthletePosition
+  category    AthleteCategory  @default(ADULT)
   shirtNumber Int?
-  bio         String?         @db.Text
+  bio         String?          @db.Text
   photoPath   String?
-  status      AthleteStatus   @default(ACTIVE)
+  status      AthleteStatus    @default(ACTIVE)
   // Só aparece no portal quando a divulgação foi autorizada.
-  isPublished Boolean         @default(false)
-  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
-  updatedAt   DateTime        @updatedAt @db.Timestamptz(3)
+  isPublished Boolean          @default(false)
+  createdAt   DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime         @updatedAt @db.Timestamptz(3)
 
   matchEvents MatchEvent[]
   lineups     MatchLineupPlayer[]
   payments    FinanceEntry[]
 
   @@index([isPublished, status, position])
+  @@index([category])
 }
 
 model StaffMember {
