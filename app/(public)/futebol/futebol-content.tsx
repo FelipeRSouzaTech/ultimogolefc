@@ -79,7 +79,7 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
       {filteredGroups.length === 0 ? (
         <EmptyState title="Nenhum jogador encontrado" description="Nenhum jogador cadastrado nesta categoria." />
       ) : (
-        filteredGroups.map(({ category, label, groups }) => (
+        filteredGroups.map(({ category, label, groups }, categoryIndex) => (
           <section key={category} aria-labelledby={`categoria-${category}`}>
             <h2 id={`categoria-${category}`} className="section-title mb-5">
               {label}
@@ -102,13 +102,28 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
                 </ul>
               </div>
             ))}
+            {/* Exibe a comissão técnica após os Atacantes da primeira categoria (geralmente Adulto/Principal) */}
+            {categoryIndex === 0 && staff.length > 0 && groups.some((g) => g.position === "FORWARD") ? (
+              <section aria-labelledby="comissao" className="mt-12">
+                <h2 id="comissao" className="section-title mb-5">
+                  Comissão técnica
+                </h2>
+                <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {staff.map((member) => (
+                    <li key={member.id}>
+                      <PersonCard name={member.name} caption={member.role} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
           </section>
         ))
       )}
 
-      {staff.length > 0 ? (
-        <section aria-labelledby="comissao">
-          <h2 id="comissao" className="section-title mb-5">
+      {staff.length > 0 && filteredGroups.length > 0 && !filteredGroups[0]?.groups.some((g) => g.position === "FORWARD") ? (
+        <section aria-labelledby="comissao-fim" className="mt-12">
+          <h2 id="comissao-fim" className="section-title mb-5">
             Comissão técnica
           </h2>
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
