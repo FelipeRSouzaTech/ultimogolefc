@@ -70,6 +70,25 @@ export function sortCategoriesByGroup(categories: AthleteCategory[]): AthleteCat
   });
 }
 
+export function isAthleteCategory(value: unknown): value is AthleteCategory {
+  return typeof value === "string" && (ATHLETE_CATEGORIES as readonly string[]).includes(value);
+}
+
+type TeamProfileLike = { category: string; name: string | null };
+
+/**
+ * Nome de exibição de cada categoria: o nome definido no painel (Equipes) quando houver,
+ * senão o nome padrão. Nomes em branco e categorias desconhecidas são ignorados.
+ */
+export function resolveCategoryLabels(profiles: readonly TeamProfileLike[]): Record<AthleteCategory, string> {
+  const labels = { ...ATHLETE_CATEGORY_LABELS };
+  for (const profile of profiles) {
+    const name = profile.name?.trim();
+    if (name && isAthleteCategory(profile.category)) labels[profile.category] = name;
+  }
+  return labels;
+}
+
 export const STAFF_GROUPS = ["BOARD", "TECHNICAL"] as const;
 export type StaffGroup = (typeof STAFF_GROUPS)[number];
 

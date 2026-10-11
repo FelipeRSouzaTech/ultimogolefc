@@ -20,6 +20,12 @@ const imagePath = z
   .regex(/^(\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp|svg))?$/, "Use um caminho local de imagem, por exemplo /brand/imagem.png.")
   .transform((value) => (value === "" ? null : value));
 
+/** Apresentação de uma equipe (categoria): nome de exibição opcional e imagem do cartão. */
+export const teamProfileSchema = z.object({
+  name: optionalText(40, "Nome muito longo (até 40 caracteres)."),
+  coverPath: imagePath,
+});
+
 const externalUrl = z
   .string()
   .trim()

@@ -155,6 +155,16 @@ enum AthleteCategory {
   SIXTY
 }
 
+/// Dados editáveis de cada equipe (categoria de atletas): nome de exibição e imagem do cartão em /equipes.
+/// As categorias em si são fixas (enum); aqui fica só a apresentação. Sem registro, vale o nome padrão.
+model TeamProfile {
+  category  AthleteCategory @id
+  name      String?
+  /// Imagem do cartão (retrato 5:6, recomendado 500×600 px).
+  coverPath String?
+  updatedAt DateTime        @updatedAt @db.Timestamptz(3)
+}
+
 enum TechnicalStaffRole {
   HEAD_COACH
   ASSISTANT_COACH

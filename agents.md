@@ -193,7 +193,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `app/(admin)/admin/(painel)/comissao-tecnica/page.tsx` — lista + painel "Novo membro"
 - **Campos**: Nome, Apelido, Função (10 opções), Competições/Temporadas (multi-select), Situação (Ativo/Inativo), Categorias (multi-select, usa `AthleteCategory`), Ordem, Divulgação autorizada
 
-### 10. `claude/futebol-comissao-tecnica` (PR aberto — Claude)
+### 10. `claude/futebol-comissao-tecnica` (PR #13 merged — Claude)
 - **Pedido**: comissão técnica aparecer abaixo de "Atacantes" em `/futebol`
 - **Causa do problema**: a página pública lia a tabela antiga `StaffMember`, mas o painel **Comissão Técnica** (PR #10) grava em `TechnicalStaff`. A lista chegava vazia, então mudar só a posição do bloco (commits `ee1e551`…`e41af93`) não tinha efeito
 - **Mudança**:
@@ -204,7 +204,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Para aparecer**: membro com "Divulgação autorizada", situação Ativo e a categoria marcada
 - **Não verificado**: tela não foi aberta em navegador (ambiente do agente não instala dependências); validação = CI do PR
 
-### 11. `claude/campeonatos-cards` (PR aberto — Claude)
+### 11. `claude/campeonatos-cards` (PR #14 merged — Claude)
 - **Pedido**: trocar os cartões de `/campeonatos` pelo modelo de cartão-retrato da referência (imagem enviada pelo usuário), nas cores do projeto, e permitir upload de imagem 500×600 em `/admin/campeonatos`
 - **Banco**: migration `20261011230000_competition_cover` — `Competition.coverPath` (TEXT, opcional)
 - **Mudança**:
@@ -214,6 +214,19 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `lib/validation/football.ts` — `imagePath` compartilhado; `competitionSchema.coverPath`
 - **Decisão**: 500×600 é tamanho **recomendado** (texto de ajuda); o envio não recusa outras medidas — a imagem é recortada para preencher (`object-cover`). Não há redimensionamento no servidor
 - **Não verificado**: tela não foi aberta em navegador; validação = CI do PR
+
+### 12. `claude/equipes` (PR aberto — Claude)
+- **Pedido**: mesmo modelo de cartão em `/equipes`; em `/admin/equipes`, editar as categorias de atletas em uma tela com upload de imagem 500×600
+- **Banco**: migration `20261011233000_team_profile` — model `TeamProfile` (`category AthleteCategory @id`, `name?`, `coverPath?`)
+- **Decisão**: as categorias continuam **fixas** (enum `AthleteCategory`, usado por `Athlete` e `TechnicalStaff`). "Editar" = nome de exibição + imagem do cartão. Criar/excluir categoria exigiria trocar o enum por tabela — não foi feito
+- **Mudança**:
+  - `modules/squad/rules.ts` — `isAthleteCategory`, `resolveCategoryLabels(profiles)` (nome do painel ou padrão)
+  - `lib/validation/site.ts` — `teamProfileSchema`
+  - `app/(admin)/admin/(painel)/equipes/` — `page.tsx` lista todas as categorias com miniatura e botão Editar; `[category]/page.tsx` + `team-form.tsx` + `actions.ts` (`saveTeamProfileAction`, upsert + auditoria)
+  - `app/(public)/equipes/page.tsx` — cartões-retrato (`.competition-tile` + `.tile-caption` em `globals.css`), foto com faixa azul e nome; link para `/futebol?categoria=<CATEGORIA>`
+  - `app/(public)/futebol/{page,futebol-content}.tsx` — usa os nomes editados e abre já filtrado por `?categoria=`
+- **Pendente**: formulários do painel (Elenco, Comissão Técnica) ainda mostram os nomes padrão de `ATHLETE_CATEGORY_LABELS`
+- **Não verificado**: telas não foram abertas em navegador; validação = CI do PR
 
 ## 🎯 Próximas tarefas planejadas
 
