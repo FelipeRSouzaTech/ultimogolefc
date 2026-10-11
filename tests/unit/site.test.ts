@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { can } from "@/lib/auth/permissions";
-import { athleteSchema, contactSchema, sponsorSchema } from "@/lib/validation/site";
+import { athleteSchema, contactSchema, sponsorSchema, teamProfileSchema } from "@/lib/validation/site";
 import { isContactRateLimited } from "@/modules/site/contact";
 import { buildSettings, isSafeUrl, paragraphs, SETTING_DEFS, validateSetting } from "@/modules/site/settings";
 import { groupByTier, isSponsorVisible } from "@/modules/sponsors/rules";
-import { displayName, groupByPosition, staffForCategory, staffOutsideCategories } from "@/modules/squad/rules";
+import { ATHLETE_CATEGORY_LABELS, displayName, groupByPosition, isAthleteCategory, resolveCategoryLabels, staffForCategory, staffOutsideCategories } from "@/modules/squad/rules";
 
 const def = (key: string) => {
   const found = SETTING_DEFS.find((item) => item.key === key);
@@ -175,5 +175,38 @@ describe("comissão técnica por categoria", () => {
     expect(staffOutsideCategories(staff, ["ADULT"]).map((member) => member.id)).toEqual(["sem-categoria"]);
     expect(staffOutsideCategories(staff, ["VETERAN"]).map((member) => member.id)).toEqual(["tecnico", "sem-categoria"]);
     expect(staffOutsideCategories(staff, []).map((member) => member.id)).toEqual(["tecnico", "preparador", "sem-categoria"]);
+  });
+});
+
+describe("equipes (categorias de atletas)", () => {
+  it("reconhece apenas as categorias existentes", () => {
+    expect(isAthleteCategory("BASE_U17")).toBe(true);
+    expect(isAthleteCategory("SUB_99")).toBe(false);
+    expect(isAthleteCategory(undefined)).toBe(false);
+    expect(isAthleteCategory(["ADULT"])).toBe(false);
+  });
+
+  it("usa o nome definido no painel e mantém o padrão nas demais", () => {
+    const labels = resolveCategoryLabels([
+      { category: "BASE_U17", name: "  Sub-17 " },
+      { category: "ADULT", name: "   " },
+      { category: "VETERAN", name: null },
+      { category: "INEXISTENTE", name: "Intrusa" },
+    ]);
+    expect(labels.BASE_U17).toBe("Sub-17");
+    expect(labels.ADULT).toBe(ATHLETE_CATEGORY_LABELS.ADULT);
+    expect(labels.VETERAN).toBe(ATHLETE_CATEGORY_LABELS.VETERAN);
+    expect(Object.keys(labels).includes("INEXISTENTE")).toBe(false);
+    // O mapa padrão não pode ser alterado por tabela.
+    expect(ATHLETE_CATEGORY_LABELS.BASE_U17 === "Sub-17").toBe(false);
+  });
+
+  it("valida nome e imagem do cartão da equipe", () => {
+    const empty = teamProfileSchema.safeParse({ name: "", coverPath: "" });
+    expect(empty.success).toBe(true);
+    if (empty.success) expect(empty.data).toEqual({ name: null, coverPath: null });
+    expect(teamProfileSchema.safeParse({ name: "Sub-17", coverPath: "/midia/2026/10/sub17.jpg" }).success).toBe(true);
+    expect(teamProfileSchema.safeParse({ name: "x".repeat(41), coverPath: "" }).success).toBe(false);
+    expect(teamProfileSchema.safeParse({ name: "Sub-17", coverPath: "https://exemplo.com/a.jpg" }).success).toBe(false);
   });
 });

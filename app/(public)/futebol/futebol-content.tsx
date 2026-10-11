@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { PersonCard } from "@/components/football/person-card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ATHLETE_CATEGORIES, ATHLETE_CATEGORY_LABELS, type Position, type AthleteCategory, POSITION_LABELS, staffForCategory, staffOutsideCategories } from "@/modules/squad/rules";
+import { ATHLETE_CATEGORIES, type Position, type AthleteCategory, POSITION_LABELS, staffForCategory, staffOutsideCategories } from "@/modules/squad/rules";
 
 interface Athlete {
   id: string;
@@ -37,6 +37,8 @@ interface StaffMember {
 interface FutebolContentProps {
   categorizedGroups: CategorizedGroup[];
   staff: StaffMember[];
+  /** Categoria já selecionada ao abrir a página (vinda de /equipes). */
+  initialCategory?: AthleteCategory | "all";
 }
 
 /** Grade de cartões da comissão técnica, no mesmo formato da grade de jogadores. */
@@ -52,8 +54,10 @@ function StaffGrid({ members }: { members: StaffMember[] }) {
   );
 }
 
-export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps) {
-  const [selectedCategory, setSelectedCategory] = useState<AthleteCategory | "all">("all");
+export function FutebolContent({ categorizedGroups, staff, initialCategory = "all" }: FutebolContentProps) {
+  const [selectedCategory, setSelectedCategory] = useState<AthleteCategory | "all">(initialCategory);
+  // Nomes de exibição vêm do servidor (podem ter sido editados no painel).
+  const categoryLabels = useMemo(() => new Map(categorizedGroups.map((group) => [group.category, group.label])), [categorizedGroups]);
 
   const availableCategories = useMemo(() => {
     const cats = new Set<AthleteCategory>();
@@ -99,7 +103,7 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
           <option value="all">Todas as categorias</option>
           {availableCategories.map((cat) => (
             <option key={cat} value={cat}>
-              {ATHLETE_CATEGORY_LABELS[cat]}
+              {categoryLabels.get(cat) ?? cat}
             </option>
           ))}
         </select>
