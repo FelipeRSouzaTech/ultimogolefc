@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageTitle } from "@/components/ui/page-title";
 import { prisma } from "@/lib/db/prisma";
-import { groupByPosition, sortCategoriesByGroup, ATHLETE_CATEGORY_LABELS, type Position, type AthleteCategory } from "@/modules/squad/rules";
+import { groupByPosition, sortCategoriesByGroup, ATHLETE_CATEGORY_LABELS, TECHNICAL_STAFF_ROLE_LABELS, type Position, type AthleteCategory, type TechnicalStaffRole } from "@/modules/squad/rules";
 import { FutebolContent } from "./futebol-content";
 
 export const metadata: Metadata = {
@@ -27,10 +27,22 @@ function groupByCategoryAndPosition(athletes: { id: string; name: string; nickna
 
 export default async function FutebolPage() {
   // Só entram no portal os registros com divulgação autorizada.
-  const [athletes, staff] = await Promise.all([
+  const [athletes, technicalStaff, legacyStaff] = await Promise.all([
     prisma.athlete.findMany({ where: { isPublished: true, status: "ACTIVE" } }),
+    // Fonte da comissão técnica: o cadastro do painel em Comissão Técnica.
+    prisma.technicalStaff.findMany({ where: { isPublished: true, status: "ACTIVE" }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
+    // Cadastro antigo (Institucional → Diretoria e comissão técnica): usado só enquanto o novo estiver vazio.
     prisma.staffMember.findMany({ where: { isPublished: true, group: "TECHNICAL" }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
   ]);
+  const staff =
+    technicalStaff.length > 0
+      ? technicalStaff.map((member) => ({
+          id: member.id,
+          name: member.nickname?.trim() || member.name,
+          role: TECHNICAL_STAFF_ROLE_LABELS[member.role as TechnicalStaffRole],
+          categories: member.categories as AthleteCategory[],
+        }))
+      : legacyStaff.map((member) => ({ id: member.id, name: member.name, role: member.role, categories: [] as AthleteCategory[] }));
   const categorizedGroups = groupByCategoryAndPosition(athletes);
 
   // Cast para o tipo esperado pelo componente cliente
@@ -56,7 +68,7 @@ export default async function FutebolPage() {
       <PageTitle title="Futebol" subtitle="Elenco e comissão técnica do Último Gole FC." />
       <FutebolContent
         categorizedGroups={clientCategorizedGroups}
-        staff={staff.map((m) => ({ id: m.id, name: m.name, role: m.role }))}
+        staff={staff}
       />
     </>
   );

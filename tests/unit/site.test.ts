@@ -4,7 +4,7 @@ import { athleteSchema, contactSchema, sponsorSchema } from "@/lib/validation/si
 import { isContactRateLimited } from "@/modules/site/contact";
 import { buildSettings, isSafeUrl, paragraphs, SETTING_DEFS, validateSetting } from "@/modules/site/settings";
 import { groupByTier, isSponsorVisible } from "@/modules/sponsors/rules";
-import { displayName, groupByPosition } from "@/modules/squad/rules";
+import { displayName, groupByPosition, staffForCategory, staffOutsideCategories } from "@/modules/squad/rules";
 
 const def = (key: string) => {
   const found = SETTING_DEFS.find((item) => item.key === key);
@@ -156,5 +156,24 @@ describe("permissões das novas áreas", () => {
     expect(can("EDITOR", "messages:manage")).toBe(false);
     expect(can("FOOTBALL_MANAGER", "messages:manage")).toBe(false);
     expect(can("VIEWER", "messages:manage")).toBe(false);
+  });
+});
+
+describe("comissão técnica por categoria", () => {
+  const staff = [
+    { id: "tecnico", categories: ["ADULT"] },
+    { id: "preparador", categories: ["ADULT", "VETERAN"] },
+    { id: "sem-categoria", categories: [] },
+  ];
+
+  it("lista em cada categoria quem atua nela, mantendo a ordem recebida", () => {
+    expect(staffForCategory(staff, "ADULT").map((member) => member.id)).toEqual(["tecnico", "preparador"]);
+    expect(staffForCategory(staff, "VETERAN").map((member) => member.id)).toEqual(["preparador"]);
+  });
+
+  it("separa quem não atua em nenhuma categoria exibida, sem repetir nem perder ninguém", () => {
+    expect(staffOutsideCategories(staff, ["ADULT"]).map((member) => member.id)).toEqual(["sem-categoria"]);
+    expect(staffOutsideCategories(staff, ["VETERAN"]).map((member) => member.id)).toEqual(["tecnico", "sem-categoria"]);
+    expect(staffOutsideCategories(staff, []).map((member) => member.id)).toEqual(["tecnico", "preparador", "sem-categoria"]);
   });
 });
