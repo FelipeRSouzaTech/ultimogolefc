@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { PersonCard } from "@/components/football/person-card";
-import { EmptyState } from "@/components/ui/empty-state";
 import { PageTitle } from "@/components/ui/page-title";
 import { prisma } from "@/lib/db/prisma";
-import { displayName, groupByPosition, sortCategoriesByGroup, ATHLETE_CATEGORY_LABELS, type Position, type AthleteCategory, POSITION_LABELS } from "@/modules/squad/rules";
+import { groupByPosition, sortCategoriesByGroup, ATHLETE_CATEGORY_LABELS, type Position, type AthleteCategory } from "@/modules/squad/rules";
+import { FutebolContent } from "./futebol-content";
 
 export const metadata: Metadata = {
   title: "Futebol",
@@ -34,55 +33,31 @@ export default async function FutebolPage() {
   ]);
   const categorizedGroups = groupByCategoryAndPosition(athletes);
 
+  // Cast para o tipo esperado pelo componente cliente
+  const clientCategorizedGroups = categorizedGroups.map((cg) => ({
+    category: cg.category,
+    label: cg.label,
+    groups: cg.groups.map((g) => ({
+      position: g.position as Position,
+      label: g.label,
+      athletes: g.athletes.map((a) => ({
+        id: a.id,
+        name: a.name,
+        nickname: a.nickname,
+        position: a.position as Position,
+        shirtNumber: a.shirtNumber,
+        photoPath: a.photoPath,
+      })),
+    })),
+  }));
+
   return (
     <>
       <PageTitle title="Futebol" subtitle="Elenco e comissão técnica do Último Gole FC." />
-      <div className="container-page space-y-12 py-10">
-        {categorizedGroups.length === 0 ? (
-          <EmptyState title="Elenco ainda não divulgado" description="Os jogadores aparecerão aqui assim que o elenco for publicado." />
-        ) : (
-          categorizedGroups.map(({ category, label, groups }) => (
-            <section key={category} aria-labelledby={`categoria-${category}`}>
-              <h2 id={`categoria-${category}`} className="section-title mb-5">
-                {label}
-              </h2>
-              {groups.map((group) => (
-                <div key={group.position}>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3">{group.label}</h3>
-                  <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {group.athletes.map((athlete) => (
-                      <li key={athlete.id}>
-                        <PersonCard
-                          name={displayName(athlete)}
-                          caption={POSITION_LABELS[athlete.position as Position]}
-                          photoPath={athlete.photoPath}
-                          number={athlete.shirtNumber}
-                          href={`/futebol/jogador/${athlete.id}`}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </section>
-          ))
-        )}
-
-        {staff.length > 0 ? (
-          <section aria-labelledby="comissao">
-            <h2 id="comissao" className="section-title mb-5">
-              Comissão técnica
-            </h2>
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {staff.map((member) => (
-                <li key={member.id}>
-                  <PersonCard name={member.name} caption={member.role} />
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-      </div>
+      <FutebolContent
+        categorizedGroups={clientCategorizedGroups}
+        staff={staff.map((m) => ({ id: m.id, name: m.name, role: m.role }))}
+      />
     </>
   );
 }
