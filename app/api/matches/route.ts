@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { fail, ok, serverError } from "@/lib/api";
 import { listResults, listUpcomingMatches, type MatchWithTeams } from "@/modules/matches/service";
+import { withRateLimit, rateLimitHeaders, DEFAULT_RATE_LIMIT } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,9 @@ const serialize = (match: MatchWithTeams) => ({
 
 /** GET /api/matches?tipo=proximos|resultados&competicao=<slug>&temporada=<rótulo> */
 export async function GET(request: NextRequest) {
+  const rateLimit = await withRateLimit(request, "api/matches", DEFAULT_RATE_LIMIT);
+  if (!rateLimit.allowed) return rateLimit.response;
+
   const query = request.nextUrl.searchParams;
   const type = query.get("tipo") ?? "proximos";
   if (type !== "proximos" && type !== "resultados") return fail(400, 'Parâmetro "tipo" deve ser "proximos" ou "resultados".');
@@ -27,7 +31,7 @@ export async function GET(request: NextRequest) {
   };
   try {
     const matches = type === "proximos" ? await listUpcomingMatches(filters) : await listResults(filters);
-    return ok(matches.map(serialize));
+    return ok(matches.map(serialize), { headers: rateLimitHeaders({ ...rateLimit, maxRequests: DEFAULT_RATE_LIMIT.maxRequests }) });
   } catch (error) {
     return serverError(error);
   }
