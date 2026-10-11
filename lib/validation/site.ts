@@ -3,7 +3,7 @@ import { DIRECTOR_STATUSES } from "@/modules/finance/rules";
 import { GALLERY_CATEGORIES } from "@/modules/gallery/rules";
 import { isSafeUrl } from "@/modules/site/settings";
 import { SPONSOR_TIERS } from "@/modules/sponsors/rules";
-import { POSITIONS, STAFF_GROUPS } from "@/modules/squad/rules";
+import { POSITIONS, STAFF_GROUPS, ATHLETE_CATEGORIES } from "@/modules/squad/rules";
 import { emailSchema } from "./auth";
 
 const optionalText = (max: number, message: string) =>
@@ -33,6 +33,7 @@ export const athleteSchema = z.object({
   name: z.string().trim().min(2, "Informe o nome.").max(120, "Nome muito longo."),
   nickname: optionalText(60, "Apelido muito longo."),
   position: z.enum(POSITIONS, { errorMap: () => ({ message: "Selecione a posição." }) }),
+  category: z.enum(ATHLETE_CATEGORIES, { errorMap: () => ({ message: "Selecione a categoria." }) }),
   shirtNumber: z
     .string()
     .trim()

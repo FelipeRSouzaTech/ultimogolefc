@@ -12,6 +12,7 @@ export async function saveAthleteAction(id: string | null, formData: FormData): 
       name: field(formData, "name"),
       nickname: field(formData, "nickname"),
       position: field(formData, "position"),
+      category: field(formData, "category"),
       shirtNumber: field(formData, "shirtNumber"),
       bio: field(formData, "bio"),
       photoPath: field(formData, "photoPath"),
