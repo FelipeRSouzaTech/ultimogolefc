@@ -174,14 +174,14 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Solução**: Adicionado `category: field(formData, "category")` no `athleteSchema` e no `saveAthleteAction`
 
 ### 8. `fix/remove-diretoria-institucional` (PR #8 merged)
-- **Branch**: `fix/remove-diretoria-institucional` → `main`
+- **Branch**: `fix/remove-diretoria-institucional` → `main` (incluído no merge do #8/athlete-categories)
 - **Mudança**: Remove seção "Diretoria" da página institucional pública `/clube` e painel "Diretoria e comissão técnica" de `/admin/institucional`
 - **Arquivos**:
   - `app/(public)/clube/page.tsx` — remove query `StaffMember` (BOARD) e seção Diretoria
   - `app/(admin)/admin/(painel)/institucional/page.tsx` — remove painel completo com listagem e formulário
 
-### 9. `feat/technical-staff` (PR #9 — aguardando revisão)
-- **Branch**: `feat/technical-staff`
+### 9. `feat/technical-staff` (PR #10 merged)
+- **Branch**: `feat/technical-staff` → `main` (`3ed220f`)
 - **Mudança**: Nova aba **Comissão Técnica** em `/admin/comissao-tecnica` com CRUD completo
 - **Banco**: migration `20261011032514_technical_staff` — enum `TechnicalStaffRole` + models `TechnicalStaff` e `TechnicalStaffSeason` (N:N com Season)
 - **Arquivos**:
@@ -213,8 +213,8 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 
 ```markdown
 **Contexto atual:**
-- Branch atual: `feat/technical-staff` (PR #9 aguardando merge)
-- Main está em: último commit com fix categoria atleta
+- Branch atual: `main` (último commit `3ed220f`)
+- Main está em: `3ed220f` (PR #10 feat/technical-staff merged)
 - Última tarefa: cria aba Comissão Técnica (/admin/comissao-tecnica) com cadastro completo
 - Próxima tarefa: [a definir]
 - Arquivos relevantes: prisma/schema.prisma, modules/squad/rules.ts, app/(admin)/admin/(painel)/comissao-tecnica/
