@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { PersonCard } from "@/components/football/person-card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ATHLETE_CATEGORIES, type Position, type AthleteCategory, POSITION_LABELS, staffForCategory, staffOutsideCategories } from "@/modules/squad/rules";
+import { type Position, type AthleteCategory, POSITION_LABELS, staffForCategory, staffOutsideCategories } from "@/modules/squad/rules";
 
 interface Athlete {
   id: string;
@@ -55,15 +55,8 @@ function StaffGrid({ members }: { members: StaffMember[] }) {
 }
 
 export function FutebolContent({ categorizedGroups, staff, initialCategory = "all" }: FutebolContentProps) {
-  const [selectedCategory, setSelectedCategory] = useState<AthleteCategory | "all">(initialCategory);
+  const [selectedCategory] = useState<AthleteCategory | "all">(initialCategory);
   // Nomes de exibição vêm do servidor (podem ter sido editados no painel).
-  const categoryLabels = useMemo(() => new Map(categorizedGroups.map((group) => [group.category, group.label])), [categorizedGroups]);
-
-  const availableCategories = useMemo(() => {
-    const cats = new Set<AthleteCategory>();
-    categorizedGroups.forEach((g) => cats.add(g.category));
-    return [...cats].sort((a, b) => ATHLETE_CATEGORIES.indexOf(a) - ATHLETE_CATEGORIES.indexOf(b));
-  }, [categorizedGroups]);
 
   const filteredGroups = useMemo(() => {
     if (selectedCategory === "all") return categorizedGroups;
@@ -90,29 +83,11 @@ export function FutebolContent({ categorizedGroups, staff, initialCategory = "al
 
   return (
     <div className="container-page space-y-12 py-10">
-      <div className="mb-8">
-        <label htmlFor="category-filter" className="block text-sm font-semibold text-gray-700 mb-2">
-          Filtrar por categoria
-        </label>
-        <select
-          id="category-filter"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value as AthleteCategory | "all")}
-          className="input w-full sm:w-64"
-        >
-          <option value="all">Todas as categorias</option>
-          {availableCategories.map((cat) => (
-            <option key={cat} value={cat}>
-              {categoryLabels.get(cat) ?? cat}
-            </option>
-          ))}
-        </select>
-        <p className="mt-2 text-sm text-gray-500" aria-live="polite">
-          {filteredGroups.length === 1
-            ? `Exibindo ${filteredGroups[0]?.label} (${filteredGroups[0]?.groups.reduce((sum, g) => sum + g.athletes.length, 0)} jogador${filteredGroups[0]?.groups.reduce((sum, g) => sum + g.athletes.length, 0) !== 1 ? "es" : ""})`
-            : `Exibindo ${filteredGroups.length} categor${filteredGroups.length === 1 ? "ia" : "ias"} com ${totalPlayers} jogador${totalPlayers !== 1 ? "es" : ""} no total`}
-        </p>
-      </div>
+      <p className="mb-8 text-sm text-gray-500" aria-live="polite">
+        {filteredGroups.length === 1
+          ? `Exibindo ${filteredGroups[0]?.label} (${filteredGroups[0]?.groups.reduce((sum, g) => sum + g.athletes.length, 0)} jogador${filteredGroups[0]?.groups.reduce((sum, g) => sum + g.athletes.length, 0) !== 1 ? "es" : ""})`
+          : `Exibindo ${filteredGroups.length} categor${filteredGroups.length === 1 ? "ia" : "ias"} com ${totalPlayers} jogador${totalPlayers !== 1 ? "es" : ""} no total}`}
+      </p>
 
       {filteredGroups.length === 0 ? (
         <EmptyState title="Nenhum jogador encontrado" description="Nenhum jogador cadastrado nesta categoria." />
