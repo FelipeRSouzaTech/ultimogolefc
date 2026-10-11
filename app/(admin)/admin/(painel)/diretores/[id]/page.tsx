@@ -6,6 +6,7 @@ import { ConfirmButton } from "@/components/ui/confirm-button";
 import { requirePagePermission } from "@/lib/auth/guard";
 import { can } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db/prisma";
+import { DIRECTOR_ROLE_LABELS, type DirectorRole } from "@/modules/finance/rules";
 import { deleteDirectorAction, saveDirectorAction } from "../actions";
 import { DirectorForm } from "../director-form";
 
@@ -17,10 +18,11 @@ export default async function EditDirectorPage({ params }: { params: Promise<{ i
   const director = await prisma.director.findUnique({ where: { id } });
   if (!director) notFound();
   const canWrite = can(user.role, "content:write");
+  const roleLabel = DIRECTOR_ROLE_LABELS[director.role as DirectorRole] ?? director.role;
 
   return (
     <>
-      <AdminHeading title={director.name} description={director.role}>
+      <AdminHeading title={director.name} description={roleLabel}>
         <Link href="/admin/diretores" className="btn btn-secondary btn-sm">
           Voltar
         </Link>

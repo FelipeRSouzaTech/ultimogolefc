@@ -5,7 +5,7 @@ import { AdminHeading, Panel, ReadOnlyNotice } from "@/components/ui/admin";
 import { requirePagePermission } from "@/lib/auth/guard";
 import { can } from "@/lib/auth/permissions";
 import { prisma } from "@/lib/db/prisma";
-import { DIRECTOR_STATUS_LABELS, type DirectorStatus } from "@/modules/finance/rules";
+import { DIRECTOR_ROLE_LABELS, DIRECTOR_STATUS_LABELS, type DirectorRole, type DirectorStatus } from "@/modules/finance/rules";
 import { saveDirectorAction } from "./actions";
 import { DirectorForm } from "./director-form";
 
@@ -33,7 +33,9 @@ export default async function DirectorsPage() {
                     <Link href={`/admin/diretores/${director.id}`} className="font-semibold hover:text-primary hover:underline">
                       {director.name}
                     </Link>
-                    <span className="block text-xs text-gray-600">{director.role}</span>
+                    <span className="block text-xs text-gray-600">
+                      {DIRECTOR_ROLE_LABELS[director.role as DirectorRole] ?? director.role}
+                    </span>
                   </span>
                   <span className={`badge ${director.status === "ACTIVE" ? "badge-solid" : ""}`}>{DIRECTOR_STATUS_LABELS[director.status as DirectorStatus]}</span>
                 </li>
