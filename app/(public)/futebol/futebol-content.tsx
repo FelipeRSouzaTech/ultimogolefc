@@ -120,9 +120,11 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
             <h2 id={`categoria-${category}`} className="section-title mb-5">
               {label}
             </h2>
+            {/* Um respiro entre os grupos: cada posição começa uma linha abaixo dos cartões da anterior. */}
+            <div className="space-y-10">
             {groups.map((group) => (
               <div key={group.position}>
-                <h3 className="text-lg font-semibold text-gray-700 mb-3">{group.label}</h3>
+                <h3 className="mb-4 text-xl font-semibold text-gray-700">{group.label}</h3>
                 <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {group.athletes.map((athlete) => (
                     <li key={athlete.id}>
@@ -141,10 +143,11 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
             {/* Comissão técnica da categoria: último grupo, logo abaixo de Atacantes, com o mesmo estilo de título. */}
             {categoryStaff.length > 0 ? (
               <div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-3">Comissão técnica</h3>
+                <h3 className="mb-4 text-xl font-semibold text-gray-700">Comissão técnica</h3>
                 <StaffGrid members={categoryStaff} />
               </div>
             ) : null}
+            </div>
           </section>
           );
         })

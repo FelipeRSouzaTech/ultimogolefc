@@ -200,6 +200,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `app/(public)/futebol/page.tsx` — lê `prisma.technicalStaff` (`isPublished: true`, `status: ACTIVE`); `StaffMember` (TECHNICAL) só é usado enquanto o cadastro novo estiver vazio
   - `app/(public)/futebol/futebol-content.tsx` — em cada categoria, depois dos grupos de posição (logo abaixo de Atacantes), bloco "Comissão técnica" com o mesmo `<h3>`; quem não atua em nenhuma categoria com jogadores publicados aparece em um bloco no fim (só com o filtro em "Todas as categorias")
   - `modules/squad/rules.ts` — `staffForCategory`, `staffOutsideCategories` (regras puras, com testes em `tests/unit/site.test.ts`)
+- **Ajuste de layout (mesmo PR)**: título de cada posição maior (`text-xl`, abaixo do título da categoria, que chega a 1,5rem) e espaço entre os grupos de posição (`space-y-10`) em `futebol-content.tsx`
 - **Para aparecer**: membro com "Divulgação autorizada", situação Ativo e a categoria marcada
 - **Não verificado**: tela não foi aberta em navegador (ambiente do agente não instala dependências); validação = CI do PR
 
