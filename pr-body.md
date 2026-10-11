@@ -1,41 +1,33 @@
 ## Descrição
 
-Cria nova aba **Comissão Técnica** em `/admin/comissao-tecnica` com formulário completo de cadastro.
+Adiciona **filtro por categoria** na página pública `/futebol`, permitindo que o usuário selecione uma categoria específica (Base, Adulto, Veterano, etc.) para ver apenas os jogadores vinculados a ela.
 
 ### Mudanças
 
-**`prisma/schema.prisma`**
-- Novo enum `TechnicalStaffRole` (10 funções)
-- Novo model `TechnicalStaff` com: nome, apelido, função, situação (Ativo/Inativo), categorias (array multi-seleção), ordem, divulgação autorizada
-- Novo model `TechnicalStaffSeason` (N:N com `Season`) para vincular às competições/temporadas
-- Relacionamento adicionado em `Season.technicalStaff`
+**`app/(public)/futebol/page.tsx`** (Server Component)
+- Remove imports não usados (`displayName`, `POSITION_LABELS`)
+- Prepara dados do servidor e passa tipados para o componente cliente
+- Mantém busca de atletas publicados/ativos e comissão técnica
 
-**`modules/squad/rules.ts`**
-- `TECHNICAL_STAFF_ROLES` + `TECHNICAL_STAFF_ROLE_LABELS` (pt-BR)
+**`app/(public)/futebol/futebol-content.tsx`** (novo — Client Component `"use client"`)
+- Componente interativo com filtro `select` por categoria
+- Estado `selectedCategory` com `"all"` como padrão
+- Lista `availableCategories` derivada **apenas das categorias que têm jogadores** (não mostra categorias vazias)
+- Filtro `useMemo` reativo — troca instantânea sem nova requisição
+- Contador de jogadores exibido dinamicamente
+- Reutiliza `PersonCard`, `EmptyState`, `ATHLETE_CATEGORY_LABELS`, `POSITION_LABELS`
 
-**`lib/validation/site.ts`**
-- `technicalStaffSchema` (Zod) com validação de arrays para `seasonIds` e `categories`
+### Comportamento
 
-**`app/(admin)/admin/(painel)/comissao-tecnica/`** (novos arquivos)
-- `actions.ts` — `saveTechnicalStaffAction`, `deleteTechnicalStaffAction` (com auditoria)
-- `technical-staff-form.tsx` — Formulário com selects múltiplos para competições e categorias
-- `page.tsx` — Lista + painel de cadastro
+| Estado | Exibição |
+|--------|----------|
+| `"all"` (padrão) | Todas as categorias com jogadores, agrupadas por categoria → posição |
+| Categoria específica | Apenas a categoria selecionada; se vazia, mostra `EmptyState` |
 
-### Campos do formulário
-
-| Campo | Tipo | Detalhes |
-|-------|------|----------|
-| **Nome** | text | Obrigatório, máx. 120 chars |
-| **Apelido** | text | Opcional, máx. 60 chars |
-| **Função** | select | Técnico, Aux. Técnico, Preparador Físico, Treineiro de Goleiros, Fisioterapeuta, Médico, Nutricionista, Psicólogo, Analista de Desempenho, Outro |
-| **Competições/Temporadas** | multi-select | Obrigatório — lista temporadas atuais (`Season.isCurrent = true`) com nome da competição |
-| **Situação** | select | Ativo / Inativo |
-| **Categorias** | multi-select | Obrigatório — usa `AthleteCategory` (Base U7–U20, Adulto, Veterano, Master, Super Master, Sessentão) |
-| **Ordem** | number | Para ordenação na listagem |
-| **Divulgação autorizada** | checkbox | Para publicação no portal |
+O select **só lista categorias que têm pelo menos um jogador** — categorias sem atletas não aparecem no dropdown.
 
 ### Testes
 - `npm run build` ✅
 - `npm run typecheck` ✅
 - `npm run lint` ✅
-- Migration aplicada: `20261011032514_technical_staff`
+- `npm run test` ✅ (126 passam)

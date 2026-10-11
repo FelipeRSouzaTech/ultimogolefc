@@ -5,12 +5,12 @@ import { PageTitle } from "@/components/ui/page-title";
 import { prisma } from "@/lib/db/prisma";
 
 export const metadata: Metadata = {
-  title: "Competições",
+  title: "Campeonatos",
   description: "Campeonatos disputados pelo Último Gole FC, com calendário, resultados e classificação.",
-  alternates: { canonical: "/competicoes" },
+  alternates: { canonical: "/campeonatos" },
 };
 
-export default async function CompeticoesPage() {
+export default async function CampeonatosPage() {
   const competitions = await prisma.competition.findMany({
     orderBy: [{ isActive: "desc" }, { name: "asc" }],
     include: { seasons: { orderBy: { label: "desc" }, select: { id: true, label: true, isCurrent: true } } },
@@ -18,10 +18,10 @@ export default async function CompeticoesPage() {
 
   return (
     <>
-      <PageTitle title="Competições" subtitle="Campeonatos, temporadas e classificação." />
+      <PageTitle title="Campeonatos" subtitle="Campeonatos, temporadas e classificação." />
       <div className="container-page py-10">
         {competitions.length === 0 ? (
-          <EmptyState title="Nenhuma competição cadastrada" description="As competições disputadas pelo clube aparecerão aqui." />
+          <EmptyState title="Nenhum campeonato cadastrado" description="Os campeonatos disputados pelo clube aparecerão aqui." />
         ) : (
           <ul className="grid gap-6 md:grid-cols-2">
             {competitions.map((competition) => (
@@ -37,8 +37,8 @@ export default async function CompeticoesPage() {
                     : `Temporadas: ${competition.seasons.map((season) => season.label).join(", ")}`}
                 </p>
                 <div className="mt-5 flex-1" />
-                <Link href={`/competicoes/${competition.slug}`} className="btn btn-primary self-start">
-                  Ver competição
+                <Link href={`/campeonatos/${competition.slug}`} className="btn btn-primary self-start">
+                  Ver campeonato
                 </Link>
               </li>
             ))}

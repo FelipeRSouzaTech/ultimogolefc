@@ -21,9 +21,9 @@ export default async function NewMatchPage() {
         </Link>
       </AdminHeading>
       {seasons.length === 0 ? (
-        <EmptyState title="Cadastre uma temporada primeiro" description="Uma partida pertence a uma temporada de uma competição, com os clubes participantes definidos.">
-          <Link href="/admin/competicoes" className="btn btn-primary">
-            Ir para competições
+        <EmptyState title="Cadastre uma temporada primeiro" description="Uma partida pertence a uma temporada de um campeonato, com os clubes participantes definidos.">
+          <Link href="/admin/campeonatos" className="btn btn-primary">
+            Ir para campeonatos
           </Link>
         </EmptyState>
       ) : (

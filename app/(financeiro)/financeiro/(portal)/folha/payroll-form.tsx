@@ -63,7 +63,7 @@ export function PayrollForm({ action, today, athletes, competitions, matches }: 
         </div>
         <div>
           <label className="label" htmlFor="competitionId">
-            Competição
+            Campeonato
           </label>
           <select id="competitionId" name="competitionId" className="input" value={competitionId} onChange={(event) => setCompetitionId(event.target.value)}>
             <option value="">Nenhuma</option>

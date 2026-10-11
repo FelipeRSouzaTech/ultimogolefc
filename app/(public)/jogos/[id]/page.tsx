@@ -62,7 +62,7 @@ export default async function MatchPage({ params }: Props) {
         </h1>
         <header className="border-b border-gray-100 bg-gray-50 px-6 py-5 text-center">
           <p className="eyebrow">
-            <Link href={`/competicoes/${match.season.competition.slug}?temporada=${encodeURIComponent(match.season.label)}`} className="hover:underline">
+            <Link href={`/campeonatos/${match.season.competition.slug}?temporada=${encodeURIComponent(match.season.label)}`} className="hover:underline">
               {match.season.competition.name} · {match.season.label}
             </Link>
             {match.round ? ` · ${match.round}` : ""}

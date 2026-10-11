@@ -58,7 +58,7 @@ export default async function AdminMatchesPage({ searchParams }: { searchParams:
                   Partida
                 </th>
                 <th scope="col">Placar</th>
-                <th scope="col">Competição</th>
+                <th scope="col">Campeonato</th>
                 <th scope="col">Data</th>
                 <th scope="col">Status</th>
               </tr>

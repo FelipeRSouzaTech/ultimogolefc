@@ -32,7 +32,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   const stats = [
     { label: "Notícias publicadas", value: published, href: "/admin/noticias" },
     { label: "Notícias em rascunho", value: drafts, href: "/admin/noticias?status=DRAFT" },
-    { label: "Competições ativas", value: activeCompetitions, href: "/admin/competicoes" },
+    { label: "Campeonatos ativos", value: activeCompetitions, href: "/admin/campeonatos" },
     { label: "Jogadores ativos", value: athletes, href: "/admin/elenco" },
     { label: "Patrocinadores ativos", value: activeSponsors, href: "/admin/patrocinadores" },
     ...(unreadMessages === null ? [] : [{ label: "Mensagens não lidas", value: unreadMessages, href: "/admin/mensagens" }]),

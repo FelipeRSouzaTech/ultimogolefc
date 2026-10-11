@@ -3,6 +3,14 @@ import Link from "next/link";
 import { CREST_PATH, PUBLIC_NAV, SITE_NAME } from "@/lib/site";
 import { getSettings } from "@/modules/site/service";
 
+type SimpleNavItem = { href: string; label: string };
+type DropdownNavItem = { type: "dropdown"; item: SimpleNavItem; children: readonly (SimpleNavItem & { parentHref?: string })[] };
+type PublicNavItem = SimpleNavItem | DropdownNavItem;
+
+function isDropdown(item: PublicNavItem): item is DropdownNavItem {
+  return "type" in item && item.type === "dropdown";
+}
+
 export async function SiteFooter() {
   const settings = await getSettings();
   const footerText = settings["footer.text"] ?? "";
@@ -12,7 +20,16 @@ export async function SiteFooter() {
     { label: "Facebook", href: settings["social.facebook"] ?? "" },
     { label: "YouTube", href: settings["social.youtube"] ?? "" },
   ].filter((item) => item.href.startsWith("https://"));
-  const links = [...PUBLIC_NAV, { href: "/resultados", label: "Resultados" }, { href: "/apoie", label: "Apoie o clube" }, { href: "/privacidade", label: "Privacidade" }];
+  
+  // Achata a navegação para o rodapé: itens simples + filhos de dropdowns
+  const flatLinks = (PUBLIC_NAV as readonly PublicNavItem[]).flatMap((item) => {
+    if (isDropdown(item)) {
+      return item.children.map((child) => ({ href: child.href, label: child.label }));
+    }
+    return [{ href: item.href, label: item.label }];
+  });
+  
+  const links = [...flatLinks, { href: "/resultados", label: "Resultados" }, { href: "/apoie", label: "Apoie o clube" }, { href: "/privacidade", label: "Privacidade" }];
 
   return (
     <footer className="mt-16 border-t border-gray-100 bg-gray-50">

@@ -14,7 +14,7 @@ test.describe("portal público", () => {
     await page.goto("/jogos");
     await expect(page.getByRole("heading", { level: 1, name: "Próximos jogos" })).toBeVisible();
     await expect(page.getByText("Acompanhe os próximos jogos do Último Gole FC.")).toBeVisible();
-    await expect(page.getByLabel("Competição")).toBeVisible();
+    await expect(page.getByLabel("Campeonato")).toBeVisible();
     await expect(page.getByLabel("Temporada")).toBeVisible();
     await expect(page.getByLabel("Status")).toBeVisible();
   });
@@ -22,7 +22,7 @@ test.describe("portal público", () => {
   test("páginas de resultados, competições e notícias respondem", async ({ page }) => {
     for (const [path, title] of [
       ["/resultados", "Resultados"],
-      ["/competicoes", "Competições"],
+      ["/campeonatos", "Campeonatos"],
       ["/noticias", "Notícias"],
       ["/galeria", "Galeria"],
       ["/futebol", "Futebol"],

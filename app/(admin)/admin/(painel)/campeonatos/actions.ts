@@ -21,11 +21,11 @@ export async function saveCompetitionAction(id: string | null, formData: FormDat
       where: { name: { equals: parsed.data.name, mode: "insensitive" }, ...(id ? { id: { not: id } } : {}) },
       select: { id: true },
     });
-    if (duplicate) return { error: "Revise os campos destacados.", fieldErrors: { name: ["Já existe uma competição com este nome."] } };
+    if (duplicate) return { error: "Revise os campos destacados.", fieldErrors: { name: ["Já existe um campeonato com este nome."] } };
 
     let competition;
     if (id) {
-      if (!(await prisma.competition.findUnique({ where: { id }, select: { id: true } }))) return { error: "Competição não encontrada." };
+      if (!(await prisma.competition.findUnique({ where: { id }, select: { id: true } }))) return { error: "Campeonato não encontrado." };
       competition = await prisma.competition.update({ where: { id }, data: parsed.data });
     } else {
       const slug = await uniqueSlug(parsed.data.name, async (candidate) => (await prisma.competition.findUnique({ where: { slug: candidate }, select: { id: true } })) !== null);
@@ -36,20 +36,20 @@ export async function saveCompetitionAction(id: string | null, formData: FormDat
       action: id ? "competition.update" : "competition.create",
       entity: "Competition",
       entityId: competition.id,
-      summary: `${id ? "Editou" : "Criou"} a competição "${competition.name}"`,
+      summary: `${id ? "Editou" : "Criou"} o campeonato "${competition.name}"`,
     });
-    return { ok: true, message: "Competição salva.", redirectTo: id ? undefined : `/admin/competicoes/${competition.id}` };
+    return { ok: true, message: "Campeonato salvo.", redirectTo: id ? undefined : `/admin/campeonatos/${competition.id}` };
   });
 }
 
 export async function deleteCompetitionAction(id: string): Promise<ActionState> {
   return withPermission("football:delete", async (user) => {
     const competition = await prisma.competition.findUnique({ where: { id }, include: { _count: { select: { seasons: true } } } });
-    if (!competition) return { error: "Competição não encontrada." };
-    if (competition._count.seasons > 0) return { error: "Exclua as temporadas desta competição antes de excluí-la." };
+    if (!competition) return { error: "Campeonato não encontrado." };
+    if (competition._count.seasons > 0) return { error: "Exclua as temporadas deste campeonato antes de excluí-lo." };
     await prisma.competition.delete({ where: { id } });
-    await audit({ userId: user.id, action: "competition.delete", entity: "Competition", entityId: id, summary: `Excluiu a competição "${competition.name}"` });
-    return { ok: true, redirectTo: "/admin/competicoes" };
+    await audit({ userId: user.id, action: "competition.delete", entity: "Competition", entityId: id, summary: `Excluiu o campeonato "${competition.name}"` });
+    return { ok: true, redirectTo: "/admin/campeonatos" };
   });
 }
 
@@ -71,13 +71,13 @@ export async function saveSeasonAction(competitionId: string, seasonId: string |
     if (!parsed.success) return zodErrorState(parsed.error);
 
     const competition = await prisma.competition.findUnique({ where: { id: competitionId }, select: { id: true, name: true } });
-    if (!competition) return { error: "Competição não encontrada." };
+    if (!competition) return { error: "Campeonato não encontrado." };
 
     const duplicate = await prisma.season.findFirst({
       where: { competitionId, label: parsed.data.label, ...(seasonId ? { id: { not: seasonId } } : {}) },
       select: { id: true },
     });
-    if (duplicate) return { error: "Revise os campos destacados.", fieldErrors: { label: ["Esta competição já tem uma temporada com este nome."] } };
+    if (duplicate) return { error: "Revise os campos destacados.", fieldErrors: { label: ["Este campeonato já tem uma temporada com este nome."] } };
 
     let season;
     if (seasonId) {
@@ -95,7 +95,7 @@ export async function saveSeasonAction(competitionId: string, seasonId: string |
       summary: `${seasonId ? "Editou" : "Criou"} a temporada ${season.label} de "${competition.name}"`,
       after: { pointsWin: season.pointsWin, pointsDraw: season.pointsDraw, pointsLoss: season.pointsLoss, tiebreakers: season.tiebreakers, standingsMode: season.standingsMode },
     });
-    return { ok: true, message: "Temporada salva.", redirectTo: seasonId ? undefined : `/admin/competicoes/temporadas/${season.id}` };
+    return { ok: true, message: "Temporada salva.", redirectTo: seasonId ? undefined : `/admin/campeonatos/temporadas/${season.id}` };
   });
 }
 
@@ -106,7 +106,7 @@ export async function deleteSeasonAction(seasonId: string): Promise<ActionState>
     if (season._count.matches > 0) return { error: "Esta temporada tem partidas cadastradas e não pode ser excluída." };
     await prisma.season.delete({ where: { id: seasonId } });
     await audit({ userId: user.id, action: "season.delete", entity: "Season", entityId: seasonId, summary: `Excluiu a temporada ${season.label} de "${season.competition.name}"` });
-    return { ok: true, redirectTo: `/admin/competicoes/${season.competitionId}` };
+    return { ok: true, redirectTo: `/admin/campeonatos/${season.competitionId}` };
   });
 }
 

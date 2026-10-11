@@ -10,9 +10,9 @@ import { deleteCompetitionAction, saveCompetitionAction, saveSeasonAction } from
 import { CompetitionForm } from "../competition-form";
 import { SeasonForm } from "../season-form";
 
-export const metadata: Metadata = { title: "Competição" };
+export const metadata: Metadata = { title: "Campeonato" };
 
-export default async function CompetitionAdminPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CampeonatoAdminPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePagePermission("football:read");
   const { id } = await params;
   const competition = await prisma.competition.findUnique({
@@ -25,14 +25,14 @@ export default async function CompetitionAdminPage({ params }: { params: Promise
   return (
     <>
       <AdminHeading title={competition.name}>
-        <Link href="/admin/competicoes" className="btn btn-secondary btn-sm">
+        <Link href="/admin/campeonatos" className="btn btn-secondary btn-sm">
           Voltar
         </Link>
-        <Link href={`/competicoes/${competition.slug}`} className="btn btn-secondary btn-sm">
+        <Link href={`/campeonatos/${competition.slug}`} className="btn btn-secondary btn-sm">
           Ver no portal
         </Link>
         {can(user.role, "football:delete") ? (
-          <ConfirmButton action={deleteCompetitionAction.bind(null, competition.id)} label="Excluir" confirmMessage={`Excluir a competição "${competition.name}"?`} />
+          <ConfirmButton action={deleteCompetitionAction.bind(null, competition.id)} label="Excluir" confirmMessage={`Excluir o campeonato "${competition.name}"?`} />
         ) : null}
       </AdminHeading>
       {canWrite ? null : <ReadOnlyNotice />}
@@ -46,7 +46,7 @@ export default async function CompetitionAdminPage({ params }: { params: Promise
               <ul className="divide-y divide-gray-100">
                 {competition.seasons.map((season) => (
                   <li key={season.id} className="flex items-center justify-between gap-3 py-3">
-                    <Link href={`/admin/competicoes/temporadas/${season.id}`} className="font-semibold hover:text-primary hover:underline">
+                    <Link href={`/admin/campeonatos/temporadas/${season.id}`} className="font-semibold hover:text-primary hover:underline">
                       {season.label}
                     </Link>
                     <span className="flex items-center gap-2 text-sm text-gray-600">
@@ -59,7 +59,7 @@ export default async function CompetitionAdminPage({ params }: { params: Promise
             )}
           </Panel>
           {canWrite ? (
-            <Panel title="Dados da competição">
+            <Panel title="Dados do campeonato">
               <CompetitionForm action={saveCompetitionAction.bind(null, competition.id)} values={competition} />
             </Panel>
           ) : null}

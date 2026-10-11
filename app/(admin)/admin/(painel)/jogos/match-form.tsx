@@ -32,7 +32,7 @@ export function MatchForm({ action, seasons, values }: Props) {
     <ActionForm action={action} submitLabel="Salvar partida" className="space-y-5">
       <div>
         <label className="label" htmlFor="seasonId">
-          Competição e temporada
+          Campeonato e temporada
         </label>
         <select id="seasonId" name="seasonId" className="input" value={seasonId} onChange={(event) => setSeasonId(event.target.value)} required>
           {seasons.map((season) => (

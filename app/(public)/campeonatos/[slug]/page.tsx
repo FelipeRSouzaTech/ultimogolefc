@@ -24,11 +24,11 @@ async function loadCompetition(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const competition = await loadCompetition(slug);
-  if (!competition) return { title: "Competição não encontrada" };
+  if (!competition) return { title: "Campeonato não encontrado" };
   return {
     title: competition.name,
     description: competition.description?.slice(0, 160) ?? `Calendário, resultados e classificação de ${competition.name}.`,
-    alternates: { canonical: `/competicoes/${competition.slug}` },
+    alternates: { canonical: `/campeonatos/${competition.slug}` },
   };
 }
 
@@ -45,7 +45,7 @@ export default async function CompetitionPage({ params, searchParams }: Props) {
       <>
         <PageTitle title={competition.name} subtitle={competition.description ?? undefined} />
         <div className="container-page py-10">
-          <EmptyState title="Nenhuma temporada cadastrada" description="Os dados desta competição ainda não foram publicados." />
+          <EmptyState title="Nenhuma temporada cadastrada" description="Os dados deste campeonato ainda não foram publicados." />
         </div>
       </>
     );
@@ -69,7 +69,7 @@ export default async function CompetitionPage({ params, searchParams }: Props) {
             {competition.seasons.map((item) => (
               <Link
                 key={item.id}
-                href={`/competicoes/${competition.slug}?temporada=${encodeURIComponent(item.label)}`}
+                href={`/campeonatos/${competition.slug}?temporada=${encodeURIComponent(item.label)}`}
                 className={`btn btn-sm ${item.id === season.id ? "btn-primary" : "btn-secondary"}`}
                 aria-current={item.id === season.id ? "page" : undefined}
               >

@@ -17,7 +17,7 @@ export function MatchFilters({ action, competitions, seasonLabels, statuses, cur
     <form action={action} method="get" className="card mb-8 grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
       <div>
         <label className="label" htmlFor="competicao">
-          Competição
+          Campeonato
         </label>
         <select id="competicao" name="competicao" className="input" defaultValue={current.competicao ?? ""}>
           <option value="">Todas</option>

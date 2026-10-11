@@ -13,23 +13,38 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const MENU: { href: string; label: string; permission: Permission | null }[] = [
-  { href: "/admin", label: "Visão geral", permission: "dashboard:view" },
-  { href: "/admin/noticias", label: "Notícias", permission: "news:read" },
-  { href: "/admin/jogos", label: "Jogos", permission: "football:read" },
-  { href: "/admin/competicoes", label: "Competições", permission: "football:read" },
-  { href: "/admin/clubes", label: "Clubes", permission: "football:read" },
-  { href: "/admin/elenco", label: "Elenco", permission: "football:read" },
-  { href: "/admin/comissao-tecnica", label: "Comissão Técnica", permission: "football:read" },
-  { href: "/admin/diretores", label: "Diretores", permission: "content:read" },
-  { href: "/admin/patrocinadores", label: "Patrocinadores", permission: "content:read" },
-  { href: "/admin/institucional", label: "Institucional", permission: "content:read" },
-  { href: "/admin/galeria", label: "Galeria", permission: "content:read" },
-  { href: "/admin/midia", label: "Mídia", permission: "content:read" },
-  { href: "/admin/mensagens", label: "Mensagens", permission: "messages:manage" },
-  { href: "/admin/usuarios", label: "Usuários", permission: "users:manage" },
-  { href: "/admin/auditoria", label: "Auditoria", permission: "audit:read" },
-  { href: "/admin/conta", label: "Minha conta", permission: null },
+type AdminMenuItem =
+  | { type: "item"; href: string; label: string; permission: Permission | null }
+  | { type: "group"; label: string; items: { type: "item"; href: string; label: string; permission: Permission | null }[] };
+
+type AdminNavItem =
+  | { type: "item"; href: string; label: string }
+  | { type: "group"; label: string; items: { type: "item"; href: string; label: string }[] };
+
+const MENU: AdminMenuItem[] = [
+  { type: "item", href: "/admin", label: "Visão geral", permission: "dashboard:view" },
+  { type: "item", href: "/admin/noticias", label: "Notícias", permission: "news:read" },
+  {
+    type: "group",
+    label: "Futebol",
+    items: [
+      { type: "item", href: "/admin/jogos", label: "Jogos", permission: "football:read" },
+      { type: "item", href: "/admin/campeonatos", label: "Campeonatos", permission: "football:read" },
+      { type: "item", href: "/admin/clubes", label: "Clubes", permission: "football:read" },
+      { type: "item", href: "/admin/elenco", label: "Elenco", permission: "football:read" },
+      { type: "item", href: "/admin/comissao-tecnica", label: "Comissão Técnica", permission: "football:read" },
+      { type: "item", href: "/admin/equipes", label: "Equipes", permission: "football:read" },
+    ],
+  },
+  { type: "item", href: "/admin/diretores", label: "Diretores", permission: "content:read" },
+  { type: "item", href: "/admin/patrocinadores", label: "Patrocinadores", permission: "content:read" },
+  { type: "item", href: "/admin/institucional", label: "Institucional", permission: "content:read" },
+  { type: "item", href: "/admin/galeria", label: "Galeria", permission: "content:read" },
+  { type: "item", href: "/admin/midia", label: "Mídia", permission: "content:read" },
+  { type: "item", href: "/admin/mensagens", label: "Mensagens", permission: "messages:manage" },
+  { type: "item", href: "/admin/usuarios", label: "Usuários", permission: "users:manage" },
+  { type: "item", href: "/admin/auditoria", label: "Auditoria", permission: "audit:read" },
+  { type: "item", href: "/admin/conta", label: "Minha conta", permission: null },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -37,7 +52,21 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const user = await requireUser();
   // Funções sem acesso ao painel (hoje, o tesoureiro) são levadas ao portal a que pertencem.
   if (!can(user.role, "dashboard:view")) redirect(can(user.role, "finance:read") ? "/financeiro" : "/admin/login");
-  const items = MENU.filter((item) => item.permission === null || can(user.role, item.permission)).map(({ href, label }) => ({ href, label }));
+
+  const filterItem = (item: { permission: Permission | null }) => item.permission === null || can(user.role, item.permission);
+
+  const items: AdminNavItem[] = MENU.flatMap((item): AdminNavItem[] => {
+    if (item.type === "group") {
+      const visibleItems = item.items.filter(filterItem);
+      if (visibleItems.length === 0) return [];
+      return [{
+        type: "group",
+        label: item.label,
+        items: visibleItems.map(({ href, label }) => ({ type: "item" as const, href, label }))
+      }];
+    }
+    return filterItem(item) ? [{ type: "item" as const, href: item.href, label: item.label }] : [];
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 lg:grid lg:grid-cols-[15rem_1fr]">

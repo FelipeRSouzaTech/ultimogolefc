@@ -12,14 +12,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const MENU = [
-  { href: "/financeiro", label: "Resumo" },
-  { href: "/financeiro/lancamentos", label: "Lançamentos" },
-  { href: "/financeiro/folha", label: "Folha de pagamento" },
-  { href: "/financeiro/mensalidades", label: "Mensalidades" },
-  { href: "/financeiro/acordos", label: "Patrocínios e doações" },
-  { href: "/financeiro/jogos", label: "Custos por jogo" },
-  { href: "/financeiro/conta", label: "Minha conta" },
+const MENU: { type: "item"; href: string; label: string }[] = [
+  { type: "item", href: "/financeiro", label: "Resumo" },
+  { type: "item", href: "/financeiro/lancamentos", label: "Lançamentos" },
+  { type: "item", href: "/financeiro/folha", label: "Folha de pagamento" },
+  { type: "item", href: "/financeiro/mensalidades", label: "Mensalidades" },
+  { type: "item", href: "/financeiro/acordos", label: "Patrocínios e doações" },
+  { type: "item", href: "/financeiro/jogos", label: "Custos por jogo" },
+  { type: "item", href: "/financeiro/conta", label: "Minha conta" },
 ];
 
 /**
