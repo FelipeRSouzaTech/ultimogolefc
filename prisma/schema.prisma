@@ -155,6 +155,47 @@ enum AthleteCategory {
   SIXTY
 }
 
+enum TechnicalStaffRole {
+  HEAD_COACH
+  ASSISTANT_COACH
+  PHYSICAL_TRAINER
+  GOALKEEPER_COACH
+  PHYSIOTHERAPIST
+  DOCTOR
+  NUTRITIONIST
+  PSYCHOLOGIST
+  ANALYST
+  OTHER
+}
+
+model TechnicalStaff {
+  id          String            @id @default(cuid())
+  name        String
+  nickname    String?
+  role        TechnicalStaffRole
+  status      AthleteStatus     @default(ACTIVE)
+  categories  AthleteCategory[] @default([])
+  sortOrder   Int               @default(0)
+  isPublished Boolean           @default(false)
+  createdAt   DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime          @updatedAt @db.Timestamptz(3)
+
+  seasons     TechnicalStaffSeason[]
+
+  @@index([status, isPublished])
+}
+
+model TechnicalStaffSeason {
+  technicalStaffId String
+  seasonId         String
+  assignedAt       DateTime @default(now()) @db.Timestamptz(3)
+
+  technicalStaff TechnicalStaff @relation(fields: [technicalStaffId], references: [id], onDelete: Cascade)
+  season         Season         @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@id([technicalStaffId, seasonId])
+}
+
 model User {
   id           String    @id @default(cuid())
   name         String
@@ -299,6 +340,7 @@ model Season {
   teams       CompetitionTeam[]
   matches     Match[]
   overrides   StandingOverride[]
+  technicalStaff TechnicalStaffSeason[]
 
   @@unique([competitionId, label])
 }
