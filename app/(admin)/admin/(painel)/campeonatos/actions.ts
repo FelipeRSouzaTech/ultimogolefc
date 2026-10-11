@@ -13,6 +13,7 @@ export async function saveCompetitionAction(id: string | null, formData: FormDat
     const parsed = competitionSchema.safeParse({
       name: field(formData, "name"),
       description: field(formData, "description"),
+      coverPath: field(formData, "coverPath"),
       isActive: formData.get("isActive") === "on",
     });
     if (!parsed.success) return zodErrorState(parsed.error);
