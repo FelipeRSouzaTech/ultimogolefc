@@ -78,6 +78,33 @@ export const STAFF_GROUP_LABELS: Record<StaffGroup, string> = {
   TECHNICAL: "Comissão técnica",
 };
 
+export const TECHNICAL_STAFF_ROLES = [
+  "HEAD_COACH",
+  "ASSISTANT_COACH",
+  "PHYSICAL_TRAINER",
+  "GOALKEEPER_COACH",
+  "PHYSIOTHERAPIST",
+  "DOCTOR",
+  "NUTRITIONIST",
+  "PSYCHOLOGIST",
+  "ANALYST",
+  "OTHER",
+] as const;
+export type TechnicalStaffRole = (typeof TECHNICAL_STAFF_ROLES)[number];
+
+export const TECHNICAL_STAFF_ROLE_LABELS: Record<TechnicalStaffRole, string> = {
+  HEAD_COACH: "Técnico",
+  ASSISTANT_COACH: "Aux. Técnico",
+  PHYSICAL_TRAINER: "Preparador Físico",
+  GOALKEEPER_COACH: "Treineiro de Goleiros",
+  PHYSIOTHERAPIST: "Fisioterapeuta",
+  DOCTOR: "Médico",
+  NUTRITIONIST: "Nutricionista",
+  PSYCHOLOGIST: "Psicólogo",
+  ANALYST: "Analista de Desempenho",
+  OTHER: "Outro",
+};
+
 type AthleteLike = { name: string; nickname: string | null; position: string; shirtNumber: number | null };
 
 /** Nome exibido: o apelido esportivo, quando houver. */

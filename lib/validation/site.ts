@@ -3,7 +3,7 @@ import { DIRECTOR_STATUSES } from "@/modules/finance/rules";
 import { GALLERY_CATEGORIES } from "@/modules/gallery/rules";
 import { isSafeUrl } from "@/modules/site/settings";
 import { SPONSOR_TIERS } from "@/modules/sponsors/rules";
-import { POSITIONS, STAFF_GROUPS, ATHLETE_CATEGORIES } from "@/modules/squad/rules";
+import { POSITIONS, STAFF_GROUPS, ATHLETE_CATEGORIES, TECHNICAL_STAFF_ROLES } from "@/modules/squad/rules";
 import { emailSchema } from "./auth";
 
 const optionalText = (max: number, message: string) =>
@@ -49,6 +49,17 @@ export const staffSchema = z.object({
   name: z.string().trim().min(2, "Informe o nome.").max(120, "Nome muito longo."),
   role: z.string().trim().min(2, "Informe o cargo.").max(80, "Cargo muito longo."),
   group: z.enum(STAFF_GROUPS, { errorMap: () => ({ message: "Selecione o grupo." }) }),
+  sortOrder,
+  isPublished: z.boolean(),
+});
+
+export const technicalStaffSchema = z.object({
+  name: z.string().trim().min(2, "Informe o nome.").max(120, "Nome muito longo."),
+  nickname: optionalText(60, "Apelido muito longo."),
+  role: z.enum(TECHNICAL_STAFF_ROLES, { errorMap: () => ({ message: "Selecione a função." }) }),
+  seasonIds: z.array(z.string()).min(1, "Selecione pelo menos uma competição/temporada."),
+  status: z.enum(["ACTIVE", "INACTIVE"]),
+  categories: z.array(z.enum(ATHLETE_CATEGORIES)).min(1, "Selecione pelo menos uma categoria."),
   sortOrder,
   isPublished: z.boolean(),
 });
