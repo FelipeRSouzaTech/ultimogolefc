@@ -79,7 +79,7 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
       {filteredGroups.length === 0 ? (
         <EmptyState title="Nenhum jogador encontrado" description="Nenhum jogador cadastrado nesta categoria." />
       ) : (
-        filteredGroups.map(({ category, label, groups }, categoryIndex) => (
+        filteredGroups.map(({ category, label, groups }) => (
           <section key={category} aria-labelledby={`categoria-${category}`}>
             <h2 id={`categoria-${category}`} className="section-title mb-5">
               {label}
@@ -102,10 +102,10 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
                 </ul>
               </div>
             ))}
-            {/* Exibe a comissão técnica após os Atacantes da primeira categoria (geralmente Adulto/Principal) */}
-            {categoryIndex === 0 && staff.length > 0 && groups.some((g) => g.position === "FORWARD") ? (
-              <section aria-labelledby="comissao" className="mt-12">
-                <h2 id="comissao" className="section-title mb-5">
+            {/* Exibe a comissão técnica após os Atacantes (FORWARD) de cada categoria */}
+            {staff.length > 0 && groups.some((g) => g.position === "FORWARD") ? (
+              <section aria-labelledby={`comissao-${category}`} className="mt-12">
+                <h2 id={`comissao-${category}`} className="section-title mb-5">
                   Comissão técnica
                 </h2>
                 <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -121,7 +121,8 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
         ))
       )}
 
-      {staff.length > 0 && filteredGroups.length > 0 && !filteredGroups[0]?.groups.some((g) => g.position === "FORWARD") ? (
+      {/* Fallback: se nenhuma categoria tem Atacantes, mostra no final */ }
+      {staff.length > 0 && filteredGroups.length > 0 && !filteredGroups.some((cat) => cat.groups.some((g) => g.position === "FORWARD")) ? (
         <section aria-labelledby="comissao-fim" className="mt-12">
           <h2 id="comissao-fim" className="section-title mb-5">
             Comissão técnica
