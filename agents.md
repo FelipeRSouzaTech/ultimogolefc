@@ -193,6 +193,16 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `app/(admin)/admin/(painel)/comissao-tecnica/page.tsx` — lista + painel "Novo membro"
 - **Campos**: Nome, Apelido, Função (10 opções), Competições/Temporadas (multi-select), Situação (Ativo/Inativo), Categorias (multi-select, usa `AthleteCategory`), Ordem, Divulgação autorizada
 
+### 10. `claude/futebol-comissao-tecnica` (PR aberto — Claude)
+- **Pedido**: comissão técnica aparecer abaixo de "Atacantes" em `/futebol`
+- **Causa do problema**: a página pública lia a tabela antiga `StaffMember`, mas o painel **Comissão Técnica** (PR #10) grava em `TechnicalStaff`. A lista chegava vazia, então mudar só a posição do bloco (commits `ee1e551`…`e41af93`) não tinha efeito
+- **Mudança**:
+  - `app/(public)/futebol/page.tsx` — lê `prisma.technicalStaff` (`isPublished: true`, `status: ACTIVE`); `StaffMember` (TECHNICAL) só é usado enquanto o cadastro novo estiver vazio
+  - `app/(public)/futebol/futebol-content.tsx` — em cada categoria, depois dos grupos de posição (logo abaixo de Atacantes), bloco "Comissão técnica" com o mesmo `<h3>`; quem não atua em nenhuma categoria com jogadores publicados aparece em um bloco no fim (só com o filtro em "Todas as categorias")
+  - `modules/squad/rules.ts` — `staffForCategory`, `staffOutsideCategories` (regras puras, com testes em `tests/unit/site.test.ts`)
+- **Para aparecer**: membro com "Divulgação autorizada", situação Ativo e a categoria marcada
+- **Não verificado**: tela não foi aberta em navegador (ambiente do agente não instala dependências); validação = CI do PR
+
 ## 🎯 Próximas tarefas planejadas
 
 - [ ] Aguardar próxima instrução do usuário

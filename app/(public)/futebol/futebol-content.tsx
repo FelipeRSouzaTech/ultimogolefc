@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { PersonCard } from "@/components/football/person-card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ATHLETE_CATEGORIES, ATHLETE_CATEGORY_LABELS, type Position, type AthleteCategory, POSITION_LABELS } from "@/modules/squad/rules";
+import { ATHLETE_CATEGORIES, ATHLETE_CATEGORY_LABELS, type Position, type AthleteCategory, POSITION_LABELS, staffForCategory, staffOutsideCategories } from "@/modules/squad/rules";
 
 interface Athlete {
   id: string;
@@ -26,9 +26,30 @@ interface CategorizedGroup {
   groups: Group[];
 }
 
+interface StaffMember {
+  id: string;
+  name: string;
+  role: string;
+  /** Categorias em que a pessoa atua; vazio = sem categoria definida. */
+  categories: AthleteCategory[];
+}
+
 interface FutebolContentProps {
   categorizedGroups: CategorizedGroup[];
-  staff: { id: string; name: string; role: string }[];
+  staff: StaffMember[];
+}
+
+/** Grade de cartões da comissão técnica, no mesmo formato da grade de jogadores. */
+function StaffGrid({ members }: { members: StaffMember[] }) {
+  return (
+    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {members.map((member) => (
+        <li key={member.id}>
+          <PersonCard name={member.name} caption={member.role} />
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps) {
@@ -50,11 +71,18 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
     [filteredGroups]
   );
 
-  // Determina se a comissão técnica já foi exibida após Atacantes em alguma categoria
-  const staffShownAfterForward = useMemo(() => {
-    if (staff.length === 0) return true;
-    return filteredGroups.some((cat) => cat.groups.some((g) => g.position === "FORWARD"));
-  }, [staff.length, filteredGroups]);
+  // Quem não atua em nenhuma categoria com jogadores publicados vai para um bloco no fim, para ninguém sumir.
+  // Com o filtro em uma categoria específica, o bloco não aparece: ele não pertence àquela categoria.
+  const staffAtEnd = useMemo(
+    () =>
+      selectedCategory === "all"
+        ? staffOutsideCategories(
+            staff,
+            categorizedGroups.map((group) => group.category),
+          )
+        : [],
+    [staff, categorizedGroups, selectedCategory],
+  );
 
   return (
     <div className="container-page space-y-12 py-10">
@@ -78,14 +106,16 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
         <p className="mt-2 text-sm text-gray-500" aria-live="polite">
           {filteredGroups.length === 1
             ? `Exibindo ${filteredGroups[0]?.label} (${filteredGroups[0]?.groups.reduce((sum, g) => sum + g.athletes.length, 0)} jogador${filteredGroups[0]?.groups.reduce((sum, g) => sum + g.athletes.length, 0) !== 1 ? "es" : ""})`
-            : `Exibindo ${filteredGroups.length} categor${filteredGroups.length === 1 ? "ia" : "ias"} com ${totalPlayers} jogador${totalPlayers !== 1 ? "es" : ""} no total}`}
+            : `Exibindo ${filteredGroups.length} categor${filteredGroups.length === 1 ? "ia" : "ias"} com ${totalPlayers} jogador${totalPlayers !== 1 ? "es" : ""} no total`}
         </p>
       </div>
 
       {filteredGroups.length === 0 ? (
         <EmptyState title="Nenhum jogador encontrado" description="Nenhum jogador cadastrado nesta categoria." />
       ) : (
-        filteredGroups.map(({ category, label, groups }, index) => (
+        filteredGroups.map(({ category, label, groups }) => {
+          const categoryStaff = staffForCategory(staff, category);
+          return (
           <section key={category} aria-labelledby={`categoria-${category}`}>
             <h2 id={`categoria-${category}`} className="section-title mb-5">
               {label}
@@ -108,42 +138,25 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
                 </ul>
               </div>
             ))}
-            {/* Exibe a comissão técnica após os Atacantes (FORWARD):
-                - Se vendo "all": apenas na primeira categoria que tiver FORWARD (geralmente Adulto)
-                - Se filtrando por categoria: nessa categoria se tiver FORWARD */}
-            {staff.length > 0 && groups.some((g) => g.position === "FORWARD") && (
-              selectedCategory === "all" ? index === 0 : true
-            ) ? (
-              <section aria-labelledby={`comissao-${category}`} className="mt-12">
-                <h2 id={`comissao-${category}`} className="section-title mb-5">
-                  Comissão técnica
-                </h2>
-                <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {staff.map((member) => (
-                    <li key={member.id}>
-                      <PersonCard name={member.name} caption={member.role} />
-                    </li>
-                  ))}
-                </ul>
-              </section>
+            {/* Comissão técnica da categoria: último grupo, logo abaixo de Atacantes, com o mesmo estilo de título. */}
+            {categoryStaff.length > 0 ? (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-3">Comissão técnica</h3>
+                <StaffGrid members={categoryStaff} />
+              </div>
             ) : null}
           </section>
-        ))
+          );
+        })
       )}
 
-      {/* Fallback: mostra comissão técnica no final se não foi exibida após Atacantes */ }
-      {staff.length > 0 && filteredGroups.length > 0 && !staffShownAfterForward ? (
-        <section aria-labelledby="comissao-fim" className="mt-12">
-          <h2 id="comissao-fim" className="section-title mb-5">
+      {/* Comissão sem categoria exibida (ou sem jogadores publicados na página): bloco próprio no fim. */}
+      {staffAtEnd.length > 0 ? (
+        <section aria-labelledby="comissao-tecnica">
+          <h2 id="comissao-tecnica" className="section-title mb-5">
             Comissão técnica
           </h2>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {staff.map((member) => (
-              <li key={member.id}>
-                <PersonCard name={member.name} caption={member.role} />
-              </li>
-            ))}
-          </ul>
+          <StaffGrid members={staffAtEnd} />
         </section>
       ) : null}
     </div>

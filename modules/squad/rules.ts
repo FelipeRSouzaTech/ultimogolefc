@@ -126,3 +126,18 @@ export function groupByPosition<T extends AthleteLike>(athletes: readonly T[]): 
       ),
   })).filter((group) => group.athletes.length > 0);
 }
+
+type StaffLike = { categories: readonly string[] };
+
+/** Comissão técnica de uma categoria: quem tem aquela categoria marcada no cadastro. */
+export function staffForCategory<T extends StaffLike>(staff: readonly T[], category: AthleteCategory): T[] {
+  return staff.filter((member) => member.categories.includes(category));
+}
+
+/**
+ * Quem não aparece em nenhuma das categorias exibidas (sem categoria marcada, ou só em categorias
+ * sem jogadores publicados). Essas pessoas vão para um bloco no fim da página, para ninguém sumir.
+ */
+export function staffOutsideCategories<T extends StaffLike>(staff: readonly T[], shownCategories: readonly AthleteCategory[]): T[] {
+  return staff.filter((member) => !shownCategories.some((category) => member.categories.includes(category)));
+}
