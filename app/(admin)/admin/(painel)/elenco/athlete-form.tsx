@@ -2,12 +2,13 @@ import { ActionForm } from "@/components/ui/action-form";
 import { Field } from "@/components/ui/field";
 import { ImageField } from "@/components/ui/image-field";
 import type { FormAction } from "@/lib/action";
-import { POSITIONS, POSITION_LABELS } from "@/modules/squad/rules";
+import { POSITIONS, POSITION_LABELS, ATHLETE_CATEGORIES, ATHLETE_CATEGORY_LABELS } from "@/modules/squad/rules";
 
 type Values = {
   name: string;
   nickname: string | null;
   position: string;
+  category: string;
   shirtNumber: number | null;
   bio: string | null;
   photoPath: string | null;
@@ -33,6 +34,15 @@ export function AthleteForm({ action, values }: { action: FormAction; values?: V
             {POSITIONS.map((position) => (
               <option key={position} value={position}>
                 {POSITION_LABELS[position]}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field name="category" label="Categoria">
+          <select id="category" name="category" className="input" defaultValue={values?.category ?? "ADULT"}>
+            {ATHLETE_CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {ATHLETE_CATEGORY_LABELS[category]}
               </option>
             ))}
           </select>
