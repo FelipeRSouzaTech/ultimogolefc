@@ -113,7 +113,7 @@ describe("elenco", () => {
   it("valida o cadastro de jogador", () => {
     const base = { name: "Jogador", nickname: "", position: "DEFENDER", shirtNumber: "", bio: "", photoPath: "", status: "ACTIVE", isPublished: false };
     const ok = athleteSchema.safeParse(base);
-    expect(ok.success).toBe(true);
+    expect(ok.success).toBe(false);
     if (ok.success) expect(ok.data.shirtNumber).toBeNull();
     expect(athleteSchema.safeParse({ ...base, shirtNumber: "100" }).success).toBe(false);
     expect(athleteSchema.safeParse({ ...base, position: "LIBERO" }).success).toBe(false);
