@@ -121,8 +121,8 @@ export function FutebolContent({ categorizedGroups, staff }: FutebolContentProps
         ))
       )}
 
-      {/* Fallback: se nenhuma categoria tem Atacantes, mostra no final */ }
-      {staff.length > 0 && filteredGroups.length > 0 && !filteredGroups.some((cat) => cat.groups.some((g) => g.position === "FORWARD")) ? (
+      {/* Fallback: mostra comissão técnica no final da página se existir staff mas não foi exibida após Atacantes */ }
+      {staff.length > 0 && filteredGroups.length > 0 ? (
         <section aria-labelledby="comissao-fim" className="mt-12">
           <h2 id="comissao-fim" className="section-title mb-5">
             Comissão técnica
