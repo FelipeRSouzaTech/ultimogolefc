@@ -31,7 +31,7 @@ export function EntryForm({ action, today, matches, agreements, defaultMatchId }
         <FieldError name="type" />
       </fieldset>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
         <div key={type}>
           <label className="label" htmlFor="category">
             Categoria

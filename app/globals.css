@@ -49,6 +49,14 @@
 }
 
 @layer base {
+  /*
+   * Itens de grade podem encolher abaixo do conteúdo mínimo. Sem isto, uma tabela ou um texto longo
+   * dentro de uma coluna de grade alarga a página no celular (rolagem lateral e zoom para fora).
+   */
+  .grid > * {
+    min-width: 0;
+  }
+
   *,
   ::before,
   ::after {
@@ -234,6 +242,8 @@
 
   /* Superfícies */
   .card {
+    /* Cartões costumam ser itens de grade: sem isto, uma tabela larga dentro deles alarga a página no celular. */
+    min-width: 0;
     background-color: var(--color-white);
     border: 1px solid var(--color-gray-100);
     border-radius: var(--radius-lg);
@@ -586,9 +596,16 @@
 
   /* Tabelas */
   .table {
+    /* A legenda acessível (sr-only, posição absoluta) fica presa à tabela; sem isto ela escapa da área
+       com rolagem e alarga a página no celular. */
+    position: relative;
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
+  }
+  /* Listas do painel com muitas colunas: no celular rolam de lado dentro do cartão em vez de espremer o texto. */
+  .table-wide {
+    min-width: 40rem;
   }
   .table th {
     padding: 0.625rem 0.5rem;

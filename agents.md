@@ -265,7 +265,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Mantidos como aviso fixo na página** (estado permanente, não resultado de ação): `ReadOnlyNotice`, conta sem acesso no login do financeiro, aviso de escalação em jogos, filtro ativo em Lançamentos, "esta é a sua conta" em usuários.
 - **Não verificado**: não foi aberto em navegador; validação = CI do PR
 
-### 16. `claude/modal-exclusao` (PR aberto — Claude)
+### 16. `claude/modal-exclusao` (PR #20 merged — Claude)
 - **Pedido**: modal para o botão Excluir e alerta (toast) na exclusão, no projeto todo
 - **Mudança**:
   - `components/ui/confirm-button.tsx` — troca o `window.confirm` por um modal (`<dialog>` nativo com `showModal()`): título, pergunta, Cancelar (foco inicial) e botão vermelho; Esc e clique fora fecham. Toda exclusão/remoção passa a mostrar toast de sucesso (mensagem da ação, `successMessage` ou o padrão de `confirmTexts`)
@@ -273,6 +273,21 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `app/globals.css` — `.modal*` e `.btn-danger-solid`
 - **Alcance**: todos os usos de `<ConfirmButton>` (clubes, campeonatos, temporadas, jogos e lances, elenco, comissão técnica, diretores, patrocinadores, notícias e categorias, galeria e fotos, mídia, mensagens, mensalidades, revogar sessões). **Não usar `window.confirm` em telas novas**
 - **Não verificado**: não foi aberto em navegador; validação = CI do PR
+
+### 17. `claude/responsivo` (PR aberto — Claude)
+- **Pedido**: melhorar a responsividade; componentes distorcendo no celular (Poco X7 Pro, ~393 px de largura)
+- **Como foi avaliado**: as páginas foram renderizadas fora do Next (React SSR com banco falso e Tailwind compilado localmente) e fotografadas no Chromium em 320, 360, 393, 412, 768 e 1280 px, com detecção automática de rolagem lateral. Não é o app rodando de verdade (sem banco real nem interação)
+- **Causas encontradas e correções**:
+  - Itens de grade não encolhiam (tabela/texto longo alargava a página) → `.grid > * { min-width: 0 }` e `.card { min-width: 0 }` em `globals.css`
+  - Legenda `sr-only` de tabela escapava da área com rolagem → `.table { position: relative }`; tabela do Resumo do financeiro e a classificação ganharam `overflow-x-auto`
+  - Menu do painel/financeiro no celular era faixa rolável com grupo aberto no meio → `components/layout/admin-nav.tsx`: botão "Menu · página atual" que abre a lista em coluna (desktop igual)
+  - `MonthNav` cabe em uma linha no celular (só setas); títulos (`PageTitle`, `AdminHeading`) menores no celular
+  - Classificação no celular: Pos, Time, Pts, J, SG (V/E/D a partir de `sm`, GP/GC a partir de `md`)
+  - `/futebol`: 2 cartões por linha no celular (`PersonCard` mais compacto); removida `}` sobrando no texto "no total"
+  - Tabelas largas do painel (`.table-wide`, min 40rem) rolam de lado dentro do cartão em vez de espremer
+  - Formulários do financeiro na coluna lateral ficam em 1 coluna em `xl` (2 colunas em `2xl`)
+  - Card de jogo: espaço antes da vírgula na data
+- **Não verificado**: interação real no aparelho (abrir menus, teclado virtual); validação = CI do PR + teste do usuário no celular
 
 ## 🎯 Próximas tarefas planejadas
 

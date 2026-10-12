@@ -48,7 +48,7 @@ export default async function MatchCostsPage() {
             ) : null}
           </p>
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-wide">
               <caption className="sr-only">Despesas por partida</caption>
               <thead>
                 <tr>

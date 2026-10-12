@@ -51,7 +51,7 @@ export default async function AdminMatchesPage({ searchParams }: { searchParams:
         <EmptyState title="Nenhuma partida" description="Cadastre clubes, uma competição com temporada e participantes, e depois as partidas." />
       ) : (
         <div className="card overflow-x-auto">
-          <table className="table">
+          <table className="table table-wide">
             <thead>
               <tr>
                 <th scope="col" className="text-left">

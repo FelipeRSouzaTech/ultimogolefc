@@ -82,31 +82,33 @@ export default async function FinanceOverviewPage({ searchParams }: { searchPara
           {summary.byCategory.length === 0 ? (
             <p className="text-sm text-gray-600">Nenhum lançamento neste mês.</p>
           ) : (
-            <table className="table">
-              <caption className="sr-only">Totais por categoria em {monthLabel(month)}</caption>
-              <thead>
-                <tr>
-                  <th scope="col" className="text-left">
-                    Categoria
-                  </th>
-                  <th scope="col">Tipo</th>
-                  <th scope="col">Lançamentos</th>
-                  <th scope="col">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {summary.byCategory.map((item) => (
-                  <tr key={item.category}>
-                    <td className="text-left">{CATEGORY_LABELS[item.category]}</td>
-                    <td>{ENTRY_TYPE_LABELS[item.type]}</td>
-                    <td>{item.count}</td>
-                    <td className="font-bold">
-                      <Money cents={item.totalCents} sign={item.type} />
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="table">
+                <caption className="sr-only">Totais por categoria em {monthLabel(month)}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" className="text-left">
+                      Categoria
+                    </th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Lançamentos</th>
+                    <th scope="col">Total</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {summary.byCategory.map((item) => (
+                    <tr key={item.category}>
+                      <td className="text-left">{CATEGORY_LABELS[item.category]}</td>
+                      <td>{ENTRY_TYPE_LABELS[item.type]}</td>
+                      <td>{item.count}</td>
+                      <td className="font-bold">
+                        <Money cents={item.totalCents} sign={item.type} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </Panel>
 

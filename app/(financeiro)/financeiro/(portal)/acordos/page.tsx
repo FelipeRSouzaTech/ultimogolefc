@@ -124,7 +124,7 @@ export default async function AgreementsPage() {
               <Field name="agreed" label="Valor combinado (R$)" hint="Total do acordo, não a parcela.">
                 <input id="agreed" name="agreed" className="input" inputMode="decimal" placeholder="0,00" required maxLength={16} />
               </Field>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
                 <Field name="startsOn" label="Início" hint="Opcional.">
                   <input id="startsOn" name="startsOn" type="date" className="input" />
                 </Field>

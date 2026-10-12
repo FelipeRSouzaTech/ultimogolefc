@@ -44,7 +44,7 @@ interface FutebolContentProps {
 /** Grade de cartões da comissão técnica, no mesmo formato da grade de jogadores. */
 function StaffGrid({ members }: { members: StaffMember[] }) {
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <ul className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
       {members.map((member) => (
         <li key={member.id}>
           <PersonCard name={member.name} caption={member.role} />
@@ -86,7 +86,7 @@ export function FutebolContent({ categorizedGroups, staff, initialCategory = "al
       <p className="mb-8 text-sm text-gray-500" aria-live="polite">
         {filteredGroups.length === 1
           ? `Exibindo ${filteredGroups[0]?.label} (${filteredGroups[0]?.groups.reduce((sum, g) => sum + g.athletes.length, 0)} jogador${filteredGroups[0]?.groups.reduce((sum, g) => sum + g.athletes.length, 0) !== 1 ? "es" : ""})`
-          : `Exibindo ${filteredGroups.length} categor${filteredGroups.length === 1 ? "ia" : "ias"} com ${totalPlayers} jogador${totalPlayers !== 1 ? "es" : ""} no total}`}
+          : `Exibindo ${filteredGroups.length} categor${filteredGroups.length === 1 ? "ia" : "ias"} com ${totalPlayers} jogador${totalPlayers !== 1 ? "es" : ""} no total`}
       </p>
 
       {filteredGroups.length === 0 ? (
@@ -104,7 +104,7 @@ export function FutebolContent({ categorizedGroups, staff, initialCategory = "al
             {groups.map((group) => (
               <div key={group.position}>
                 <h3 className="mb-4 text-xl font-semibold text-gray-700">{group.label}</h3>
-                <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <ul className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
                   {group.athletes.map((athlete) => (
                     <li key={athlete.id}>
                       <PersonCard
