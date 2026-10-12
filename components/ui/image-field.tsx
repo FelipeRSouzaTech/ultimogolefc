@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { toast } from "@/lib/toast";
 import { uploadImageAction } from "@/modules/media/actions";
 import { FieldError } from "./action-form";
 import { SmartImage } from "./smart-image";
@@ -13,22 +14,22 @@ type Props = { name: string; label: string; defaultValue?: string | null; hint?:
  */
 export function ImageField({ name, label, defaultValue, hint }: Props) {
   const [path, setPath] = useState(defaultValue ?? "");
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const fileInput = useRef<HTMLInputElement>(null);
 
   function onFileChange(file: File | undefined) {
     if (!file) return;
-    setError(null);
     startTransition(async () => {
       try {
         const formData = new FormData();
         formData.set("file", file);
         const result = await uploadImageAction(formData);
-        if (result.ok) setPath(result.path);
-        else setError(result.error);
+        if (result.ok) {
+          setPath(result.path);
+          toast("success", "Imagem enviada.");
+        } else toast("error", result.error);
       } catch {
-        setError("Não foi possível enviar a imagem. Verifique o tamanho (até 5 MB) e tente novamente.");
+        toast("error", "Não foi possível enviar a imagem. Verifique o tamanho (até 5 MB) e tente novamente.");
       } finally {
         if (fileInput.current) fileInput.current.value = "";
       }
@@ -73,11 +74,6 @@ export function ImageField({ name, label, defaultValue, hint }: Props) {
         </div>
       </div>
       <p className="hint">{hint ?? "PNG, JPG ou WebP, até 5 MB."}</p>
-      {error ? (
-        <p className="field-error" role="alert">
-          {error}
-        </p>
-      ) : null}
       <FieldError name={name} />
     </div>
   );

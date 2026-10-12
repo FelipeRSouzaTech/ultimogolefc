@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import type { ActionState, FormAction } from "@/lib/action";
+import { toast } from "@/lib/toast";
 
 const FormStateContext = createContext<ActionState>({});
 
@@ -31,7 +32,8 @@ type Props = {
 
 /**
  * Formulário ligado a uma Server Action.
- * Mantém os valores digitados quando o servidor devolve erro e exibe as mensagens de forma acessível.
+ * Mantém os valores digitados quando o servidor devolve erro. O resultado (erro ou sucesso) aparece como
+ * notificação no canto da tela; os erros de cada campo continuam ao lado do campo.
  */
 export function ActionForm({ action, children, submitLabel, pendingLabel = "Salvando…", className, submitClassName, resetOnSuccess = false }: Props) {
   const router = useRouter();
@@ -46,13 +48,16 @@ export function ActionForm({ action, children, submitLabel, pendingLabel = "Salv
       try {
         const result = await action(formData);
         setState(result ?? {});
+        if (result?.error) toast("error", result.error);
         if (result?.ok) {
+          toast("success", result.message);
           if (resetOnSuccess) form.reset();
           if (result.redirectTo) router.push(result.redirectTo);
           router.refresh();
         }
       } catch {
-        setState({ error: "Não foi possível falar com o servidor. Verifique a conexão e tente novamente." });
+        setState({});
+        toast("error", "Não foi possível falar com o servidor. Verifique a conexão e tente novamente.");
       }
     });
   }
@@ -60,16 +65,6 @@ export function ActionForm({ action, children, submitLabel, pendingLabel = "Salv
   return (
     <FormStateContext.Provider value={state}>
       <form onSubmit={onSubmit} className={className} noValidate>
-        {state.error ? (
-          <p className="alert alert-error mb-4" role="alert">
-            {state.error}
-          </p>
-        ) : null}
-        {state.ok && state.message ? (
-          <p className="alert alert-info mb-4" role="status">
-            {state.message}
-          </p>
-        ) : null}
         {children}
         <div className="mt-6">
           <button type="submit" className={submitClassName ?? "btn btn-primary"} disabled={pending}>

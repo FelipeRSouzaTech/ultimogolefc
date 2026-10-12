@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "@/lib/toast";
 
 /** Copia o endereço da notícia para a área de transferência, com retorno visual. */
 export function ShareLink({ url }: { url: string }) {
-  const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");
+  // Se a cópia falhar, o endereço fica visível para ser copiado à mão (um aviso passageiro não serviria).
+  const [failed, setFailed] = useState(false);
 
   async function copy() {
     try {
       await navigator.clipboard.writeText(url);
-      setStatus("copied");
+      setFailed(false);
+      toast("success", "Link copiado.");
     } catch {
-      setStatus("failed");
+      setFailed(true);
     }
   }
 
@@ -21,7 +24,7 @@ export function ShareLink({ url }: { url: string }) {
         Copiar link
       </button>
       <span role="status" className="text-sm text-gray-600">
-        {status === "copied" ? "Link copiado." : status === "failed" ? `Copie manualmente: ${url}` : ""}
+        {failed ? `Copie manualmente: ${url}` : ""}
       </span>
     </div>
   );
