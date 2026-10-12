@@ -5,9 +5,9 @@ import { field, zodErrorState, type ActionState } from "@/lib/action";
 import { audit } from "@/lib/audit";
 import { withPermission } from "@/lib/auth/guard";
 import { saoPauloLocalToUtc } from "@/lib/datetime";
-import { agreementSchema, dueSettingsSchema, entrySchema, payDueSchema, payrollSchema, voidSchema, waiveSchema } from "@/lib/validation/finance";
-import { entryDate, formatMoney, isMonthKey, isPayrollOnlyCategory, monthLabel, payrollServiceName, type PayrollService } from "@/modules/finance/rules";
-import { createEntry, generateDues, payDue, saveDueSettings, setDueWaived, voidEntry } from "@/modules/finance/service";
+import { agreementSchema, dueCreateSchema, entrySchema, payDueSchema, payrollSchema, voidSchema, waiveSchema } from "@/lib/validation/finance";
+import { entryDate, formatMoney, isMonthKey, isPayrollOnlyCategory, monthLabel, payrollServiceName, type PaymentMethod, type PayrollService } from "@/modules/finance/rules";
+import { createDue, createEntry, payDue, removeDue, setDueWaived, voidEntry } from "@/modules/finance/service";
 
 const INVALID_DATE = { error: "Revise os campos destacados.", fieldErrors: { occurredOn: ["Data inválida."] } };
 
@@ -152,20 +152,43 @@ export async function voidEntryAction(entryId: string, formData: FormData): Prom
   });
 }
 
-export async function saveDueSettingsAction(formData: FormData): Promise<ActionState> {
+/** Inclui a mensalidade de um diretor no mês exibido, já paga ou em aberto. */
+export async function createDueAction(month: string, formData: FormData): Promise<ActionState> {
   return withPermission("finance:write", async (user) => {
-    const parsed = dueSettingsSchema.safeParse({ amount: field(formData, "amount"), dueDay: field(formData, "dueDay") });
+    if (!isMonthKey(month)) return { error: "Mês inválido." };
+    const parsed = dueCreateSchema.safeParse({
+      directorId: field(formData, "directorId"),
+      amount: field(formData, "amount"),
+      mode: field(formData, "mode"),
+      paidOn: field(formData, "paidOn"),
+      method: field(formData, "method"),
+      dueOn: field(formData, "dueOn"),
+    });
     if (!parsed.success) return zodErrorState(parsed.error);
-    await saveDueSettings(parsed.data.amount, parsed.data.dueDay, user.id);
-    return { ok: true, message: "Configuração salva. Vale para as próximas mensalidades geradas." };
+    const data = parsed.data;
+
+    if (data.mode === "PAID") {
+      const paidOn = entryDate(data.paidOn);
+      if (!paidOn) return { error: "Revise os campos destacados.", fieldErrors: { paidOn: ["Data inválida."] } };
+      if (paidOn.getTime() > Date.now() + 24 * 60 * 60 * 1000) {
+        return { error: "Revise os campos destacados.", fieldErrors: { paidOn: ["A data não pode estar no futuro."] } };
+      }
+      // Já entra paga: o vencimento fica igual à data do pagamento.
+      await createDue({ directorId: data.directorId, month, amountCents: data.amount, dueDate: paidOn, payment: { method: data.method as PaymentMethod, paidOn } }, user.id);
+      return { ok: true, message: `Mensalidade de ${monthLabel(month)} incluída como paga (${formatMoney(data.amount)}).` };
+    }
+
+    const dueDate = saoPauloLocalToUtc(`${data.dueOn}T23:59`);
+    if (!dueDate) return { error: "Revise os campos destacados.", fieldErrors: { dueOn: ["Data inválida."] } };
+    await createDue({ directorId: data.directorId, month, amountCents: data.amount, dueDate, payment: null }, user.id);
+    return { ok: true, message: `Mensalidade de ${monthLabel(month)} incluída em aberto (${formatMoney(data.amount)}).` };
   });
 }
 
-export async function generateDuesAction(month: string): Promise<ActionState> {
+export async function removeDueAction(dueId: string): Promise<ActionState> {
   return withPermission("finance:write", async (user) => {
-    if (!isMonthKey(month)) return { error: "Mês inválido." };
-    const created = await generateDues(month, user.id);
-    return { ok: true, message: created === 0 ? "Todos os jogadores ativos já têm mensalidade neste mês." : `${created} mensalidade(s) gerada(s) para ${monthLabel(month)}.` };
+    await removeDue(dueId, user.id);
+    return { ok: true };
   });
 }
 

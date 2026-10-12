@@ -2,18 +2,34 @@ import type { Metadata } from "next";
 import { ActionButton } from "@/components/ui/action-button";
 import { ActionForm } from "@/components/ui/action-form";
 import { AdminHeading, Panel, ReadOnlyNotice } from "@/components/ui/admin";
+import { ConfirmButton } from "@/components/ui/confirm-button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field } from "@/components/ui/field";
 import { requireFinance } from "@/lib/auth/finance-guard";
 import { can } from "@/lib/auth/permissions";
 import { formatDate, utcToSaoPauloLocal } from "@/lib/datetime";
+import { prisma } from "@/lib/db/prisma";
 import type { SearchParams } from "@/lib/params";
-import { centsToInput, DIRECTOR_STATUS_LABELS, DUE_STATUS_LABELS, dueStatus, monthLabel, PAYMENT_METHODS, PAYMENT_METHOD_LABELS, type DirectorStatus, type DueStatus } from "@/modules/finance/rules";
-import { getDueSettings, listDues } from "@/modules/finance/service";
-import { generateDuesAction, payDueAction, saveDueSettingsAction, unwaiveDueAction, waiveDueAction } from "../actions";
+import {
+  DIRECTOR_ROLE_LABELS,
+  DIRECTOR_STATUS_LABELS,
+  DUE_STATUS_LABELS,
+  dueStatus,
+  membersWithoutDue,
+  monthLabel,
+  PAYMENT_METHODS,
+  PAYMENT_METHOD_LABELS,
+  summarizeDues,
+  type DirectorRole,
+  type DirectorStatus,
+  type DueStatus,
+} from "@/modules/finance/rules";
+import { listDues } from "@/modules/finance/service";
+import { createDueAction, payDueAction, removeDueAction, unwaiveDueAction, waiveDueAction } from "../actions";
 import { MonthNav } from "../finance-nav";
 import { Money } from "../money";
 import { monthFromParams } from "../params";
+import { DueForm } from "./due-form";
 
 export const metadata: Metadata = { title: "Mensalidades" };
 
@@ -22,48 +38,40 @@ const BADGE: Record<DueStatus, string> = { PAID: "badge badge-solid", WAIVED: "b
 export default async function DuesPage({ searchParams }: { searchParams: SearchParams }) {
   const user = await requireFinance();
   const month = monthFromParams(await searchParams);
-  const [dues, settings] = await Promise.all([listDues(month), getDueSettings()]);
+  const [dues, directors] = await Promise.all([listDues(month), prisma.director.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, role: true, status: true } })]);
   const canWrite = can(user.role, "finance:write");
   const today = utcToSaoPauloLocal(new Date()).slice(0, 10);
+  const summary = summarizeDues(dues);
+  const roleLabel = (role: string) => DIRECTOR_ROLE_LABELS[role as DirectorRole] ?? role;
 
-  let paidCents = 0;
-  let pendingCents = 0;
-  for (const due of dues) {
-    const status = dueStatus(due);
-    if (status === "PAID") paidCents += due.amountCents;
-    if (status === "OPEN" || status === "OVERDUE") pendingCents += due.amountCents;
-  }
+  // Cada diretor tem no máximo uma mensalidade por mês: quem já tem sai da lista do formulário.
+  const available = new Set(
+    membersWithoutDue(
+      directors.map((director) => director.id),
+      dues.map((due) => due.directorId),
+    ),
+  );
+  const directorOptions = directors
+    .filter((director) => available.has(director.id))
+    .map((director) => ({
+      id: director.id,
+      label: `${director.name} (${roleLabel(director.role)})${director.status === "ACTIVE" ? "" : ` — ${DIRECTOR_STATUS_LABELS[director.status as DirectorStatus]}`}`,
+    }));
+  // Diretores ativos que ainda não têm mensalidade no mês.
+  const missing = directors.filter((director) => director.status === "ACTIVE" && available.has(director.id));
 
   return (
     <>
-      <AdminHeading title="Mensalidades" description="Mensalidade paga pelos diretores do clube. Os diretores são cadastrados no painel administrativo." />
+      <AdminHeading title="Mensalidades" description="Mensalidade paga pelos diretores do clube. Os diretores vêm do cadastro do painel administrativo, em Diretores." />
       {canWrite ? null : <ReadOnlyNotice />}
       <MonthNav basePath="/financeiro/mensalidades" month={month} />
 
       <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
         <Panel title={`Mensalidades de ${monthLabel(month)}`}>
           {dues.length === 0 ? (
-            <EmptyState
-              title="Nenhuma mensalidade neste mês"
-              description={settings.amountCents === null ? "Defina o valor da mensalidade ao lado e depois gere as cobranças." : "Gere as cobranças para os diretores ativos."}
-            />
+            <EmptyState title="Nenhuma mensalidade neste mês" description="Inclua a mensalidade de cada diretor pelo formulário Nova mensalidade." />
           ) : (
-            <>
-              <p className="mb-4 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-                <span>
-                  Recebido:{" "}
-                  <strong>
-                    <Money cents={paidCents} />
-                  </strong>
-                </span>
-                <span>
-                  A receber:{" "}
-                  <strong>
-                    <Money cents={pendingCents} />
-                  </strong>
-                </span>
-              </p>
-              <ul className="divide-y divide-gray-100">
+            <ul className="divide-y divide-gray-100">
                 {dues.map((due) => {
                   const status = dueStatus(due);
                   return (
@@ -72,7 +80,7 @@ export default async function DuesPage({ searchParams }: { searchParams: SearchP
                         <div>
                           <p className="font-semibold">{due.director.name}</p>
                           <p className="text-sm text-gray-600">
-                            {due.director.role} · {DIRECTOR_STATUS_LABELS[due.director.status as DirectorStatus]}
+                            {roleLabel(due.director.role)} · {DIRECTOR_STATUS_LABELS[due.director.status as DirectorStatus]}
                           </p>
                           <p className="text-sm text-gray-600">
                             <Money cents={due.amountCents} /> · vence em {formatDate(due.dueDate)}
@@ -110,46 +118,69 @@ export default async function DuesPage({ searchParams }: { searchParams: SearchP
                               </Field>
                             </ActionForm>
                           </details>
+                          <ConfirmButton action={removeDueAction.bind(null, due.id)} label="Excluir" confirmMessage={`Excluir a mensalidade de ${monthLabel(month)} de ${due.director.name}?`} />
                         </div>
                       ) : null}
                       {canWrite && status === "WAIVED" ? (
-                        <div className="mt-2">
+                        <div className="mt-2 flex flex-wrap gap-3">
                           <ActionButton action={unwaiveDueAction.bind(null, due.id)} label="Desfazer isenção" />
+                          <ConfirmButton action={removeDueAction.bind(null, due.id)} label="Excluir" confirmMessage={`Excluir a mensalidade de ${monthLabel(month)} de ${due.director.name}?`} />
                         </div>
                       ) : null}
                       {status === "PAID" ? <p className="mt-1 text-xs text-gray-600">Para desfazer, estorne o lançamento correspondente em Lançamentos.</p> : null}
                     </li>
                   );
                 })}
-              </ul>
-            </>
+            </ul>
           )}
         </Panel>
 
-        {canWrite ? (
-          <div className="space-y-6">
-            <Panel title="Gerar cobranças">
-              <p className="mb-4 text-sm text-gray-600">
-                Cria a mensalidade de {monthLabel(month)} para cada diretor com situação Ativo que ainda não tem. Pode ser repetido sem duplicar.
-              </p>
-              {settings.amountCents === null ? (
-                <p className="alert alert-info">Defina o valor da mensalidade abaixo para liberar a geração.</p>
+        <div className="space-y-6">
+          <Panel title={`Resumo de ${monthLabel(month)}`}>
+            <dl className="grid grid-cols-2 gap-4">
+              <div>
+                <dt className="text-sm text-gray-600">Recebido</dt>
+                <dd className="font-display text-xl font-extrabold">
+                  <Money cents={summary.paidCents} />
+                </dd>
+                <dd className="text-sm text-gray-600">
+                  {summary.counts.PAID} paga{summary.counts.PAID !== 1 ? "s" : ""}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-sm text-gray-600">A receber</dt>
+                <dd className="font-display text-xl font-extrabold">
+                  <Money cents={summary.pendingCents} />
+                </dd>
+                <dd className="text-sm text-gray-600">
+                  {summary.counts.OPEN} em aberto · {summary.counts.OVERDUE} atrasada{summary.counts.OVERDUE !== 1 ? "s" : ""}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-sm text-gray-600">Isentas</dt>
+                <dd className="font-display text-xl font-extrabold">{summary.counts.WAIVED}</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-gray-600">Diretores ativos sem mensalidade</dt>
+                <dd className="font-display text-xl font-extrabold">{missing.length}</dd>
+              </div>
+            </dl>
+            {missing.length > 0 ? <p className="mt-4 text-sm text-gray-600">Faltam: {missing.map((director) => director.name).join(", ")}.</p> : null}
+          </Panel>
+
+          {canWrite ? (
+            <Panel title="Nova mensalidade">
+              {directors.length === 0 ? (
+                <p className="text-sm text-gray-600">Nenhum diretor cadastrado. Cadastre os diretores no painel administrativo, em Diretores.</p>
+              ) : directorOptions.length === 0 ? (
+                <p className="text-sm text-gray-600">Todos os diretores cadastrados já têm mensalidade em {monthLabel(month)}.</p>
               ) : (
-                <ActionButton action={generateDuesAction.bind(null, month)} label="Gerar mensalidades do mês" className="btn btn-primary" />
+                // Sugestão de vencimento: dia 10 do mês exibido.
+                <DueForm action={createDueAction.bind(null, month)} monthName={monthLabel(month)} today={today} defaultDueOn={`${month}-10`} directors={directorOptions} />
               )}
             </Panel>
-            <Panel title="Valor e vencimento">
-              <ActionForm action={saveDueSettingsAction} submitLabel="Salvar" className="space-y-4">
-                <Field name="amount" label="Valor da mensalidade (R$)">
-                  <input id="amount" name="amount" className="input" inputMode="decimal" placeholder="0,00" required defaultValue={settings.amountCents === null ? "" : centsToInput(settings.amountCents)} maxLength={16} />
-                </Field>
-                <Field name="dueDay" label="Dia do vencimento" hint="Em meses mais curtos, vale o último dia do mês. Mudanças não alteram mensalidades já geradas.">
-                  <input id="dueDay" name="dueDay" type="number" min={1} max={31} className="input" required defaultValue={settings.dueDay} />
-                </Field>
-              </ActionForm>
-            </Panel>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
     </>
   );
