@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { confirmTexts } from "@/lib/confirm";
 import { MAX_TOASTS, pushToast, subscribeToasts, toast, toastDuration, type ToastItem } from "@/lib/toast";
 
 const item = (id: number, kind: ToastItem["kind"], message: string): ToastItem => ({ id, kind, message, durationMs: 1000 });
@@ -36,5 +37,19 @@ describe("notificações (toasts)", () => {
     unsubscribe();
     toast("success", "Depois de cancelar.");
     expect(received).toHaveLength(1);
+  });
+});
+
+describe("modal de confirmação", () => {
+  it("usa título e aviso de exclusão ou remoção conforme o rótulo do botão", () => {
+    expect(confirmTexts("Excluir")).toEqual({ title: "Confirmar exclusão", success: "Excluído com sucesso." });
+    expect(confirmTexts("Excluir álbum")).toEqual({ title: "Confirmar exclusão", success: "Excluído com sucesso." });
+    expect(confirmTexts("Remover foto")).toEqual({ title: "Confirmar remoção", success: "Removido com sucesso." });
+    expect(confirmTexts("  remover ")).toEqual({ title: "Confirmar remoção", success: "Removido com sucesso." });
+  });
+
+  it("para outras operações usa o próprio rótulo", () => {
+    expect(confirmTexts("Revogar sessões")).toEqual({ title: "Revogar sessões?", success: "Operação concluída." });
+    expect(confirmTexts("")).toEqual({ title: "Confirmar", success: "Operação concluída." });
   });
 });

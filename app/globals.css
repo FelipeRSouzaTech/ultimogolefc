@@ -169,6 +169,16 @@
     box-shadow: var(--glow-danger);
   }
 
+  /* Confirmação de ação destrutiva (botão principal do modal de exclusão). */
+  .btn-danger-solid {
+    background-color: var(--color-danger);
+    border-color: var(--color-danger);
+    color: var(--color-white);
+  }
+  .btn-danger-solid:hover {
+    box-shadow: var(--glow-danger);
+  }
+
   /* Para uso sobre fundo azul-marinho (banner, faixas). */
   .btn-inverse {
     background-color: var(--color-white);
@@ -484,6 +494,54 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .toast {
+      animation: none;
+    }
+  }
+
+  /* Modal de confirmação (<dialog> nativo): caixa centralizada sobre fundo escurecido. */
+  .modal {
+    width: min(28rem, calc(100vw - 2rem));
+    max-width: none;
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--color-gray-100);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-white);
+    color: var(--color-black);
+    box-shadow:
+      0 24px 48px rgb(0 0 0 / 0.25),
+      0 4px 12px rgb(0 0 0 / 0.15);
+    animation: modal-in 160ms ease-out;
+  }
+  .modal::backdrop {
+    background-color: rgb(10 23 48 / 0.6);
+  }
+  .modal-body {
+    padding: 1.5rem;
+  }
+  .modal-icon {
+    display: flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: 1rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background-color: color-mix(in srgb, var(--color-danger) 12%, var(--color-white));
+    color: var(--color-danger);
+  }
+  @keyframes modal-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .modal {
       animation: none;
     }
   }
