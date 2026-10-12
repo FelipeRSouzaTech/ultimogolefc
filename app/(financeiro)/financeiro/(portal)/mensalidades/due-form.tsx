@@ -5,7 +5,7 @@ import { ActionForm, FieldError } from "@/components/ui/action-form";
 import type { FormAction } from "@/lib/action";
 import { DUE_ENTRY_MODES, DUE_ENTRY_MODE_LABELS, PAYMENT_METHODS, PAYMENT_METHOD_LABELS, type DueEntryMode } from "@/modules/finance/rules";
 
-type Props = { action: FormAction; monthName: string; today: string; defaultDueOn: string; directors: { id: string; label: string }[] };
+type Props = { action: FormAction; monthName: string; today: string; defaultDueOn: string; directors: { id: string; label: string; taken: boolean }[] };
 
 /**
  * Inclusão da mensalidade de um diretor no mês exibido. A situação define os campos seguintes:
@@ -33,11 +33,13 @@ export function DueForm({ action, monthName, today, defaultDueOn, directors }: P
           <select id="directorId" name="directorId" className="input" defaultValue="" required>
             <option value="">Selecione</option>
             {directors.map((director) => (
-              <option key={director.id} value={director.id}>
+              <option key={director.id} value={director.id} disabled={director.taken}>
                 {director.label}
+                {director.taken ? " — já incluída neste mês" : ""}
               </option>
             ))}
           </select>
+          {directors.every((director) => director.taken) ? <p className="hint">Todos os diretores já têm mensalidade em {monthName}. Para outro mês, use Anterior e Próximo.</p> : null}
           <FieldError name="directorId" />
         </div>
         <div>
