@@ -215,7 +215,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Decisão**: 500×600 é tamanho **recomendado** (texto de ajuda); o envio não recusa outras medidas — a imagem é recortada para preencher (`object-cover`). Não há redimensionamento no servidor
 - **Não verificado**: tela não foi aberta em navegador; validação = CI do PR
 
-### 12. `claude/equipes` (PR aberto — Claude)
+### 12. `claude/equipes` (PR #15 merged — Claude)
 - **Pedido**: mesmo modelo de cartão em `/equipes`; em `/admin/equipes`, editar as categorias de atletas em uma tela com upload de imagem 500×600
 - **Banco**: migration `20261011233000_team_profile` — model `TeamProfile` (`category AthleteCategory @id`, `name?`, `coverPath?`)
 - **Decisão**: as categorias continuam **fixas** (enum `AthleteCategory`, usado por `Athlete` e `TechnicalStaff`). "Editar" = nome de exibição + imagem do cartão. Criar/excluir categoria exigiria trocar o enum por tabela — não foi feito
@@ -227,6 +227,18 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `app/(public)/futebol/{page,futebol-content}.tsx` — usa os nomes editados e abre já filtrado por `?categoria=`
 - **Pendente**: formulários do painel (Elenco, Comissão Técnica) ainda mostram os nomes padrão de `ATHLETE_CATEGORY_LABELS`
 - **Não verificado**: telas não foram abertas em navegador; validação = CI do PR
+
+### 13. `claude/folha-categorias` (PR aberto — Claude)
+- **Pedido**: em `/financeiro/folha`, categoria selecionável — Jogadores, Comissão técnica (dropdown da comissão) e Outras despesas (tipo de serviço: Fotógrafo, Arbitragem, Transmissão, Outros + campo livre); novo texto de descrição; remover "Total por jogador no mês"
+- **Banco**: migration `20261012001500_folha_categorias` — `FinanceCategory.STAFF_PAYMENT`; `FinanceEntry.technicalStaffId` (FK `TechnicalStaff`, Restrict) e `FinanceEntry.payrollService` (texto)
+- **Mudança**:
+  - `modules/finance/rules.ts` — `PAYROLL_CATEGORIES`, `PAYROLL_SERVICES`/labels, `isPayrollOnlyCategory`, `payrollServiceName`, `payrollRecipientName`; removido `totalsByAthlete`
+  - `lib/validation/finance.ts` — `payrollSchema` com `category` e campo obrigatório conforme a categoria
+  - `modules/finance/service.ts` — `createEntry` aceita `technicalStaffId`/`payrollService`; `listEntries({ payroll: true })`
+  - `app/(financeiro)/financeiro/(portal)/` — `actions.ts` (`createPayrollAction`), `folha/{page,payroll-form}.tsx`, `lancamentos/{page,entry-form}.tsx`, `exportar/route.ts` (colunas Comissão técnica e Tipo de serviço)
+  - `app/(admin)/admin/(painel)/comissao-tecnica/actions.ts` — não exclui membro com pagamentos (orienta inativar)
+- **Decisão**: em "Outras despesas", todos os tipos (inclusive Arbitragem) entram na categoria `OTHER_EXPENSE`, como pedido; a categoria `REFEREE` de Lançamentos continua existindo à parte. A folha lista `PLAYER_PAYMENT`, `STAFF_PAYMENT` e as `OTHER_EXPENSE` com `payrollService` preenchido
+- **Não verificado**: tela não foi aberta em navegador; validação = CI do PR
 
 ## 🎯 Próximas tarefas planejadas
 

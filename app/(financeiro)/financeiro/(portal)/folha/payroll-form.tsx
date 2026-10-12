@@ -3,18 +3,27 @@
 import { useState } from "react";
 import { ActionForm, FieldError } from "@/components/ui/action-form";
 import type { FormAction } from "@/lib/action";
-import { CATEGORY_LABELS, PAYMENT_METHODS, PAYMENT_METHOD_LABELS } from "@/modules/finance/rules";
+import { CATEGORY_LABELS, PAYMENT_METHODS, PAYMENT_METHOD_LABELS, PAYROLL_CATEGORIES, PAYROLL_SERVICES, PAYROLL_SERVICE_LABELS, type PayrollCategory } from "@/modules/finance/rules";
 
 type Option = { id: string; label: string };
 type MatchOption = Option & { competitionId: string };
 
-type Props = { action: FormAction; today: string; athletes: Option[]; competitions: Option[]; matches: MatchOption[] };
+type Props = { action: FormAction; today: string; athletes: Option[]; staff: Option[]; competitions: Option[]; matches: MatchOption[] };
+
+const DESCRIPTION_HINTS: Record<PayrollCategory, string> = {
+  PLAYER_PAYMENT: "Opcional. Em branco, fica \"Pagamento a\" seguido do apelido.",
+  STAFF_PAYMENT: "Opcional. Em branco, fica \"Pagamento a\" seguido do nome.",
+  OTHER_EXPENSE: "Opcional. Em branco, fica o tipo de serviço.",
+};
 
 /**
- * Pagamento a um jogador. Segue o modelo do formulário de despesa, com a categoria fixa em "Jogadores"
- * e os vínculos com o elenco (pelo apelido esportivo), a competição e a partida.
+ * Lançamento da folha. Segue o modelo do formulário de despesa; a categoria define o segundo campo:
+ * Jogadores → jogador do elenco; Comissão técnica → membro da comissão; Outras despesas → tipo de serviço
+ * (em "Outros", um campo livre). Campos das outras categorias não são exibidos nem enviados.
  */
-export function PayrollForm({ action, today, athletes, competitions, matches }: Props) {
+export function PayrollForm({ action, today, athletes, staff, competitions, matches }: Props) {
+  const [category, setCategory] = useState<PayrollCategory>("PLAYER_PAYMENT");
+  const [service, setService] = useState("");
   const [competitionId, setCompetitionId] = useState("");
   // Com uma competição escolhida, só aparecem as partidas dela.
   const visibleMatches = competitionId ? matches.filter((match) => match.competitionId === competitionId) : matches;
@@ -26,27 +35,90 @@ export function PayrollForm({ action, today, athletes, competitions, matches }: 
           <label className="label" htmlFor="category">
             Categoria
           </label>
-          <select id="category" className="input" defaultValue="PLAYER_PAYMENT" disabled aria-describedby="category-hint">
-            <option value="PLAYER_PAYMENT">{CATEGORY_LABELS.PLAYER_PAYMENT}</option>
+          <select
+            id="category"
+            name="category"
+            className="input"
+            value={category}
+            onChange={(event) => {
+              setCategory(event.target.value as PayrollCategory);
+              setService("");
+            }}
+            aria-describedby="category-hint"
+          >
+            {PAYROLL_CATEGORIES.map((option) => (
+              <option key={option} value={option}>
+                {CATEGORY_LABELS[option]}
+              </option>
+            ))}
           </select>
           <p className="hint" id="category-hint">
             Entra no caixa como despesa.
           </p>
+          <FieldError name="category" />
         </div>
-        <div>
-          <label className="label" htmlFor="athleteId">
-            Jogador
-          </label>
-          <select id="athleteId" name="athleteId" className="input" defaultValue="" required>
-            <option value="">Selecione</option>
-            {athletes.map((athlete) => (
-              <option key={athlete.id} value={athlete.id}>
-                {athlete.label}
-              </option>
-            ))}
-          </select>
-          <FieldError name="athleteId" />
-        </div>
+        {category === "PLAYER_PAYMENT" ? (
+          <div>
+            <label className="label" htmlFor="athleteId">
+              Jogador
+            </label>
+            <select id="athleteId" name="athleteId" className="input" defaultValue="" required>
+              <option value="">Selecione</option>
+              {athletes.map((athlete) => (
+                <option key={athlete.id} value={athlete.id}>
+                  {athlete.label}
+                </option>
+              ))}
+            </select>
+            {athletes.length === 0 ? <p className="hint">Nenhum jogador ativo. Cadastre no painel administrativo, em Elenco.</p> : null}
+            <FieldError name="athleteId" />
+          </div>
+        ) : null}
+        {category === "STAFF_PAYMENT" ? (
+          <div>
+            <label className="label" htmlFor="technicalStaffId">
+              Comissão técnica
+            </label>
+            <select id="technicalStaffId" name="technicalStaffId" className="input" defaultValue="" required>
+              <option value="">Selecione</option>
+              {staff.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.label}
+                </option>
+              ))}
+            </select>
+            {staff.length === 0 ? <p className="hint">Nenhum membro ativo. Cadastre no painel administrativo, em Comissão Técnica.</p> : null}
+            <FieldError name="technicalStaffId" />
+          </div>
+        ) : null}
+        {category === "OTHER_EXPENSE" ? (
+          <div>
+            <label className="label" htmlFor="service">
+              Tipo de serviço
+            </label>
+            <select id="service" name="service" className="input" value={service} onChange={(event) => setService(event.target.value)} required>
+              <option value="">Selecione</option>
+              {PAYROLL_SERVICES.map((option) => (
+                <option key={option} value={option}>
+                  {PAYROLL_SERVICE_LABELS[option]}
+                </option>
+              ))}
+            </select>
+            <FieldError name="service" />
+          </div>
+        ) : null}
+        {category === "OTHER_EXPENSE" && service === "OTHER" ? (
+          <div className="sm:col-span-2">
+            <label className="label" htmlFor="serviceOther">
+              Qual serviço?
+            </label>
+            <input id="serviceOther" name="serviceOther" className="input" required minLength={3} maxLength={60} placeholder="Preencha o tipo de serviço" aria-describedby="serviceOther-hint" />
+            <p className="hint" id="serviceOther-hint">
+              Informe o tipo de serviço, por exemplo: Ambulância, Locução, Segurança.
+            </p>
+            <FieldError name="serviceOther" />
+          </div>
+        ) : null}
         <div>
           <label className="label" htmlFor="amount">
             Valor (R$)
@@ -107,7 +179,7 @@ export function PayrollForm({ action, today, athletes, competitions, matches }: 
             Descrição
           </label>
           <input id="description" name="description" className="input" maxLength={160} placeholder="Ex.: Ajuda de custo" />
-          <p className="hint">Opcional. Em branco, fica &quot;Pagamento a&quot; seguido do apelido.</p>
+          <p className="hint">{DESCRIPTION_HINTS[category]}</p>
           <FieldError name="description" />
         </div>
       </div>

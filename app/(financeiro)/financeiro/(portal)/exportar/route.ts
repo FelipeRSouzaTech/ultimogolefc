@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const entries = await listEntries({ month });
 
   const csv = toCsv(
-    ["Data", "Tipo", "Categoria", "Descrição", "Valor (R$)", "Forma", "Jogador", "Campeonato", "Partida", "Acordo", "Situação", "Motivo do estorno", "Lançado por"],
+    ["Data", "Tipo", "Categoria", "Descrição", "Valor (R$)", "Forma", "Jogador", "Comissão técnica", "Tipo de serviço", "Campeonato", "Partida", "Acordo", "Situação", "Motivo do estorno", "Lançado por"],
     entries.map((entry) => [
       formatDate(entry.occurredOn),
       ENTRY_TYPE_LABELS[entry.type as EntryType],
@@ -29,6 +29,8 @@ export async function GET(request: NextRequest) {
       centsToInput(entry.type === "EXPENSE" ? -entry.amountCents : entry.amountCents),
       PAYMENT_METHOD_LABELS[entry.method as PaymentMethod],
       entry.athlete ? entry.athlete.nickname?.trim() || entry.athlete.name : "",
+      entry.technicalStaff ? entry.technicalStaff.nickname?.trim() || entry.technicalStaff.name : "",
+      entry.payrollService ?? "",
       entry.competition?.name ?? "",
       entry.match ? `${entry.match.homeTeam.name} x ${entry.match.awayTeam.name}` : "",
       entry.agreement?.name ?? "",

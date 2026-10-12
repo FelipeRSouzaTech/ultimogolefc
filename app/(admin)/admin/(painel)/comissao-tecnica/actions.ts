@@ -71,6 +71,10 @@ export async function deleteTechnicalStaffAction(id: string): Promise<ActionStat
   return withPermission("football:write", async (user) => {
     const existing = await prisma.technicalStaff.findUnique({ where: { id }, select: { name: true } });
     if (!existing) return { error: "Registro não encontrado." };
+    // Pagamentos da folha ficam ligados ao membro; com histórico, ele não pode ser excluído.
+    if ((await prisma.financeEntry.count({ where: { technicalStaffId: id } })) > 0) {
+      return { error: "Este membro tem pagamentos registrados no financeiro e não pode ser excluído. Mude a situação para Inativo." };
+    }
 
     await prisma.technicalStaff.delete({ where: { id } });
     await audit({ userId: user.id, action: "DELETE", entity: "TechnicalStaff", entityId: id, summary: `Removeu ${existing.name}` });

@@ -121,6 +121,18 @@ export default async function EntriesPage({ searchParams }: { searchParams: Sear
                               {entry.competition ? ` · ${entry.competition.name}` : ""}
                             </p>
                           ) : null}
+                          {entry.technicalStaff ? (
+                            <p className="text-sm text-gray-600">
+                              Comissão técnica: {entry.technicalStaff.nickname?.trim() || entry.technicalStaff.name}
+                              {entry.competition ? ` · ${entry.competition.name}` : ""}
+                            </p>
+                          ) : null}
+                          {entry.payrollService ? (
+                            <p className="text-sm text-gray-600">
+                              Serviço: {entry.payrollService}
+                              {entry.competition ? ` · ${entry.competition.name}` : ""}
+                            </p>
+                          ) : null}
                           {entry.agreement ? <p className="text-sm text-gray-600">Acordo: {entry.agreement.name}</p> : null}
                           {entry.notes ? <p className="text-sm text-gray-600">{entry.notes}</p> : null}
                           {voided ? (

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { can, homePathFor, ROLES } from "@/lib/auth/permissions";
+import { payrollSchema } from "@/lib/validation/finance";
 import {
   membersWithoutDue,
   categoryType,
@@ -18,7 +19,9 @@ import {
   shiftMonth,
   summarize,
   toCsv,
-  totalsByAthlete,
+  isPayrollOnlyCategory,
+  payrollRecipientName,
+  payrollServiceName,
 } from "@/modules/finance/rules";
 
 describe("valores em dinheiro", () => {
@@ -131,21 +134,65 @@ describe("mensalidades", () => {
 });
 
 describe("folha de pagamento", () => {
-  const payment = (athleteId: string | null, amountCents: number, voided = false) => ({ athleteId, amountCents, voidedAt: voided ? new Date() : null });
-
   it("pagamento a jogador é despesa na categoria Jogadores", () => {
     expect(categoryType("PLAYER_PAYMENT")).toBe("EXPENSE");
     const summary = summarize([{ type: "EXPENSE", category: "PLAYER_PAYMENT", amountCents: 15000, voidedAt: null }]);
     expect(summary).toMatchObject({ incomeCents: 0, expenseCents: 15000, balanceCents: -15000 });
   });
 
-  it("soma por jogador, do maior para o menor, sem contar estornos", () => {
-    const totals = totalsByAthlete([payment("a", 10000), payment("b", 30000), payment("a", 5000), payment("a", 99999, true), payment(null, 7000)]);
-    expect(totals).toEqual([
-      { athleteId: "b", totalCents: 30000, count: 1 },
-      { athleteId: "a", totalCents: 15000, count: 2 },
+  it("pagamento à comissão técnica é despesa em categoria própria", () => {
+    expect(categoryType("STAFF_PAYMENT")).toBe("EXPENSE");
+    const summary = summarize([
+      { type: "EXPENSE", category: "STAFF_PAYMENT", amountCents: 8000, voidedAt: null },
+      { type: "EXPENSE", category: "PLAYER_PAYMENT", amountCents: 2000, voidedAt: null },
     ]);
-    expect(totalsByAthlete([])).toEqual([]);
+    expect(summary.expenseCents).toBe(10000);
+    expect(summary.byCategory.map((item) => [item.category, item.totalCents])).toEqual([
+      ["STAFF_PAYMENT", 8000],
+      ["PLAYER_PAYMENT", 2000],
+    ]);
+  });
+
+  it("jogadores e comissão só são lançados pela folha; outras despesas continuam livres", () => {
+    expect(isPayrollOnlyCategory("PLAYER_PAYMENT")).toBe(true);
+    expect(isPayrollOnlyCategory("STAFF_PAYMENT")).toBe(true);
+    expect(isPayrollOnlyCategory("OTHER_EXPENSE")).toBe(false);
+    expect(isPayrollOnlyCategory("REFEREE")).toBe(false);
+  });
+
+  it("grava o tipo de serviço pelo rótulo ou, em Outros, pelo texto digitado", () => {
+    expect(payrollServiceName("PHOTOGRAPHER", null)).toBe("Fotógrafo");
+    expect(payrollServiceName("REFEREE", "ignorado")).toBe("Arbitragem");
+    expect(payrollServiceName("BROADCAST", null)).toBe("Transmissão");
+    expect(payrollServiceName("OTHER", "  Ambulância ")).toBe("Ambulância");
+    expect(payrollServiceName("OTHER", "   ")).toBeNull();
+    expect(payrollServiceName("OTHER", null)).toBeNull();
+  });
+
+  it("mostra quem recebeu conforme a categoria", () => {
+    const base = { payrollService: null, athlete: null, technicalStaff: null };
+    expect(payrollRecipientName({ ...base, category: "PLAYER_PAYMENT", athlete: { name: "Carlos Souza", nickname: "Carlão" } })).toBe("Carlão");
+    expect(payrollRecipientName({ ...base, category: "PLAYER_PAYMENT" })).toBe("Jogador removido");
+    expect(payrollRecipientName({ ...base, category: "STAFF_PAYMENT", technicalStaff: { name: "José Lima", nickname: null } })).toBe("José Lima");
+    expect(payrollRecipientName({ ...base, category: "OTHER_EXPENSE", payrollService: "Fotógrafo" })).toBe("Fotógrafo");
+  });
+
+  it("exige o campo da categoria escolhida", () => {
+    const base = { athleteId: "", technicalStaffId: "", service: "", serviceOther: "", competitionId: "", matchId: "", amount: "100,00", occurredOn: "2026-10-10", method: "PIX", description: "", notes: "" };
+    const fields = (input: Record<string, string>) => {
+      const result = payrollSchema.safeParse(input);
+      return result.success ? [] : result.error.issues.map((issue) => issue.path.join("."));
+    };
+    expect(fields({ ...base, category: "PLAYER_PAYMENT" })).toEqual(["athleteId"]);
+    expect(fields({ ...base, category: "PLAYER_PAYMENT", athleteId: "a1" })).toEqual([]);
+    expect(fields({ ...base, category: "STAFF_PAYMENT", athleteId: "a1" })).toEqual(["technicalStaffId"]);
+    expect(fields({ ...base, category: "STAFF_PAYMENT", technicalStaffId: "t1" })).toEqual([]);
+    expect(fields({ ...base, category: "OTHER_EXPENSE" })).toEqual(["service"]);
+    expect(fields({ ...base, category: "OTHER_EXPENSE", service: "REFEREE" })).toEqual([]);
+    expect(fields({ ...base, category: "OTHER_EXPENSE", service: "OTHER" })).toEqual(["serviceOther"]);
+    expect(fields({ ...base, category: "OTHER_EXPENSE", service: "OTHER", serviceOther: "Ambulância" })).toEqual([]);
+    expect(fields({ ...base, category: "OTHER_EXPENSE", service: "INVENTADO" })).toEqual(["service"]);
+    expect(fields({ ...base, category: "UNIFORM", athleteId: "a1" })).toEqual(["category"]);
   });
 });
 

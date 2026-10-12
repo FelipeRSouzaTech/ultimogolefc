@@ -7,9 +7,9 @@ import { can } from "@/lib/auth/permissions";
 import { formatDate, utcToSaoPauloLocal } from "@/lib/datetime";
 import { prisma } from "@/lib/db/prisma";
 import type { SearchParams } from "@/lib/params";
-import { monthLabel, PAYMENT_METHOD_LABELS, summarize, totalsByAthlete, type PaymentMethod } from "@/modules/finance/rules";
+import { CATEGORY_LABELS, monthLabel, PAYMENT_METHOD_LABELS, payrollRecipientName, summarize, type Category, type PaymentMethod } from "@/modules/finance/rules";
 import { listEntries } from "@/modules/finance/service";
-import { displayName } from "@/modules/squad/rules";
+import { displayName, TECHNICAL_STAFF_ROLE_LABELS, type TechnicalStaffRole } from "@/modules/squad/rules";
 import { createPayrollAction } from "../actions";
 import { MonthNav } from "../finance-nav";
 import { Money } from "../money";
@@ -23,23 +23,25 @@ export default async function PayrollPage({ searchParams }: { searchParams: Sear
   const month = monthFromParams(await searchParams);
   const canWrite = can(user.role, "finance:write");
 
-  const [entries, athletes, competitions, matches] = await Promise.all([
-    listEntries({ month, category: "PLAYER_PAYMENT" }),
+  const [entries, athletes, staff, competitions, matches] = await Promise.all([
+    listEntries({ month, payroll: true }),
     // Inativos continuam na lista de quem recebeu, mas só ativos podem receber novos pagamentos.
     prisma.athlete.findMany({ where: { status: "ACTIVE" }, select: { id: true, name: true, nickname: true, shirtNumber: true } }),
+    prisma.technicalStaff.findMany({ where: { status: "ACTIVE" }, select: { id: true, name: true, nickname: true, role: true } }),
     prisma.competition.findMany({ orderBy: [{ isActive: "desc" }, { name: "asc" }], select: { id: true, name: true } }),
     prisma.match.findMany({ orderBy: { kickoffAt: "desc" }, take: 80, include: { homeTeam: true, awayTeam: true, season: { select: { competitionId: true } } } }),
   ]);
   const total = summarize(entries).expenseCents;
-  const names = new Map(entries.filter((entry) => entry.athlete).map((entry) => [entry.athlete?.id ?? "", entry.athlete ? displayName(entry.athlete) : ""]));
-  const perAthlete = totalsByAthlete(entries);
   const athleteOptions = athletes
     .map((athlete) => ({ id: athlete.id, label: `${displayName(athlete)}${athlete.shirtNumber !== null ? ` (camisa ${athlete.shirtNumber})` : ""}` }))
+    .sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
+  const staffOptions = staff
+    .map((member) => ({ id: member.id, label: `${member.nickname?.trim() || member.name} (${TECHNICAL_STAFF_ROLE_LABELS[member.role as TechnicalStaffRole]})` }))
     .sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
 
   return (
     <>
-      <AdminHeading title="Folha de pagamento" description="Pagamentos feitos aos jogadores. Cada registro entra no caixa como despesa na categoria Jogadores." />
+      <AdminHeading title="Folha de pagamento" description="Pagamentos feitos aos jogadores, à comissão técnica e outras despesas relacionadas às partidas. Cada registro entra no caixa como despesa na categoria selecionada." />
       {canWrite ? null : <ReadOnlyNotice />}
       <MonthNav basePath="/financeiro/folha" month={month} />
 
@@ -47,7 +49,7 @@ export default async function PayrollPage({ searchParams }: { searchParams: Sear
         <div className="space-y-6">
           <Panel title={`Pagamentos de ${monthLabel(month)}`}>
             {entries.length === 0 ? (
-              <EmptyState title="Nenhum pagamento neste mês" description="Os pagamentos registrados aos jogadores aparecerão aqui." />
+              <EmptyState title="Nenhum pagamento neste mês" description="Os pagamentos registrados na folha aparecerão aqui." />
             ) : (
               <>
                 <p className="mb-4 text-sm">
@@ -62,9 +64,9 @@ export default async function PayrollPage({ searchParams }: { searchParams: Sear
                     return (
                       <li key={entry.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
                         <div className="min-w-0">
-                          <p className={`font-semibold ${voided ? "text-gray-600 line-through" : ""}`}>{entry.athlete ? displayName(entry.athlete) : "Jogador removido"}</p>
+                          <p className={`font-semibold ${voided ? "text-gray-600 line-through" : ""}`}>{payrollRecipientName(entry)}</p>
                           <p className="text-sm text-gray-600">
-                            {formatDate(entry.occurredOn)} · {PAYMENT_METHOD_LABELS[entry.method as PaymentMethod]} · {entry.description}
+                            {CATEGORY_LABELS[entry.category as Category]} · {formatDate(entry.occurredOn)} · {PAYMENT_METHOD_LABELS[entry.method as PaymentMethod]} · {entry.description}
                           </p>
                           {entry.competition || entry.match ? (
                             <p className="text-sm text-gray-600">
@@ -96,53 +98,22 @@ export default async function PayrollPage({ searchParams }: { searchParams: Sear
               </>
             )}
           </Panel>
-
-          {perAthlete.length > 0 ? (
-            <Panel title="Total por jogador no mês">
-              <table className="table">
-                <caption className="sr-only">Total pago a cada jogador em {monthLabel(month)}</caption>
-                <thead>
-                  <tr>
-                    <th scope="col" className="text-left">
-                      Jogador
-                    </th>
-                    <th scope="col">Pagamentos</th>
-                    <th scope="col">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {perAthlete.map((item) => (
-                    <tr key={item.athleteId}>
-                      <td className="text-left">{names.get(item.athleteId) ?? "—"}</td>
-                      <td>{item.count}</td>
-                      <td className="font-bold">
-                        <Money cents={item.totalCents} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Panel>
-          ) : null}
         </div>
 
         {canWrite ? (
           <Panel title="Novo pagamento">
-            {athleteOptions.length === 0 ? (
-              <p className="text-sm text-gray-600">Nenhum jogador ativo no elenco. Cadastre os jogadores no painel administrativo, em Elenco.</p>
-            ) : (
-              <PayrollForm
-                action={createPayrollAction}
-                today={utcToSaoPauloLocal(new Date()).slice(0, 10)}
-                athletes={athleteOptions}
-                competitions={competitions.map((competition) => ({ id: competition.id, label: competition.name }))}
-                matches={matches.map((match) => ({
-                  id: match.id,
-                  competitionId: match.season.competitionId,
-                  label: `${formatDate(match.kickoffAt)} · ${match.homeTeam.name} x ${match.awayTeam.name}`,
-                }))}
-              />
-            )}
+            <PayrollForm
+              action={createPayrollAction}
+              today={utcToSaoPauloLocal(new Date()).slice(0, 10)}
+              athletes={athleteOptions}
+              staff={staffOptions}
+              competitions={competitions.map((competition) => ({ id: competition.id, label: competition.name }))}
+              matches={matches.map((match) => ({
+                id: match.id,
+                competitionId: match.season.competitionId,
+                label: `${formatDate(match.kickoffAt)} · ${match.homeTeam.name} x ${match.awayTeam.name}`,
+              }))}
+            />
           </Panel>
         ) : null}
       </div>

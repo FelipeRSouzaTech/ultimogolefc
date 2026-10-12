@@ -3,12 +3,12 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db/prisma";
 import { BusinessError } from "@/lib/action";
 import { dueStatus, entryDate } from "@/modules/finance/rules";
-import { createEntry, type EntryInput, generateDues, getDueSettings, listDues, overallBalance, payDue, saveDueSettings, setDueWaived, voidEntry } from "@/modules/finance/service";
+import { createEntry, type EntryInput, generateDues, getDueSettings, listDues, listEntries, overallBalance, payDue, saveDueSettings, setDueWaived, voidEntry } from "@/modules/finance/service";
 
 // Mês bem antigo, exclusivo deste teste, para não misturar com dados reais do banco de testes.
 const MONTH = "2001-01";
 const run = randomUUID().slice(0, 8);
-const ids = { user: "", directors: [] as string[], athlete: "", competitions: [] as string[], clubs: [] as string[], season: "", match: "" };
+const ids = { user: "", directors: [] as string[], athlete: "", staff: "", competitions: [] as string[], clubs: [] as string[], season: "", match: "" };
 let previous: { amountCents: number | null; dueDay: number };
 const paidOn = entryDate("2001-01-15") ?? new Date();
 
@@ -36,6 +36,8 @@ beforeAll(async () => {
   }
   const athlete = await prisma.athlete.create({ data: { name: `Jogador ${run}`, nickname: `Craque ${run}`, position: "FORWARD" } });
   ids.athlete = athlete.id;
+  const member = await prisma.technicalStaff.create({ data: { name: `Treinador ${run}`, role: "HEAD_COACH" } });
+  ids.staff = member.id;
   for (const letter of ["A", "B"]) {
     const club = await prisma.club.create({ data: { name: `Clube Fin ${letter} ${run}`, slug: `clube-fin-${letter.toLowerCase()}-${run}` } });
     ids.clubs.push(club.id);
@@ -55,6 +57,7 @@ afterAll(async () => {
   await prisma.auditLog.deleteMany({ where: { userId: ids.user } });
   await prisma.director.deleteMany({ where: { id: { in: ids.directors } } });
   await prisma.athlete.deleteMany({ where: { id: ids.athlete } });
+  await prisma.technicalStaff.deleteMany({ where: { id: ids.staff } });
   await prisma.match.deleteMany({ where: { id: ids.match } });
   await prisma.season.deleteMany({ where: { id: ids.season } });
   await prisma.competition.deleteMany({ where: { id: { in: ids.competitions } } });
@@ -162,6 +165,33 @@ describe("folha de pagamento no banco", () => {
     const error = await rejects(() => prisma.$transaction((tx) => createEntry(payment({ competitionId: ids.competitions[1] ?? null }), ids.user, tx)));
     expect(error instanceof BusinessError).toBe(true);
     expect(await prisma.financeEntry.count({ where: { createdById: ids.user } })).toBe(count);
+  });
+
+  it("registra pagamento à comissão técnica e outra despesa com tipo de serviço, e a folha lista só o que é dela", async () => {
+    const staffPayment = await prisma.$transaction((tx) =>
+      createEntry(payment({ category: "STAFF_PAYMENT", athleteId: null, technicalStaffId: ids.staff, amountCents: 30000 }), ids.user, tx),
+    );
+    const service = await prisma.$transaction((tx) =>
+      createEntry(payment({ category: "OTHER_EXPENSE", athleteId: null, payrollService: "Fotógrafo", amountCents: 15000 }), ids.user, tx),
+    );
+    // Despesa comum lançada em Lançamentos: mesma categoria, mas sem tipo de serviço — não é da folha.
+    const common = await prisma.$transaction((tx) =>
+      createEntry(payment({ category: "OTHER_EXPENSE", athleteId: null, matchId: null, competitionId: null, amountCents: 999 }), ids.user, tx),
+    );
+
+    const stored = await prisma.financeEntry.findUnique({ where: { id: staffPayment.id }, include: { technicalStaff: true } });
+    expect(stored).toMatchObject({ type: "EXPENSE", category: "STAFF_PAYMENT", athleteId: null });
+    expect(stored?.technicalStaff?.name).toBe(`Treinador ${run}`);
+
+    const listed = (await listEntries({ month: MONTH, payroll: true })).map((entry) => entry.id);
+    expect(listed.includes(staffPayment.id)).toBe(true);
+    expect(listed.includes(service.id)).toBe(true);
+    expect(listed.includes(common.id)).toBe(false);
+  });
+
+  it("recusa membro da comissão inexistente", async () => {
+    const error = await rejects(() => prisma.$transaction((tx) => createEntry(payment({ category: "STAFF_PAYMENT", athleteId: null, technicalStaffId: "membro-inexistente" }), ids.user, tx)));
+    expect(error instanceof BusinessError).toBe(true);
   });
 
   it("recusa jogador inexistente", async () => {
