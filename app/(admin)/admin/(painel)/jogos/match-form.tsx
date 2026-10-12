@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ActionForm, FieldError } from "@/components/ui/action-form";
 import type { FormAction } from "@/lib/action";
 import { MATCH_STATUSES, MATCH_STATUS_LABELS, type MatchStatus } from "@/modules/matches/rules";
+import { ATHLETE_CATEGORIES, ATHLETE_CATEGORY_LABELS, type AthleteCategory } from "@/modules/squad/rules";
 
 export type SeasonOption = { id: string; label: string; clubs: { id: string; name: string }[] };
 
@@ -14,15 +15,16 @@ export type MatchFormValues = {
   kickoffLocal: string;
   venue: string;
   round: string;
+  category: AthleteCategory;
   status: MatchStatus;
   homeScore: string;
   awayScore: string;
   notes: string;
 };
 
-type Props = { action: FormAction; seasons: SeasonOption[]; values?: MatchFormValues };
+type Props = { action: FormAction; seasons: SeasonOption[]; values?: MatchFormValues; categoryLabels?: Record<AthleteCategory, string> };
 
-export function MatchForm({ action, seasons, values }: Props) {
+export function MatchForm({ action, seasons, values, categoryLabels = ATHLETE_CATEGORY_LABELS }: Props) {
   const [seasonId, setSeasonId] = useState(values?.seasonId ?? seasons[0]?.id ?? "");
   const [status, setStatus] = useState<MatchStatus>(values?.status ?? "SCHEDULED");
   const clubs = seasons.find((season) => season.id === seasonId)?.clubs ?? [];
@@ -99,6 +101,20 @@ export function MatchForm({ action, seasons, values }: Props) {
           </label>
           <input id="round" name="round" className="input" defaultValue={values?.round} maxLength={40} placeholder="Ex.: 3ª rodada" />
           <FieldError name="round" />
+        </div>
+        <div>
+          <label className="label" htmlFor="category">
+            Categoria
+          </label>
+          <select id="category" name="category" className="input" defaultValue={values?.category ?? "ADULT"}>
+            {ATHLETE_CATEGORIES.map((item) => (
+              <option key={item} value={item}>
+                {categoryLabels[item]}
+              </option>
+            ))}
+          </select>
+          <p className="hint">Aparece na etiqueta do cartão do jogo na página inicial.</p>
+          <FieldError name="category" />
         </div>
         <div>
           <label className="label" htmlFor="status">

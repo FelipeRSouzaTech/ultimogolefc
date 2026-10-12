@@ -274,7 +274,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Alcance**: todos os usos de `<ConfirmButton>` (clubes, campeonatos, temporadas, jogos e lances, elenco, comissão técnica, diretores, patrocinadores, notícias e categorias, galeria e fotos, mídia, mensagens, mensalidades, revogar sessões). **Não usar `window.confirm` em telas novas**
 - **Não verificado**: não foi aberto em navegador; validação = CI do PR
 
-### 17. `claude/responsivo` (PR aberto — Claude)
+### 17. `claude/responsivo` (PR #21 merged — Claude)
 - **Pedido**: melhorar a responsividade; componentes distorcendo no celular (Poco X7 Pro, ~393 px de largura)
 - **Como foi avaliado**: as páginas foram renderizadas fora do Next (React SSR com banco falso e Tailwind compilado localmente) e fotografadas no Chromium em 320, 360, 393, 412, 768 e 1280 px, com detecção automática de rolagem lateral. Não é o app rodando de verdade (sem banco real nem interação)
 - **Causas encontradas e correções**:
@@ -288,6 +288,17 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - Formulários do financeiro na coluna lateral ficam em 1 coluna em `xl` (2 colunas em `2xl`)
   - Card de jogo: espaço antes da vírgula na data
 - **Não verificado**: interação real no aparelho (abrir menus, teclado virtual); validação = CI do PR + teste do usuário no celular
+
+### 18. `claude/home-countdown` (PR aberto — Claude)
+- **Pedido**: na home, contagem regressiva do jogo mais próximo (cores do projeto) e "Próximos jogos" com os 4 próximos, etiqueta com a categoria (ex.: Principal / Adulto) no lugar de "Masculino"; "Ver todos" continua em `/jogos`
+- **Banco**: migration `20261012220000_match_category` — `Match.category AthleteCategory @default(ADULT)` (partidas antigas ficam como Principal / Adulto)
+- **Mudança**:
+  - `modules/matches/rules.ts` — `countdownParts(alvo, agora)` (testes em `tests/unit/matches.test.ts`)
+  - `modules/matches/service.ts` — `nextMatches(clubId | null, 4)` (substitui `nextOwnMatch`); `saveMatch` grava `category` e a auditoria inclui o campo
+  - `components/football/match-countdown.tsx` (cliente, atualiza a cada segundo; mostra "--" até montar) e `components/football/upcoming-match.tsx` (`CountdownBar`, `UpcomingMatchCard`)
+  - `app/(public)/page.tsx` — faixa da contagem acima do banner; seção "Próximos jogos" (4 cartões; no celular deslizam de lado)
+  - Painel de jogos: campo **Categoria** no formulário (`match-form.tsx`, `actions.ts`, `jogos/data.ts` → `loadCategoryLabels` com os nomes editados em Equipes)
+- **Não verificado**: contagem rodando no navegador (a renderização local não executa o JavaScript do cliente); validação = CI do PR
 
 ## 🎯 Próximas tarefas planejadas
 

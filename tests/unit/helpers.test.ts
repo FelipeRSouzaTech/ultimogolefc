@@ -72,6 +72,7 @@ describe("validação de futebol", () => {
       kickoffAt: "2026-10-09T15:30",
       venue: "",
       round: "",
+      category: "ADULT",
       status: "SCHEDULED",
       notes: "",
     };
@@ -82,6 +83,7 @@ describe("validação de futebol", () => {
     expect(filled.success).toBe(true);
     if (filled.success) expect([filled.data.homeScore, filled.data.awayScore]).toEqual([0, 12]);
     expect(matchSchema.safeParse({ ...base, homeScore: "-1", awayScore: "0" }).success).toBe(false);
+    expect(matchSchema.safeParse({ ...base, category: "SUB_99", homeScore: "", awayScore: "" }).success).toBe(false);
     expect(matchSchema.safeParse({ ...base, homeScore: "abc", awayScore: "0" }).success).toBe(false);
   });
 

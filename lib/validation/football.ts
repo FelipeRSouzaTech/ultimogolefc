@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TIEBREAKERS } from "@/modules/competitions/standings";
 import { EVENT_TYPES } from "@/modules/matches/events";
 import { MATCH_STATUSES } from "@/modules/matches/rules";
+import { ATHLETE_CATEGORIES } from "@/modules/squad/rules";
 
 const optionalText = (max: number, message: string) =>
   z
@@ -62,6 +63,7 @@ export const matchSchema = z.object({
   kickoffAt: z.string().trim().min(1, "Informe data e horário."),
   venue: optionalText(120, "Local muito longo."),
   round: optionalText(40, "Rodada muito longa."),
+  category: z.enum(ATHLETE_CATEGORIES, { errorMap: () => ({ message: "Selecione a categoria." }) }),
   status: z.enum(MATCH_STATUSES, { errorMap: () => ({ message: "Selecione um status válido." }) }),
   homeScore: score,
   awayScore: score,

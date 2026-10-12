@@ -21,6 +21,7 @@ const input = (overrides: Partial<MatchSaveInput> = {}): MatchSaveInput => ({
   awayScore: 0,
   venue: null,
   round: null,
+  category: "ADULT",
   notes: null,
   ...overrides,
 });

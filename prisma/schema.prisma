@@ -379,6 +379,8 @@ model Match {
   kickoffAt  DateTime    @db.Timestamptz(3)
   venue      String?
   round      String?
+  /// Categoria do nosso time nesta partida (Principal / Adulto, Sub-17…), exibida nos cartões de jogo.
+  category   AthleteCategory @default(ADULT)
   status     MatchStatus @default(SCHEDULED)
   homeScore  Int?
   awayScore  Int?
