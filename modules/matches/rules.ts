@@ -88,3 +88,19 @@ export function outcomeFor(
   if (own < other) return "LOSS";
   return "DRAW";
 }
+
+// ---------- Contagem regressiva ----------
+
+export type Countdown = { days: number; hours: number; minutes: number; seconds: number; started: boolean };
+
+/** Tempo que falta até o início da partida, em partes inteiras. Depois do horário, tudo zero e started = true. */
+export function countdownParts(targetMs: number, nowMs: number): Countdown {
+  const total = Math.max(0, Math.floor((targetMs - nowMs) / 1000));
+  return {
+    days: Math.floor(total / 86400),
+    hours: Math.floor((total % 86400) / 3600),
+    minutes: Math.floor((total % 3600) / 60),
+    seconds: total % 60,
+    started: targetMs <= nowMs,
+  };
+}

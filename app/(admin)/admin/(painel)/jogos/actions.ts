@@ -18,6 +18,7 @@ export async function saveMatchAction(id: string | null, formData: FormData): Pr
       kickoffAt: field(formData, "kickoffAt"),
       venue: field(formData, "venue"),
       round: field(formData, "round"),
+      category: field(formData, "category"),
       status: field(formData, "status"),
       homeScore: field(formData, "homeScore"),
       awayScore: field(formData, "awayScore"),

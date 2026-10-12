@@ -1,18 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
-import { MatchCard, ResultCard } from "@/components/football/match-card";
+import { ResultCard } from "@/components/football/match-card";
 import { StandingsTable } from "@/components/football/standings-table";
+import { CountdownBar, UpcomingMatchCard } from "@/components/football/upcoming-match";
 import { NewsCard } from "@/components/news/news-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SmartImage } from "@/components/ui/smart-image";
 import { CREST_PATH, SITE_NAME } from "@/lib/site";
 import { getFeaturedSeason, getSeasonStandings } from "@/modules/competitions/service";
-import { getOwnClub, lastOwnResults, nextOwnMatch } from "@/modules/matches/service";
+import { getOwnClub, lastOwnResults, nextMatches } from "@/modules/matches/service";
 import { latestPublicNews } from "@/modules/news/service";
 import { getSettings } from "@/modules/site/service";
 import { isExternalUrl, isSafeUrl } from "@/modules/site/settings";
 import { listVisibleSponsors } from "@/modules/sponsors/service";
 import { groupByTier } from "@/modules/sponsors/rules";
+import { prisma } from "@/lib/db/prisma";
+import { resolveCategoryLabels, type AthleteCategory } from "@/modules/squad/rules";
 
 export default async function HomePage() {
   const [ownClub, news, featuredSeason, settings, sponsors] = await Promise.all([
@@ -30,15 +33,20 @@ export default async function HomePage() {
   const bannerLinkUrl = settings["home.bannerLinkUrl"] ?? "";
   const bannerImagePath = settings["home.bannerImagePath"] ?? "";
   const hasBannerLink = bannerLinkLabel !== "" && bannerLinkUrl !== "" && isSafeUrl(bannerLinkUrl);
-  const [nextMatch, results, standings] = await Promise.all([
-    ownClub ? nextOwnMatch(ownClub.id) : null,
+  const [upcoming, results, standings, teamProfiles] = await Promise.all([
+    // As 4 partidas mais próximas; a primeira alimenta a contagem regressiva.
+    nextMatches(ownClub?.id ?? null, 4),
     ownClub ? lastOwnResults(ownClub.id) : [],
     featuredSeason ? getSeasonStandings(featuredSeason.id) : null,
+    prisma.teamProfile.findMany({ select: { category: true, name: true } }),
   ]);
+  const categoryLabels = resolveCategoryLabels(teamProfiles);
+  const nextMatch = upcoming[0] ?? null;
   const [mainNews, ...otherNews] = news;
 
   return (
     <>
+      {nextMatch ? <CountdownBar match={nextMatch} /> : null}
       <section className="relative overflow-hidden border-b border-gray-100 bg-primary text-white">
         {bannerImagePath ? (
           <>
@@ -78,17 +86,24 @@ export default async function HomePage() {
       </section>
 
       <div className="container-page space-y-14 py-12">
-        <section aria-labelledby="proximo-jogo">
+        <section aria-labelledby="proximos-jogos">
           <div className="mb-5 flex items-center justify-between gap-4">
-            <h2 id="proximo-jogo" className="section-title">
-              Próximo jogo
+            <h2 id="proximos-jogos" className="section-title">
+              Próximos jogos
             </h2>
             <Link href="/jogos" className="link text-sm">
               Ver todos
             </Link>
           </div>
-          {nextMatch ? (
-            <MatchCard match={nextMatch} />
+          {upcoming.length > 0 ? (
+            // No celular os cartões deslizam de lado; a partir de telas médias, grade de 2 e depois 4 colunas.
+            <ul className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4">
+              {upcoming.map((match) => (
+                <li key={match.id} className="w-[78%] shrink-0 snap-start sm:w-auto">
+                  <UpcomingMatchCard match={match} categoryLabel={categoryLabels[match.category as AthleteCategory] ?? categoryLabels.ADULT} />
+                </li>
+              ))}
+            </ul>
           ) : (
             <EmptyState title="Nenhum jogo agendado" description="Assim que a próxima partida for confirmada, ela aparecerá aqui." />
           )}

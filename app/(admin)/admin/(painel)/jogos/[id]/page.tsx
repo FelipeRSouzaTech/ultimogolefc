@@ -10,8 +10,9 @@ import { prisma } from "@/lib/db/prisma";
 import { MATCH_STATUS_LABELS, type MatchStatus } from "@/modules/matches/rules";
 import { getMatch } from "@/modules/matches/service";
 import { deleteMatchAction, saveMatchAction } from "../actions";
-import { loadSeasonOptions } from "../data";
+import { loadCategoryLabels, loadSeasonOptions } from "../data";
 import { MatchForm } from "../match-form";
+import type { AthleteCategory } from "@/modules/squad/rules";
 import { MatchDetails } from "./match-details";
 
 export const metadata: Metadata = { title: "Editar partida" };
@@ -32,8 +33,9 @@ export default async function EditMatchPage({ params }: { params: Promise<{ id: 
   const match = await getMatch(id);
   if (!match) notFound();
 
-  const [seasons, history] = await Promise.all([
+  const [seasons, categoryLabels, history] = await Promise.all([
     loadSeasonOptions(),
+    loadCategoryLabels(),
     prisma.auditLog.findMany({ where: { entity: "Match", entityId: id }, orderBy: { createdAt: "desc" }, take: 30, include: { user: { select: { name: true } } } }),
   ]);
   const canWrite = can(user.role, "football:write");
@@ -59,6 +61,7 @@ export default async function EditMatchPage({ params }: { params: Promise<{ id: 
             <MatchForm
               action={saveMatchAction.bind(null, match.id)}
               seasons={seasons}
+              categoryLabels={categoryLabels}
               values={{
                 seasonId: match.seasonId,
                 homeTeamId: match.homeTeamId,
@@ -66,6 +69,7 @@ export default async function EditMatchPage({ params }: { params: Promise<{ id: 
                 kickoffLocal: utcToSaoPauloLocal(match.kickoffAt),
                 venue: match.venue ?? "",
                 round: match.round ?? "",
+                category: match.category as AthleteCategory,
                 status: match.status as MatchStatus,
                 homeScore: match.homeScore?.toString() ?? "",
                 awayScore: match.awayScore?.toString() ?? "",

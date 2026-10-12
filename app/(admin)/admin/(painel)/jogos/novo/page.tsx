@@ -4,14 +4,14 @@ import { AdminHeading, Panel } from "@/components/ui/admin";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requirePagePermission } from "@/lib/auth/guard";
 import { saveMatchAction } from "../actions";
-import { loadSeasonOptions } from "../data";
+import { loadCategoryLabels, loadSeasonOptions } from "../data";
 import { MatchForm } from "../match-form";
 
 export const metadata: Metadata = { title: "Nova partida" };
 
 export default async function NewMatchPage() {
   await requirePagePermission("football:write");
-  const seasons = await loadSeasonOptions();
+  const [seasons, categoryLabels] = await Promise.all([loadSeasonOptions(), loadCategoryLabels()]);
 
   return (
     <>
@@ -28,7 +28,7 @@ export default async function NewMatchPage() {
         </EmptyState>
       ) : (
         <Panel className="max-w-3xl">
-          <MatchForm action={saveMatchAction.bind(null, null)} seasons={seasons} />
+          <MatchForm action={saveMatchAction.bind(null, null)} seasons={seasons} categoryLabels={categoryLabels} />
         </Panel>
       )}
     </>

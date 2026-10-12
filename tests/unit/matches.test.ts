@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { outcomeFor, validateMatch, type MatchInput } from "@/modules/matches/rules";
+import { countdownParts, outcomeFor, validateMatch, type MatchInput } from "@/modules/matches/rules";
 
 const now = new Date("2026-10-09T15:00:00Z");
 const participants = ["a", "b", "c"];
@@ -81,5 +81,19 @@ describe("outcomeFor", () => {
     expect(outcomeFor("a", { ...match, homeScore: null, awayScore: null })).toBeNull();
     expect(outcomeFor("a", { ...match, status: "SCHEDULED" })).toBeNull();
     expect(outcomeFor("c", match)).toBeNull();
+  });
+});
+
+describe("contagem regressiva do próximo jogo", () => {
+  const now = Date.UTC(2026, 9, 12, 12, 0, 0);
+  it("separa dias, horas, minutos e segundos", () => {
+    const target = now + ((4 * 24 + 1) * 3600 + 3 * 60 + 6) * 1000;
+    expect(countdownParts(target, now)).toEqual({ days: 4, hours: 1, minutes: 3, seconds: 6, started: false });
+    expect(countdownParts(now + 59_999, now)).toEqual({ days: 0, hours: 0, minutes: 0, seconds: 59, started: false });
+  });
+
+  it("depois do horário fica zerada e indica que começou", () => {
+    expect(countdownParts(now, now)).toEqual({ days: 0, hours: 0, minutes: 0, seconds: 0, started: true });
+    expect(countdownParts(now - 5000, now)).toEqual({ days: 0, hours: 0, minutes: 0, seconds: 0, started: true });
   });
 });

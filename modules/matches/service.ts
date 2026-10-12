@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { BusinessError } from "@/lib/action";
 import { audit } from "@/lib/audit";
+import type { AthleteCategory } from "@/modules/squad/rules";
 import { validateMatch, type MatchInput, type MatchStatus } from "./rules";
 
 export const matchInclude = {
@@ -57,15 +58,17 @@ export async function getOwnClub() {
   return prisma.club.findFirst({ where: { isOwnClub: true } });
 }
 
-export async function nextOwnMatch(clubId: string) {
-  return prisma.match.findFirst({
+/** Próximas partidas (agendadas ou em andamento), da mais próxima para a mais distante. Com o nosso clube definido, só as dele. */
+export async function nextMatches(clubId: string | null, take = 4) {
+  return prisma.match.findMany({
     where: {
       status: { in: ["SCHEDULED", "LIVE"] },
       kickoffAt: { gte: new Date(Date.now() - 3 * 60 * 60 * 1000) },
-      OR: [{ homeTeamId: clubId }, { awayTeamId: clubId }],
+      ...(clubId ? { OR: [{ homeTeamId: clubId }, { awayTeamId: clubId }] } : {}),
     },
     include: matchInclude,
     orderBy: { kickoffAt: "asc" },
+    take,
   });
 }
 
@@ -85,6 +88,7 @@ export async function lastOwnResults(clubId: string, take = 3) {
 
 export type MatchSaveInput = MatchInput & {
   seasonId: string;
+  category: AthleteCategory;
   venue: string | null;
   round: string | null;
   notes: string | null;
@@ -100,6 +104,7 @@ const snapshot = (match: {
   awayScore: number | null;
   venue: string | null;
   round: string | null;
+  category: string;
 }) => ({
   seasonId: match.seasonId,
   homeTeamId: match.homeTeamId,
@@ -110,6 +115,7 @@ const snapshot = (match: {
   awayScore: match.awayScore,
   venue: match.venue,
   round: match.round,
+  category: match.category,
 });
 
 export class MatchValidationError extends Error {
@@ -145,6 +151,7 @@ export async function saveMatch(input: MatchSaveInput, userId: string, matchId?:
       awayScore: checked.value.awayScore,
       venue: input.venue,
       round: input.round,
+      category: input.category,
       notes: input.notes,
     };
 
