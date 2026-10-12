@@ -240,7 +240,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Decisão**: em "Outras despesas", todos os tipos (inclusive Arbitragem) entram na categoria `OTHER_EXPENSE`, como pedido; a categoria `REFEREE` de Lançamentos continua existindo à parte. A folha lista `PLAYER_PAYMENT`, `STAFF_PAYMENT` e as `OTHER_EXPENSE` com `payrollService` preenchido
 - **Não verificado**: tela não foi aberta em navegador; validação = CI do PR
 
-### 14. `claude/mensalidades-form` (PR aberto — Claude)
+### 14. `claude/mensalidades-form` (PR #17 merged — Claude)
 - **Pedido**: mudar a inclusão de mensalidades em `/financeiro/mensalidades` — formulário de inclusão, manter a navegação por mês, resumo do mês, usando os diretores de `/admin/diretores`
 - **Sem migration** (usa `MembershipDue` como está: uma por diretor e mês)
 - **Mudança**:
@@ -249,6 +249,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `lib/validation/finance.ts` — `dueCreateSchema`; removido `dueSettingsSchema`
   - `app/(financeiro)/financeiro/(portal)/actions.ts` — `createDueAction(month)`, `removeDueAction`; removidos `generateDuesAction` e `saveDueSettingsAction`
   - `app/(financeiro)/financeiro/(portal)/mensalidades/{page,due-form}.tsx` — painéis "Resumo de <mês>" e "Nova mensalidade"; saíram "Gerar cobranças" e "Valor e vencimento"
+- **Ajuste (`claude/mensalidades-ajuste`)**: o formulário "Nova mensalidade" passa a aparecer sempre; diretor que já tem mensalidade no mês fica desabilitado no dropdown (antes o formulário sumia quando todos já tinham, p. ex. após o antigo "Gerar cobranças")
 - **Atenção**: `generateDues`, `getDueSettings` e `saveDueSettings` continuam em `service.ts` (cobertos por testes de integração), mas **sem tela**; remover ou reaproveitar se a geração em lote voltar
 - **Não verificado**: tela não foi aberta em navegador; validação = CI do PR
 
@@ -289,5 +290,6 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Build/test**: `npm run build`, `npm run typecheck`, `npm run lint` — todos passando
 - **Tudo de uma vez**: `npm run check` (lint + tipos + testes + build). Testes com banco: `npm run test:integration`, com `TEST_DATABASE_URL` apontando para um banco exclusivo de testes
 - **Primeiro administrador**: `npm run admin:create` (nenhuma senha fica no código nem no seed)
+- **Depois de merge com migration** (`prisma/migrations/` mudou): rodar `npm run db:migrate` e reiniciar o `npm run dev`; sem isso as telas que leem a tabela alterada quebram (ex.: financeiro após o PR #16)
 - **Lint**: aspas dentro de texto JSX quebram o build (`react/no-unescaped-entities`); use `&quot;` ou reescreva a frase
 - **Um agente por branch**: não altere o branch de outro agente; se precisar do trabalho dele, espere o merge e atualize a partir da `main`

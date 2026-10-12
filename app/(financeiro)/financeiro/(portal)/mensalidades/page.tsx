@@ -44,19 +44,19 @@ export default async function DuesPage({ searchParams }: { searchParams: SearchP
   const summary = summarizeDues(dues);
   const roleLabel = (role: string) => DIRECTOR_ROLE_LABELS[role as DirectorRole] ?? role;
 
-  // Cada diretor tem no máximo uma mensalidade por mês: quem já tem sai da lista do formulário.
+  // Cada diretor tem no máximo uma mensalidade por mês.
   const available = new Set(
     membersWithoutDue(
       directors.map((director) => director.id),
       dues.map((due) => due.directorId),
     ),
   );
-  const directorOptions = directors
-    .filter((director) => available.has(director.id))
-    .map((director) => ({
-      id: director.id,
-      label: `${director.name} (${roleLabel(director.role)})${director.status === "ACTIVE" ? "" : ` — ${DIRECTOR_STATUS_LABELS[director.status as DirectorStatus]}`}`,
-    }));
+  // Todos os diretores aparecem no formulário; quem já tem mensalidade no mês fica desabilitado, com o motivo.
+  const directorOptions = directors.map((director) => ({
+    id: director.id,
+    label: `${director.name} (${roleLabel(director.role)})${director.status === "ACTIVE" ? "" : ` — ${DIRECTOR_STATUS_LABELS[director.status as DirectorStatus]}`}`,
+    taken: !available.has(director.id),
+  }));
   // Diretores ativos que ainda não têm mensalidade no mês.
   const missing = directors.filter((director) => director.status === "ACTIVE" && available.has(director.id));
 
@@ -172,8 +172,6 @@ export default async function DuesPage({ searchParams }: { searchParams: SearchP
             <Panel title="Nova mensalidade">
               {directors.length === 0 ? (
                 <p className="text-sm text-gray-600">Nenhum diretor cadastrado. Cadastre os diretores no painel administrativo, em Diretores.</p>
-              ) : directorOptions.length === 0 ? (
-                <p className="text-sm text-gray-600">Todos os diretores cadastrados já têm mensalidade em {monthLabel(month)}.</p>
               ) : (
                 // Sugestão de vencimento: dia 10 do mês exibido.
                 <DueForm action={createDueAction.bind(null, month)} monthName={monthLabel(month)} today={today} defaultDueOn={`${month}-10`} directors={directorOptions} />
