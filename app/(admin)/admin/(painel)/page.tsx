@@ -1,3 +1,4 @@
+import { FlashToast } from "@/components/ui/toaster";
 import Link from "next/link";
 import { AdminHeading, Panel } from "@/components/ui/admin";
 import { requirePagePermission } from "@/lib/auth/guard";
@@ -41,11 +42,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   return (
     <>
       <AdminHeading title="Visão geral" description="Resumo do conteúdo do portal." />
-      {denied ? (
-        <p className="alert alert-error mb-6" role="alert">
-          Você não tem permissão para acessar a área solicitada.
-        </p>
-      ) : null}
+      {denied ? <FlashToast kind="error" message="Você não tem permissão para acessar a área solicitada." /> : null}
 
       <ul className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {stats.map((item) => (

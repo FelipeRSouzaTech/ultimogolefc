@@ -240,7 +240,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Decisão**: em "Outras despesas", todos os tipos (inclusive Arbitragem) entram na categoria `OTHER_EXPENSE`, como pedido; a categoria `REFEREE` de Lançamentos continua existindo à parte. A folha lista `PLAYER_PAYMENT`, `STAFF_PAYMENT` e as `OTHER_EXPENSE` com `payrollService` preenchido
 - **Não verificado**: tela não foi aberta em navegador; validação = CI do PR
 
-### 14. `claude/mensalidades-form` (PR aberto — Claude)
+### 14. `claude/mensalidades-form` (PR #17 merged — Claude)
 - **Pedido**: mudar a inclusão de mensalidades em `/financeiro/mensalidades` — formulário de inclusão, manter a navegação por mês, resumo do mês, usando os diretores de `/admin/diretores`
 - **Sem migration** (usa `MembershipDue` como está: uma por diretor e mês)
 - **Mudança**:
@@ -251,6 +251,18 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `app/(financeiro)/financeiro/(portal)/mensalidades/{page,due-form}.tsx` — painéis "Resumo de <mês>" e "Nova mensalidade"; saíram "Gerar cobranças" e "Valor e vencimento"
 - **Atenção**: `generateDues`, `getDueSettings` e `saveDueSettings` continuam em `service.ts` (cobertos por testes de integração), mas **sem tela**; remover ou reaproveitar se a geração em lote voltar
 - **Não verificado**: tela não foi aberta em navegador; validação = CI do PR
+
+### 15. `claude/toasts` (PR aberto — Claude)
+- **Pedido**: todos os alertas como notificação moderna tipo "toast" no canto da tela (referência com sucesso, erro, atenção e informação)
+- **Como usar**: `import { toast } from "@/lib/toast"` → `toast("success" | "error" | "warning" | "info", mensagem)` em componente cliente; em página de servidor, `<FlashToast kind message />` (`components/ui/toaster.tsx`). **Não criar novos `<p className="alert …">` para resultado de ação**
+- **Mudança**:
+  - `lib/toast.ts` — fila pura (`toast`, `subscribeToasts`, `pushToast`, `toastDuration`); testes em `tests/unit/toast.test.ts`
+  - `components/ui/toaster.tsx` — `<Toaster />` (montado em `app/layout.tsx`) e `<FlashToast />`
+  - `components/ui/{action-form,action-button,confirm-button,image-field}.tsx` e `components/news/share-link.tsx` — resultado de ação vira toast; erros por campo (`FieldError`) continuam ao lado do campo
+  - `app/globals.css` — tokens `--color-success` e `--color-warning` (só para notificações) e classes `.toast*`
+  - `app/(admin)/admin/(painel)/page.tsx` — "acesso negado" vira toast
+- **Mantidos como aviso fixo na página** (estado permanente, não resultado de ação): `ReadOnlyNotice`, conta sem acesso no login do financeiro, aviso de escalação em jogos, filtro ativo em Lançamentos, "esta é a sua conta" em usuários. A confirmação de exclusão continua sendo o `window.confirm` do navegador
+- **Não verificado**: não foi aberto em navegador; validação = CI do PR
 
 ## 🎯 Próximas tarefas planejadas
 
