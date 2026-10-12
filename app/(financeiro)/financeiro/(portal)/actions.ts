@@ -6,7 +6,7 @@ import { audit } from "@/lib/audit";
 import { withPermission } from "@/lib/auth/guard";
 import { saoPauloLocalToUtc } from "@/lib/datetime";
 import { agreementSchema, dueSettingsSchema, entrySchema, payDueSchema, payrollSchema, voidSchema, waiveSchema } from "@/lib/validation/finance";
-import { entryDate, formatMoney, isMonthKey, monthLabel } from "@/modules/finance/rules";
+import { entryDate, formatMoney, isMonthKey, isPayrollOnlyCategory, monthLabel, payrollServiceName, type PayrollService } from "@/modules/finance/rules";
 import { createEntry, generateDues, payDue, saveDueSettings, setDueWaived, voidEntry } from "@/modules/finance/service";
 
 const INVALID_DATE = { error: "Revise os campos destacados.", fieldErrors: { occurredOn: ["Data inválida."] } };
@@ -36,9 +36,9 @@ export async function createEntryAction(formData: FormData): Promise<ActionState
       return { error: "Revise os campos destacados.", fieldErrors: { category: ['Registre mensalidades em "Mensalidades", para dar baixa no jogador certo.'] } };
     }
 
-    // Pagamentos a jogadores passam pela folha, para ficarem ligados ao jogador e à competição.
-    if (parsed.data.category === "PLAYER_PAYMENT") {
-      return { error: "Revise os campos destacados.", fieldErrors: { category: ['Registre pagamentos a jogadores em "Folha de pagamento".'] } };
+    // Pagamentos a jogadores e à comissão passam pela folha, para ficarem ligados a quem recebeu e à competição.
+    if (isPayrollOnlyCategory(parsed.data.category)) {
+      return { error: "Revise os campos destacados.", fieldErrors: { category: ['Registre pagamentos a jogadores e à comissão técnica em "Folha de pagamento".'] } };
     }
 
     const data = parsed.data;
@@ -63,11 +63,18 @@ export async function createEntryAction(formData: FormData): Promise<ActionState
   });
 }
 
-/** Folha de pagamento: registra um pagamento a um jogador como despesa na categoria "Jogadores". */
+/**
+ * Folha de pagamento: registra uma despesa na categoria escolhida — pagamento a um jogador,
+ * a um membro da comissão técnica ou outra despesa ligada às partidas (com o tipo de serviço).
+ */
 export async function createPayrollAction(formData: FormData): Promise<ActionState> {
   return withPermission("finance:write", async (user) => {
     const parsed = payrollSchema.safeParse({
+      category: field(formData, "category"),
       athleteId: field(formData, "athleteId"),
+      technicalStaffId: field(formData, "technicalStaffId"),
+      service: field(formData, "service"),
+      serviceOther: field(formData, "serviceOther"),
       competitionId: field(formData, "competitionId"),
       matchId: field(formData, "matchId"),
       amount: field(formData, "amount"),
@@ -84,30 +91,55 @@ export async function createPayrollAction(formData: FormData): Promise<ActionSta
       return { error: "Revise os campos destacados.", fieldErrors: { occurredOn: ["A data não pode estar no futuro."] } };
     }
 
-    const athlete = await prisma.athlete.findUnique({ where: { id: data.athleteId }, select: { name: true, nickname: true } });
-    if (!athlete) return { error: "Revise os campos destacados.", fieldErrors: { athleteId: ["Jogador não encontrado."] } };
-    const shown = athlete.nickname?.trim() || athlete.name;
+    // Só o vínculo da categoria escolhida é gravado; os demais ficam vazios mesmo que venham no formulário.
+    let athleteId: string | null = null;
+    let technicalStaffId: string | null = null;
+    let payrollService: string | null = null;
+    let defaultDescription: string;
+    let receipt: string;
+    if (data.category === "PLAYER_PAYMENT") {
+      const athlete = await prisma.athlete.findUnique({ where: { id: data.athleteId ?? "" }, select: { id: true, name: true, nickname: true } });
+      if (!athlete) return { error: "Revise os campos destacados.", fieldErrors: { athleteId: ["Jogador não encontrado."] } };
+      const shown = athlete.nickname?.trim() || athlete.name;
+      athleteId = athlete.id;
+      defaultDescription = `Pagamento a ${shown}`;
+      receipt = `a ${shown}`;
+    } else if (data.category === "STAFF_PAYMENT") {
+      const member = await prisma.technicalStaff.findUnique({ where: { id: data.technicalStaffId ?? "" }, select: { id: true, name: true, nickname: true } });
+      if (!member) return { error: "Revise os campos destacados.", fieldErrors: { technicalStaffId: ["Membro da comissão técnica não encontrado."] } };
+      const shown = member.nickname?.trim() || member.name;
+      technicalStaffId = member.id;
+      defaultDescription = `Pagamento a ${shown} (comissão técnica)`;
+      receipt = `a ${shown}`;
+    } else {
+      payrollService = payrollServiceName(data.service as PayrollService, data.serviceOther);
+      if (!payrollService) return { error: "Revise os campos destacados.", fieldErrors: { serviceOther: ["Informe o tipo de serviço."] } };
+      defaultDescription = payrollService;
+      receipt = `de ${payrollService}`;
+    }
 
     await prisma.$transaction((tx) =>
       createEntry(
         {
           type: "EXPENSE",
-          category: "PLAYER_PAYMENT",
-          description: data.description ?? `Pagamento a ${shown}`,
+          category: data.category,
+          description: data.description ?? defaultDescription,
           amountCents: data.amount,
           occurredOn,
           method: data.method,
           notes: data.notes,
           matchId: data.matchId,
           agreementId: null,
-          athleteId: data.athleteId,
+          athleteId,
           competitionId: data.competitionId,
+          technicalStaffId,
+          payrollService,
         },
         user.id,
         tx,
       ),
     );
-    return { ok: true, message: `Pagamento de ${formatMoney(data.amount)} a ${shown} registrado.` };
+    return { ok: true, message: `Pagamento ${receipt}, de ${formatMoney(data.amount)}, registrado.` };
   });
 }
 

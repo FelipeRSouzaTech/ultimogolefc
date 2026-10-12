@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ActionForm, FieldError } from "@/components/ui/action-form";
 import type { FormAction } from "@/lib/action";
-import { CATEGORY_LABELS, ENTRY_TYPE_LABELS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS, PAYMENT_METHOD_LABELS, type EntryType } from "@/modules/finance/rules";
+import { CATEGORY_LABELS, ENTRY_TYPE_LABELS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, isPayrollOnlyCategory, PAYMENT_METHODS, PAYMENT_METHOD_LABELS, type EntryType } from "@/modules/finance/rules";
 
 type Option = { id: string; label: string };
 
@@ -14,7 +14,7 @@ export function EntryForm({ action, today, matches, agreements, defaultMatchId }
   const [type, setType] = useState<EntryType>(defaultMatchId ? "EXPENSE" : "INCOME");
   // Mensalidade e pagamento a jogadores ficam de fora: têm telas próprias (Mensalidades e Folha de pagamento).
   const categories =
-    type === "INCOME" ? INCOME_CATEGORIES.filter((category) => category !== "MEMBERSHIP") : EXPENSE_CATEGORIES.filter((category) => category !== "PLAYER_PAYMENT");
+    type === "INCOME" ? INCOME_CATEGORIES.filter((category) => category !== "MEMBERSHIP") : EXPENSE_CATEGORIES.filter((category) => !isPayrollOnlyCategory(category));
 
   return (
     <ActionForm action={action} submitLabel="Registrar lançamento" className="space-y-4" resetOnSuccess>

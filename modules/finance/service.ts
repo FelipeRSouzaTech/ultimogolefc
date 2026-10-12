@@ -49,12 +49,17 @@ export type EntryInput = {
   agreementId: string | null;
   athleteId?: string | null;
   competitionId?: string | null;
+  technicalStaffId?: string | null;
+  payrollService?: string | null;
 };
 
 /** Cria um lançamento e o registro de auditoria. Pode participar de uma transação já aberta. */
 export async function createEntry(input: EntryInput, userId: string, tx: Prisma.TransactionClient) {
   if (input.athleteId && !(await tx.athlete.findUnique({ where: { id: input.athleteId }, select: { id: true } }))) {
     throw new BusinessError("Jogador não encontrado.");
+  }
+  if (input.technicalStaffId && !(await tx.technicalStaff.findUnique({ where: { id: input.technicalStaffId }, select: { id: true } }))) {
+    throw new BusinessError("Membro da comissão técnica não encontrado.");
   }
   if (input.competitionId && !(await tx.competition.findUnique({ where: { id: input.competitionId }, select: { id: true } }))) {
     throw new BusinessError("Campeonato não encontrado.");
@@ -71,7 +76,14 @@ export async function createEntry(input: EntryInput, userId: string, tx: Prisma.
     throw new BusinessError("Acordo não encontrado.");
   }
   const entry = await tx.financeEntry.create({
-    data: { ...input, athleteId: input.athleteId ?? null, competitionId: input.competitionId ?? null, createdById: userId },
+    data: {
+      ...input,
+      athleteId: input.athleteId ?? null,
+      competitionId: input.competitionId ?? null,
+      technicalStaffId: input.technicalStaffId ?? null,
+      payrollService: input.payrollService ?? null,
+      createdById: userId,
+    },
   });
   await audit(
     {
@@ -197,6 +209,7 @@ export const entryInclude = {
   match: { include: { homeTeam: true, awayTeam: true } },
   agreement: true,
   athlete: { select: { id: true, name: true, nickname: true } },
+  technicalStaff: { select: { id: true, name: true, nickname: true } },
   competition: { select: { id: true, name: true } },
   createdBy: { select: { name: true } },
   due: { select: { id: true } },
@@ -204,7 +217,15 @@ export const entryInclude = {
 
 export type EntryWithLinks = Prisma.FinanceEntryGetPayload<{ include: typeof entryInclude }>;
 
-export type EntryFilters = { month: string; type?: EntryType; category?: Category; matchId?: string; agreementId?: string };
+export type EntryFilters = {
+  month: string;
+  type?: EntryType;
+  category?: Category;
+  matchId?: string;
+  agreementId?: string;
+  /** Só os lançamentos feitos pela folha: jogadores, comissão técnica e outras despesas com tipo de serviço. */
+  payroll?: boolean;
+};
 
 export async function listEntries(filters: EntryFilters): Promise<EntryWithLinks[]> {
   const { start, end } = monthRange(filters.month);
@@ -217,6 +238,7 @@ export async function listEntries(filters: EntryFilters): Promise<EntryWithLinks
       ...(filters.category ? { category: filters.category } : {}),
       ...(filters.matchId ? { matchId: filters.matchId } : {}),
       ...(filters.agreementId ? { agreementId: filters.agreementId } : {}),
+      ...(filters.payroll ? { OR: [{ category: { in: ["PLAYER_PAYMENT", "STAFF_PAYMENT"] } }, { payrollService: { not: null } }] } : {}),
     },
     include: entryInclude,
     orderBy: [{ occurredOn: "desc" }, { createdAt: "desc" }],

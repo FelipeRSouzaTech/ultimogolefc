@@ -6,7 +6,7 @@ export type EntryType = (typeof ENTRY_TYPES)[number];
 export const ENTRY_TYPE_LABELS: Record<EntryType, string> = { INCOME: "Receita", EXPENSE: "Despesa" };
 
 export const INCOME_CATEGORIES = ["MEMBERSHIP", "SPONSORSHIP", "DONATION", "EVENT", "OTHER_INCOME"] as const;
-export const EXPENSE_CATEGORIES = ["PLAYER_PAYMENT", "REFEREE", "FIELD", "UNIFORM", "EQUIPMENT", "TRANSPORT", "REGISTRATION", "OTHER_EXPENSE"] as const;
+export const EXPENSE_CATEGORIES = ["PLAYER_PAYMENT", "STAFF_PAYMENT", "REFEREE", "FIELD", "UNIFORM", "EQUIPMENT", "TRANSPORT", "REGISTRATION", "OTHER_EXPENSE"] as const;
 export const CATEGORIES = [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES] as const;
 export type Category = (typeof CATEGORIES)[number];
 
@@ -23,6 +23,7 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   TRANSPORT: "Transporte",
   REGISTRATION: "Inscrição em competição",
   PLAYER_PAYMENT: "Jogadores",
+  STAFF_PAYMENT: "Comissão técnica",
   OTHER_EXPENSE: "Outras despesas",
 };
 
@@ -240,19 +241,45 @@ export function paysDues(status: string): boolean {
 
 // ---------- Folha de pagamento ----------
 
-type PayrollEntry = { athleteId: string | null; amountCents: number; voidedAt: Date | null };
+/** Categorias lançadas pela folha: jogadores, comissão técnica e outras despesas ligadas às partidas. */
+export const PAYROLL_CATEGORIES = ["PLAYER_PAYMENT", "STAFF_PAYMENT", "OTHER_EXPENSE"] as const;
+export type PayrollCategory = (typeof PAYROLL_CATEGORIES)[number];
 
-/** Total pago a cada jogador (sem os estornos), do maior para o menor. */
-export function totalsByAthlete(entries: readonly PayrollEntry[]): { athleteId: string; totalCents: number; count: number }[] {
-  const totals = new Map<string, { totalCents: number; count: number }>();
-  for (const entry of entries) {
-    if (entry.voidedAt !== null || entry.athleteId === null) continue;
-    const current = totals.get(entry.athleteId) ?? { totalCents: 0, count: 0 };
-    current.totalCents += entry.amountCents;
-    current.count += 1;
-    totals.set(entry.athleteId, current);
-  }
-  return [...totals.entries()].map(([athleteId, value]) => ({ athleteId, ...value })).sort((a, b) => b.totalCents - a.totalCents);
+/** Categorias que só podem ser lançadas pela folha (ficam ligadas à pessoa que recebeu). */
+export function isPayrollOnlyCategory(category: string): boolean {
+  return category === "PLAYER_PAYMENT" || category === "STAFF_PAYMENT";
+}
+
+/** Tipos de serviço de "Outras despesas" na folha. "OTHER" pede o tipo digitado. */
+export const PAYROLL_SERVICES = ["PHOTOGRAPHER", "REFEREE", "BROADCAST", "OTHER"] as const;
+export type PayrollService = (typeof PAYROLL_SERVICES)[number];
+export const PAYROLL_SERVICE_LABELS: Record<PayrollService, string> = {
+  PHOTOGRAPHER: "Fotógrafo",
+  REFEREE: "Arbitragem",
+  BROADCAST: "Transmissão",
+  OTHER: "Outros",
+};
+
+/** Texto gravado como tipo de serviço: o rótulo da opção ou, em "Outros", o que foi digitado. */
+export function payrollServiceName(service: PayrollService, typed: string | null): string | null {
+  if (service !== "OTHER") return PAYROLL_SERVICE_LABELS[service];
+  const name = typed?.trim() ?? "";
+  return name === "" ? null : name;
+}
+
+type PayrollRecipient = {
+  category: string;
+  payrollService: string | null;
+  athlete: { name: string; nickname: string | null } | null;
+  technicalStaff: { name: string; nickname: string | null } | null;
+};
+
+/** Quem (ou o quê) recebeu um lançamento da folha, para a lista de pagamentos. */
+export function payrollRecipientName(entry: PayrollRecipient): string {
+  const shown = (person: { name: string; nickname: string | null }) => person.nickname?.trim() || person.name;
+  if (entry.category === "PLAYER_PAYMENT") return entry.athlete ? shown(entry.athlete) : "Jogador removido";
+  if (entry.category === "STAFF_PAYMENT") return entry.technicalStaff ? shown(entry.technicalStaff) : "Membro da comissão removido";
+  return entry.payrollService ?? CATEGORY_LABELS.OTHER_EXPENSE;
 }
 
 // ---------- Resumo do caixa ----------

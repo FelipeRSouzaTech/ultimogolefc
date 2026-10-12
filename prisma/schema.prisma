@@ -38,6 +38,7 @@ enum FinanceCategory {
   TRANSPORT
   REGISTRATION
   PLAYER_PAYMENT
+  STAFF_PAYMENT
   OTHER_EXPENSE
 }
 
@@ -191,6 +192,7 @@ model TechnicalStaff {
   updatedAt   DateTime          @updatedAt @db.Timestamptz(3)
 
   seasons     TechnicalStaffSeason[]
+  payments    FinanceEntry[]
 
   @@index([status, isPublished])
 }
@@ -599,6 +601,11 @@ model FinanceEntry {
   // Folha de pagamento: jogador que recebeu e competição a que o pagamento se refere.
   athleteId         String?
   competitionId     String?
+  // Folha: membro da comissão técnica que recebeu (categoria STAFF_PAYMENT).
+  technicalStaffId  String?
+  // Folha, "Outras despesas": tipo de serviço pago (Fotógrafo, Arbitragem, Transmissão ou texto livre).
+  // Preenchido só nos lançamentos feitos pela folha; é o que os distingue das demais "Outras despesas".
+  payrollService    String?
   createdById       String?
   voidedAt          DateTime?     @db.Timestamptz(3)
   voidReason        String?
@@ -609,6 +616,7 @@ model FinanceEntry {
   agreement   FinanceAgreement? @relation(fields: [agreementId], references: [id], onDelete: Restrict)
   athlete     Athlete?          @relation(fields: [athleteId], references: [id], onDelete: Restrict)
   competition Competition?      @relation(fields: [competitionId], references: [id], onDelete: SetNull)
+  technicalStaff TechnicalStaff? @relation(fields: [technicalStaffId], references: [id], onDelete: Restrict)
   createdBy   User?             @relation(fields: [createdById], references: [id], onDelete: SetNull)
   due         MembershipDue?
 
@@ -618,6 +626,7 @@ model FinanceEntry {
   @@index([agreementId])
   @@index([athleteId])
   @@index([competitionId])
+  @@index([technicalStaffId])
 }
 
 // Mensalidade de um diretor em um mês ("AAAA-MM"). Paga quando tem um lançamento válido ligado.

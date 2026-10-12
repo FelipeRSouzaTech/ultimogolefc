@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AGREEMENT_KINDS, CATEGORIES, categoryType, ENTRY_TYPES, parseMoney, PAYMENT_METHODS } from "@/modules/finance/rules";
+import { AGREEMENT_KINDS, CATEGORIES, categoryType, ENTRY_TYPES, parseMoney, PAYMENT_METHODS, PAYROLL_CATEGORIES, PAYROLL_SERVICES } from "@/modules/finance/rules";
 
 const optionalText = (max: number, message: string) =>
   z
@@ -41,17 +41,38 @@ export const entrySchema = z
     }
   });
 
-/** Folha de pagamento: pagamento a um jogador, sempre despesa na categoria "Jogadores". */
-export const payrollSchema = z.object({
-  athleteId: z.string().trim().min(1, "Selecione o jogador.").max(40, "Jogador inválido."),
-  competitionId: optionalText(40, "Campeonato inválido."),
-  matchId: optionalText(40, "Partida inválida."),
-  amount: money,
-  occurredOn: day("Informe a data."),
-  method: z.enum(PAYMENT_METHODS, { errorMap: () => ({ message: "Selecione a forma de pagamento." }) }),
-  description: optionalText(160, "Descrição muito longa."),
-  notes: optionalText(1000, "Observação muito longa."),
-});
+/**
+ * Folha de pagamento: sempre despesa, na categoria escolhida.
+ * Jogadores pede o jogador; Comissão técnica pede o membro; Outras despesas pede o tipo de serviço
+ * (e, em "Outros", o tipo digitado).
+ */
+export const payrollSchema = z
+  .object({
+    category: z.enum(PAYROLL_CATEGORIES, { errorMap: () => ({ message: "Selecione a categoria." }) }),
+    athleteId: optionalText(40, "Jogador inválido."),
+    technicalStaffId: optionalText(40, "Membro da comissão inválido."),
+    service: z
+      .string()
+      .trim()
+      .refine((value) => value === "" || (PAYROLL_SERVICES as readonly string[]).includes(value), "Selecione o tipo de serviço."),
+    serviceOther: optionalText(60, "Tipo de serviço muito longo (até 60 caracteres)."),
+    competitionId: optionalText(40, "Campeonato inválido."),
+    matchId: optionalText(40, "Partida inválida."),
+    amount: money,
+    occurredOn: day("Informe a data."),
+    method: z.enum(PAYMENT_METHODS, { errorMap: () => ({ message: "Selecione a forma de pagamento." }) }),
+    description: optionalText(160, "Descrição muito longa."),
+    notes: optionalText(1000, "Observação muito longa."),
+  })
+  .superRefine((value, context) => {
+    const require = (path: string, message: string) => context.addIssue({ code: z.ZodIssueCode.custom, path: [path], message });
+    if (value.category === "PLAYER_PAYMENT" && !value.athleteId) require("athleteId", "Selecione o jogador.");
+    if (value.category === "STAFF_PAYMENT" && !value.technicalStaffId) require("technicalStaffId", "Selecione o membro da comissão técnica.");
+    if (value.category === "OTHER_EXPENSE") {
+      if (value.service === "") require("service", "Selecione o tipo de serviço.");
+      else if (value.service === "OTHER" && (value.serviceOther ?? "").length < 3) require("serviceOther", "Informe o tipo de serviço.");
+    }
+  });
 
 export const voidSchema = z.object({
   reason: z.string().trim().min(5, "Explique o motivo do estorno.").max(200, "Motivo muito longo."),

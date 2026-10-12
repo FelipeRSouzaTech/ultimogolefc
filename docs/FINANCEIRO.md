@@ -28,9 +28,11 @@ As permissões são verificadas no servidor em cada página, em cada operação 
 - **Resumo** — saldo em caixa, receitas, despesas e resultado do mês, situação das mensalidades, totais por
   categoria e exportação do mês em CSV (abre no Excel).
 - **Lançamentos** — receitas e despesas, com filtro por mês e tipo.
-- **Folha de pagamento** — pagamentos feitos aos jogadores. O formulário segue o modelo da despesa, com a
-  categoria fixa em "Jogadores", e liga o pagamento ao jogador do elenco (pelo apelido esportivo), à competição
-  e à partida. Mostra os pagamentos do mês e o total por jogador.
+- **Folha de pagamento** — pagamentos aos jogadores, à comissão técnica e outras despesas relacionadas às
+  partidas. O formulário segue o modelo da despesa e a categoria define o segundo campo: **Jogadores** (jogador
+  do elenco, pelo apelido esportivo), **Comissão técnica** (membro cadastrado em Comissão Técnica) ou **Outras
+  despesas** (tipo de serviço: Fotógrafo, Arbitragem, Transmissão ou Outros, com o tipo digitado). Todos podem
+  ser ligados à competição e à partida. Mostra os pagamentos do mês.
 - **Mensalidades** — mensalidade paga pelos **diretores**: valor e dia de vencimento, geração das cobranças do
   mês, baixa de pagamento e isenção.
 - **Patrocínios e doações** — valor combinado com cada patrocinador ou doador e quanto já foi recebido.
@@ -49,12 +51,14 @@ As permissões são verificadas no servidor em cada página, em cada operação 
   afastados, licenciados, inativos e desligados ficam de fora.
 - **Gerar cobranças não duplica.** Cada diretor tem no máximo uma mensalidade por mês; repetir a geração só
   cria as que faltam (por exemplo, para quem entrou na diretoria depois).
-- **Pagamento a jogador = despesa.** Todo registro da folha entra no caixa como despesa na categoria
-  "Jogadores" e aparece também em Lançamentos, onde pode ser estornado. Pagamentos a jogadores não são
-  lançados pela tela de Lançamentos, para ficarem sempre ligados ao jogador.
+- **Folha = despesa na categoria selecionada.** Todo registro da folha entra no caixa como despesa em
+  "Jogadores", "Comissão técnica" ou "Outras despesas" e aparece também em Lançamentos, onde pode ser
+  estornado. Pagamentos a jogadores e à comissão não são lançados pela tela de Lançamentos, para ficarem sempre
+  ligados a quem recebeu. "Outras despesas" continua disponível em Lançamentos; só as lançadas pela folha (com
+  tipo de serviço) aparecem na folha.
 - **Partida e competição coerentes.** Se o pagamento informa as duas, a partida precisa ser daquela competição.
 - **Pagamento em dobro é bloqueado**, mesmo que duas pessoas registrem ao mesmo tempo.
-- **Histórico preservado.** Jogador com pagamentos na folha não é removido do elenco, apenas inativado;
+- **Histórico preservado.** Jogador ou membro da comissão com pagamentos na folha não é removido, apenas inativado;
   diretor com mensalidades não é removido, muda de situação (por exemplo, para Desligado).
 - **Recebido de um acordo** é a soma das receitas válidas ligadas a ele; não é digitado.
 - **Datas** são tratadas no horário de Brasília. Lançamentos com data futura são recusados.
@@ -62,7 +66,7 @@ As permissões são verificadas no servidor em cada página, em cada operação 
 ## Categorias
 
 - Receitas: mensalidade, patrocínio, doação, evento, outras receitas.
-- Despesas: jogadores (folha de pagamento), arbitragem, campo, uniforme, material esportivo, transporte,
+- Despesas: jogadores e comissão técnica (folha de pagamento), arbitragem, campo, uniforme, material esportivo, transporte,
   inscrição em competição, outras despesas.
 
 As categorias são fixas no código (`modules/finance/rules.ts`). Para incluir outra, é preciso acrescentá-la ali
