@@ -253,7 +253,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Atenção**: `generateDues`, `getDueSettings` e `saveDueSettings` continuam em `service.ts` (cobertos por testes de integração), mas **sem tela**; remover ou reaproveitar se a geração em lote voltar
 - **Não verificado**: tela não foi aberta em navegador; validação = CI do PR
 
-### 15. `claude/toasts` (PR aberto — Claude)
+### 15. `claude/toasts` (PR #19 merged — Claude)
 - **Pedido**: todos os alertas como notificação moderna tipo "toast" no canto da tela (referência com sucesso, erro, atenção e informação)
 - **Como usar**: `import { toast } from "@/lib/toast"` → `toast("success" | "error" | "warning" | "info", mensagem)` em componente cliente; em página de servidor, `<FlashToast kind message />` (`components/ui/toaster.tsx`). **Não criar novos `<p className="alert …">` para resultado de ação**
 - **Mudança**:
@@ -262,7 +262,16 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `components/ui/{action-form,action-button,confirm-button,image-field}.tsx` e `components/news/share-link.tsx` — resultado de ação vira toast; erros por campo (`FieldError`) continuam ao lado do campo
   - `app/globals.css` — tokens `--color-success` e `--color-warning` (só para notificações) e classes `.toast*`
   - `app/(admin)/admin/(painel)/page.tsx` — "acesso negado" vira toast
-- **Mantidos como aviso fixo na página** (estado permanente, não resultado de ação): `ReadOnlyNotice`, conta sem acesso no login do financeiro, aviso de escalação em jogos, filtro ativo em Lançamentos, "esta é a sua conta" em usuários. A confirmação de exclusão continua sendo o `window.confirm` do navegador
+- **Mantidos como aviso fixo na página** (estado permanente, não resultado de ação): `ReadOnlyNotice`, conta sem acesso no login do financeiro, aviso de escalação em jogos, filtro ativo em Lançamentos, "esta é a sua conta" em usuários.
+- **Não verificado**: não foi aberto em navegador; validação = CI do PR
+
+### 16. `claude/modal-exclusao` (PR aberto — Claude)
+- **Pedido**: modal para o botão Excluir e alerta (toast) na exclusão, no projeto todo
+- **Mudança**:
+  - `components/ui/confirm-button.tsx` — troca o `window.confirm` por um modal (`<dialog>` nativo com `showModal()`): título, pergunta, Cancelar (foco inicial) e botão vermelho; Esc e clique fora fecham. Toda exclusão/remoção passa a mostrar toast de sucesso (mensagem da ação, `successMessage` ou o padrão de `confirmTexts`)
+  - `lib/confirm.ts` — `confirmTexts(label)` (título e aviso padrão); testes em `tests/unit/toast.test.ts`
+  - `app/globals.css` — `.modal*` e `.btn-danger-solid`
+- **Alcance**: todos os usos de `<ConfirmButton>` (clubes, campeonatos, temporadas, jogos e lances, elenco, comissão técnica, diretores, patrocinadores, notícias e categorias, galeria e fotos, mídia, mensagens, mensalidades, revogar sessões). **Não usar `window.confirm` em telas novas**
 - **Não verificado**: não foi aberto em navegador; validação = CI do PR
 
 ## 🎯 Próximas tarefas planejadas
