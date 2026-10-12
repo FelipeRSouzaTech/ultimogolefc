@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AGREEMENT_KINDS, CATEGORIES, categoryType, ENTRY_TYPES, parseMoney, PAYMENT_METHODS, PAYROLL_CATEGORIES, PAYROLL_SERVICES } from "@/modules/finance/rules";
+import { AGREEMENT_KINDS, CATEGORIES, categoryType, DUE_ENTRY_MODES, ENTRY_TYPES, parseMoney, PAYMENT_METHODS, PAYROLL_CATEGORIES, PAYROLL_SERVICES } from "@/modules/finance/rules";
 
 const optionalText = (max: number, message: string) =>
   z
@@ -78,10 +78,29 @@ export const voidSchema = z.object({
   reason: z.string().trim().min(5, "Explique o motivo do estorno.").max(200, "Motivo muito longo."),
 });
 
-export const dueSettingsSchema = z.object({
-  amount: money,
-  dueDay: z.coerce.number({ invalid_type_error: "Informe o dia." }).int("Use um número inteiro.").min(1, "Use um dia entre 1 e 31.").max(31, "Use um dia entre 1 e 31."),
-});
+/**
+ * Inclusão de mensalidade de um diretor. "Paga" pede a data e a forma do pagamento;
+ * "Em aberto" pede o vencimento.
+ */
+export const dueCreateSchema = z
+  .object({
+    directorId: z.string().trim().min(1, "Selecione o diretor.").max(40, "Diretor inválido."),
+    amount: money,
+    mode: z.enum(DUE_ENTRY_MODES, { errorMap: () => ({ message: "Selecione a situação." }) }),
+    paidOn: optionalDay,
+    method: z
+      .string()
+      .trim()
+      .refine((value) => value === "" || (PAYMENT_METHODS as readonly string[]).includes(value), "Selecione a forma de pagamento."),
+    dueOn: optionalDay,
+  })
+  .superRefine((value, context) => {
+    const require = (path: string, message: string) => context.addIssue({ code: z.ZodIssueCode.custom, path: [path], message });
+    if (value.mode === "PAID") {
+      if (value.paidOn === "") require("paidOn", "Informe a data do pagamento.");
+      if (value.method === "") require("method", "Selecione a forma de pagamento.");
+    } else if (value.dueOn === "") require("dueOn", "Informe o vencimento.");
+  });
 
 export const payDueSchema = z.object({
   method: z.enum(PAYMENT_METHODS, { errorMap: () => ({ message: "Selecione a forma de pagamento." }) }),

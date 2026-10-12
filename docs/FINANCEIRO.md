@@ -33,8 +33,11 @@ As permissões são verificadas no servidor em cada página, em cada operação 
   do elenco, pelo apelido esportivo), **Comissão técnica** (membro cadastrado em Comissão Técnica) ou **Outras
   despesas** (tipo de serviço: Fotógrafo, Arbitragem, Transmissão ou Outros, com o tipo digitado). Todos podem
   ser ligados à competição e à partida. Mostra os pagamentos do mês.
-- **Mensalidades** — mensalidade paga pelos **diretores**: valor e dia de vencimento, geração das cobranças do
-  mês, baixa de pagamento e isenção.
+- **Mensalidades** — mensalidade paga pelos **diretores** (cadastrados no painel, em Diretores). Cada
+  mensalidade é incluída pelo formulário **Nova mensalidade**: diretor, valor e situação — **Paga** (data e forma
+  do pagamento; já entra no caixa) ou **Em aberto** (vencimento; a baixa é feita depois). A tela mostra o mês
+  escolhido e o resumo do mês (recebido, a receber, isentas e diretores ativos sem mensalidade). Mensalidade não
+  paga pode ser isenta ou excluída.
 - **Patrocínios e doações** — valor combinado com cada patrocinador ou doador e quanto já foi recebido.
 - **Custos por jogo** — despesas ligadas a cada partida, com total e média.
 

@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { can, homePathFor, ROLES } from "@/lib/auth/permissions";
-import { payrollSchema } from "@/lib/validation/finance";
+import { dueCreateSchema, payrollSchema } from "@/lib/validation/finance";
 import {
   membersWithoutDue,
+  summarizeDues,
   categoryType,
   centsToInput,
   csvCell,
@@ -123,6 +124,38 @@ describe("mensalidades", () => {
     expect(membersWithoutDue(["a", "b", "c"], ["b"])).toEqual(["a", "c"]);
     expect(membersWithoutDue(["a", "a", "b"], [])).toEqual(["a", "b"]);
     expect(membersWithoutDue(["a"], ["a"])).toEqual([]);
+  });
+
+  it("resume o mês: recebido, a receber e contagem por situação", () => {
+    const now = new Date("2026-10-15T12:00:00Z");
+    const due = (amountCents: number, dueDay: string, extra: { paid?: boolean; voided?: boolean; waived?: boolean } = {}) => ({
+      amountCents,
+      dueDate: new Date(`2026-10-${dueDay}T12:00:00Z`),
+      waivedAt: extra.waived ? now : null,
+      entry: extra.paid ? { voidedAt: extra.voided ? now : null } : null,
+    });
+    const summary = summarizeDues(
+      [due(5000, "10", { paid: true }), due(5000, "10", { paid: true, voided: true }), due(7000, "20"), due(3000, "10", { waived: true }), due(4000, "05")],
+      now,
+    );
+    expect(summary).toEqual({ paidCents: 5000, pendingCents: 16000, counts: { PAID: 1, WAIVED: 1, OVERDUE: 2, OPEN: 1 }, total: 5 });
+    expect(summarizeDues([], now)).toEqual({ paidCents: 0, pendingCents: 0, counts: { PAID: 0, WAIVED: 0, OVERDUE: 0, OPEN: 0 }, total: 0 });
+  });
+
+  it("a inclusão exige os campos da situação escolhida", () => {
+    const base = { directorId: "d1", amount: "50,00", paidOn: "", method: "", dueOn: "" };
+    const fields = (input: Record<string, string>) => {
+      const result = dueCreateSchema.safeParse(input);
+      return result.success ? [] : result.error.issues.map((issue) => issue.path.join("."));
+    };
+    expect(fields({ ...base, mode: "PAID" })).toEqual(["paidOn", "method"]);
+    expect(fields({ ...base, mode: "PAID", paidOn: "2026-10-10", method: "PIX" })).toEqual([]);
+    expect(fields({ ...base, mode: "PAID", paidOn: "2026-10-10", method: "BOLETO" })).toEqual(["method"]);
+    expect(fields({ ...base, mode: "OPEN" })).toEqual(["dueOn"]);
+    expect(fields({ ...base, mode: "OPEN", dueOn: "2026-10-10" })).toEqual([]);
+    expect(fields({ ...base, mode: "OPEN", dueOn: "2026-10-10", directorId: "" })).toEqual(["directorId"]);
+    expect(fields({ ...base, mode: "OPEN", dueOn: "2026-10-10", amount: "0" })).toEqual(["amount"]);
+    expect(fields({ ...base, mode: "TALVEZ", dueOn: "2026-10-10" })).toEqual(["mode"]);
   });
 
   it("só diretores ativos são cobrados", () => {

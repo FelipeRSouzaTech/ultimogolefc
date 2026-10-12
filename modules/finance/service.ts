@@ -159,7 +159,11 @@ export async function generateDues(month: string, userId: string): Promise<numbe
 
 /** Registra o pagamento de uma mensalidade: cria a receita e liga à mensalidade, tudo ou nada. */
 export async function payDue(dueId: string, method: PaymentMethod, paidOn: Date, userId: string): Promise<void> {
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction((tx) => payDueIn(tx, dueId, method, paidOn, userId));
+}
+
+async function payDueIn(tx: Prisma.TransactionClient, dueId: string, method: PaymentMethod, paidOn: Date, userId: string): Promise<void> {
+  {
     const due = await tx.membershipDue.findUnique({ where: { id: dueId }, include: { director: true } });
     if (!due) throw new BusinessError("Mensalidade não encontrada.");
     if (due.waivedAt) throw new BusinessError("Esta mensalidade está isenta. Desfaça a isenção antes de registrar o pagamento.");
@@ -183,6 +187,71 @@ export async function payDue(dueId: string, method: PaymentMethod, paidOn: Date,
     // A condição entryId: null impede pagamento em dobro se duas pessoas registrarem ao mesmo tempo.
     const linked = await tx.membershipDue.updateMany({ where: { id: dueId, entryId: null, waivedAt: null }, data: { entryId: entry.id } });
     if (linked.count !== 1) throw new BusinessError("Esta mensalidade acabou de ser alterada por outra pessoa. Recarregue a página.");
+  }
+}
+
+export type DueInput = {
+  directorId: string;
+  month: string;
+  amountCents: number;
+  dueDate: Date;
+  /** Preenchido quando a mensalidade já entra paga: cria a receita na mesma transação. */
+  payment: { method: PaymentMethod; paidOn: Date } | null;
+};
+
+/**
+ * Inclui a mensalidade de um diretor em um mês (uma por diretor e mês), em aberto ou já paga.
+ * Tudo ou nada: se o pagamento falhar, a mensalidade não fica gravada.
+ */
+export async function createDue(input: DueInput, userId: string): Promise<void> {
+  const duplicated = new BusinessError("Este diretor já tem mensalidade neste mês.");
+  try {
+    await prisma.$transaction(async (tx) => {
+      const director = await tx.director.findUnique({ where: { id: input.directorId }, select: { name: true } });
+      if (!director) throw new BusinessError("Diretor não encontrado.");
+      if (await tx.membershipDue.findUnique({ where: { directorId_referenceMonth: { directorId: input.directorId, referenceMonth: input.month } }, select: { id: true } })) {
+        throw duplicated;
+      }
+      const due = await tx.membershipDue.create({
+        data: { directorId: input.directorId, referenceMonth: input.month, amountCents: input.amountCents, dueDate: input.dueDate },
+      });
+      await audit(
+        {
+          userId,
+          action: "finance.dues.create",
+          entity: "MembershipDue",
+          entityId: due.id,
+          summary: `Incluiu a mensalidade de ${monthLabel(input.month)} de ${director.name} (${formatMoney(input.amountCents)})`,
+          after: { month: input.month, amountCents: input.amountCents, paid: input.payment !== null },
+        },
+        tx,
+      );
+      if (input.payment) await payDueIn(tx, due.id, input.payment.method, input.payment.paidOn, userId);
+    });
+  } catch (error) {
+    // Duas inclusões ao mesmo tempo: a chave única (diretor, mês) barra a segunda.
+    if ((error as { code?: string }).code === "P2002") throw duplicated;
+    throw error;
+  }
+}
+
+/** Exclui uma mensalidade incluída por engano. Paga não pode: estorne o lançamento antes. */
+export async function removeDue(dueId: string, userId: string): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    const due = await tx.membershipDue.findUnique({ where: { id: dueId }, include: { director: true, entry: { select: { voidedAt: true } } } });
+    if (!due) throw new BusinessError("Mensalidade não encontrada.");
+    if (due.entry && due.entry.voidedAt === null) throw new BusinessError("Esta mensalidade está paga. Estorne o pagamento em Lançamentos antes de excluir.");
+    await tx.membershipDue.delete({ where: { id: dueId } });
+    await audit(
+      {
+        userId,
+        action: "finance.dues.delete",
+        entity: "MembershipDue",
+        entityId: dueId,
+        summary: `Excluiu a mensalidade de ${monthLabel(due.referenceMonth)} de ${due.director.name} (${formatMoney(due.amountCents)})`,
+      },
+      tx,
+    );
   });
 }
 

@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db/prisma";
 import { BusinessError } from "@/lib/action";
 import { dueStatus, entryDate } from "@/modules/finance/rules";
-import { createEntry, type EntryInput, generateDues, getDueSettings, listDues, listEntries, overallBalance, payDue, saveDueSettings, setDueWaived, voidEntry } from "@/modules/finance/service";
+import { createDue, createEntry, type EntryInput, generateDues, getDueSettings, listDues, listEntries, overallBalance, payDue, removeDue, saveDueSettings, setDueWaived, voidEntry } from "@/modules/finance/service";
 
 // Mês bem antigo, exclusivo deste teste, para não misturar com dados reais do banco de testes.
 const MONTH = "2001-01";
@@ -52,7 +52,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await prisma.membershipDue.deleteMany({ where: { referenceMonth: MONTH } });
+  await prisma.membershipDue.deleteMany({ where: { referenceMonth: { in: [MONTH, "2001-02"] } } });
   await prisma.financeEntry.deleteMany({ where: { createdById: ids.user } });
   await prisma.auditLog.deleteMany({ where: { userId: ids.user } });
   await prisma.director.deleteMany({ where: { id: { in: ids.directors } } });
@@ -130,6 +130,44 @@ describe("mensalidades dos diretores no banco", () => {
     await payDue(due.id, "CASH", paidOn, ids.user);
     const paid = (await listDues(MONTH)).find((item) => item.id === due.id);
     expect(paid && dueStatus(paid)).toBe("PAID");
+  });
+});
+
+describe("inclusão manual de mensalidade no banco", () => {
+  const OTHER_MONTH = "2001-02";
+  const dueDate = entryDate("2001-02-10") ?? new Date();
+  const input = (directorId: string, payment: { method: "PIX"; paidOn: Date } | null) => ({ directorId, month: OTHER_MONTH, amountCents: 7500, dueDate, payment });
+
+  it("inclui já paga: cria a receita de mensalidade e soma no caixa", async () => {
+    const before = await overallBalance();
+    await createDue(input(ids.directors[0] ?? "", { method: "PIX", paidOn: dueDate }), ids.user);
+    const due = (await listDues(OTHER_MONTH)).find((item) => item.directorId === ids.directors[0]);
+    expect(due && dueStatus(due)).toBe("PAID");
+    expect(due?.entry).toMatchObject({ type: "INCOME", category: "MEMBERSHIP", amountCents: 7500 });
+    expect((await overallBalance()).balanceCents).toBe(before.balanceCents + 7500);
+  });
+
+  it("não aceita duas mensalidades do mesmo diretor no mês nem diretor inexistente", async () => {
+    const repeated = await rejects(() => createDue(input(ids.directors[0] ?? "", null), ids.user));
+    expect(repeated instanceof BusinessError).toBe(true);
+    const unknown = await rejects(() => createDue(input("diretor-inexistente", null), ids.user));
+    expect(unknown instanceof BusinessError).toBe(true);
+    expect((await listDues(OTHER_MONTH)).filter((item) => ids.directors.includes(item.directorId))).toHaveLength(1);
+  });
+
+  it("inclui em aberto sem mexer no caixa; excluir só é permitido enquanto não está paga", async () => {
+    const before = await overallBalance();
+    await createDue(input(ids.directors[1] ?? "", null), ids.user);
+    expect((await overallBalance()).balanceCents).toBe(before.balanceCents);
+    const dues = await listDues(OTHER_MONTH);
+    const open = dues.find((item) => item.directorId === ids.directors[1]);
+    const paid = dues.find((item) => item.directorId === ids.directors[0]);
+    expect(open?.entryId).toBeNull();
+
+    const blocked = await rejects(() => removeDue(paid?.id ?? "", ids.user));
+    expect(blocked instanceof BusinessError).toBe(true);
+    await removeDue(open?.id ?? "", ids.user);
+    expect((await listDues(OTHER_MONTH)).some((item) => item.id === open?.id)).toBe(false);
   });
 });
 

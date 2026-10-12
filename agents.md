@@ -228,7 +228,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Pendente**: formulários do painel (Elenco, Comissão Técnica) ainda mostram os nomes padrão de `ATHLETE_CATEGORY_LABELS`
 - **Não verificado**: telas não foram abertas em navegador; validação = CI do PR
 
-### 13. `claude/folha-categorias` (PR aberto — Claude)
+### 13. `claude/folha-categorias` (PR #16 merged — Claude)
 - **Pedido**: em `/financeiro/folha`, categoria selecionável — Jogadores, Comissão técnica (dropdown da comissão) e Outras despesas (tipo de serviço: Fotógrafo, Arbitragem, Transmissão, Outros + campo livre); novo texto de descrição; remover "Total por jogador no mês"
 - **Banco**: migration `20261012001500_folha_categorias` — `FinanceCategory.STAFF_PAYMENT`; `FinanceEntry.technicalStaffId` (FK `TechnicalStaff`, Restrict) e `FinanceEntry.payrollService` (texto)
 - **Mudança**:
@@ -238,6 +238,18 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `app/(financeiro)/financeiro/(portal)/` — `actions.ts` (`createPayrollAction`), `folha/{page,payroll-form}.tsx`, `lancamentos/{page,entry-form}.tsx`, `exportar/route.ts` (colunas Comissão técnica e Tipo de serviço)
   - `app/(admin)/admin/(painel)/comissao-tecnica/actions.ts` — não exclui membro com pagamentos (orienta inativar)
 - **Decisão**: em "Outras despesas", todos os tipos (inclusive Arbitragem) entram na categoria `OTHER_EXPENSE`, como pedido; a categoria `REFEREE` de Lançamentos continua existindo à parte. A folha lista `PLAYER_PAYMENT`, `STAFF_PAYMENT` e as `OTHER_EXPENSE` com `payrollService` preenchido
+- **Não verificado**: tela não foi aberta em navegador; validação = CI do PR
+
+### 14. `claude/mensalidades-form` (PR aberto — Claude)
+- **Pedido**: mudar a inclusão de mensalidades em `/financeiro/mensalidades` — formulário de inclusão, manter a navegação por mês, resumo do mês, usando os diretores de `/admin/diretores`
+- **Sem migration** (usa `MembershipDue` como está: uma por diretor e mês)
+- **Mudança**:
+  - `modules/finance/service.ts` — `createDue` (em aberto ou já paga, na mesma transação), `removeDue` (só não paga); `payDue` reaproveitado via `payDueIn(tx, …)`
+  - `modules/finance/rules.ts` — `summarizeDues`, `DUE_ENTRY_MODES`/labels
+  - `lib/validation/finance.ts` — `dueCreateSchema`; removido `dueSettingsSchema`
+  - `app/(financeiro)/financeiro/(portal)/actions.ts` — `createDueAction(month)`, `removeDueAction`; removidos `generateDuesAction` e `saveDueSettingsAction`
+  - `app/(financeiro)/financeiro/(portal)/mensalidades/{page,due-form}.tsx` — painéis "Resumo de <mês>" e "Nova mensalidade"; saíram "Gerar cobranças" e "Valor e vencimento"
+- **Atenção**: `generateDues`, `getDueSettings` e `saveDueSettings` continuam em `service.ts` (cobertos por testes de integração), mas **sem tela**; remover ou reaproveitar se a geração em lote voltar
 - **Não verificado**: tela não foi aberta em navegador; validação = CI do PR
 
 ## 🎯 Próximas tarefas planejadas
