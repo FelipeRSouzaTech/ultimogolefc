@@ -22,7 +22,7 @@ export default async function UsersPage() {
       <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
         <Panel title="Contas">
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-wide">
               <thead>
                 <tr>
                   <th scope="col" className="text-left">

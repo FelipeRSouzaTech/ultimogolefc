@@ -30,7 +30,7 @@ export function PayrollForm({ action, today, athletes, staff, competitions, matc
 
   return (
     <ActionForm action={action} submitLabel="Registrar pagamento" className="space-y-4" resetOnSuccess>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
         <div>
           <label className="label" htmlFor="category">
             Categoria
@@ -108,7 +108,7 @@ export function PayrollForm({ action, today, athletes, staff, competitions, matc
           </div>
         ) : null}
         {category === "OTHER_EXPENSE" && service === "OTHER" ? (
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-2 xl:col-span-1 2xl:col-span-2">
             <label className="label" htmlFor="serviceOther">
               Qual serviço?
             </label>

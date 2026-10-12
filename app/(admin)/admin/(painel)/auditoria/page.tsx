@@ -18,7 +18,7 @@ export default async function AuditPage() {
         <EmptyState title="Nenhuma operação registrada" />
       ) : (
         <div className="card overflow-x-auto">
-          <table className="table">
+          <table className="table table-wide">
             <thead>
               <tr>
                 <th scope="col" className="text-left">

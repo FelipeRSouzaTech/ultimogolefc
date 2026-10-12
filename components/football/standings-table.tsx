@@ -5,9 +5,11 @@ type Props = { rows: StandingRowView[]; mode: "AUTO" | "MANUAL"; caption: string
 
 /** Tabela de classificação. A linha do nosso clube é destacada por fundo, peso e marca lateral. */
 export function StandingsTable({ rows, mode, caption, compact = false }: Props) {
-  const extra = compact ? "hidden" : "hidden sm:table-cell";
+  // No celular ficam Pos, Time, Pts, J e SG; V/E/D aparecem a partir de telas médias e GP/GC no desktop.
+  const extra = compact ? "hidden" : "hidden md:table-cell";
+  const results = "hidden sm:table-cell";
   return (
-    <div>
+    <div className="overflow-x-auto">
       <table className="table">
         <caption className="sr-only">{caption}</caption>
         <thead>
@@ -24,13 +26,13 @@ export function StandingsTable({ rows, mode, caption, compact = false }: Props) 
             <th scope="col">
               <abbr title="Jogos">J</abbr>
             </th>
-            <th scope="col">
+            <th scope="col" className={results}>
               <abbr title="Vitórias">V</abbr>
             </th>
-            <th scope="col">
+            <th scope="col" className={results}>
               <abbr title="Empates">E</abbr>
             </th>
-            <th scope="col">
+            <th scope="col" className={results}>
               <abbr title="Derrotas">D</abbr>
             </th>
             <th scope="col" className={extra}>
@@ -57,9 +59,9 @@ export function StandingsTable({ rows, mode, caption, compact = false }: Props) 
               </td>
               <td className="font-bold">{row.points}</td>
               <td>{row.played}</td>
-              <td>{row.wins}</td>
-              <td>{row.draws}</td>
-              <td>{row.losses}</td>
+              <td className={results}>{row.wins}</td>
+              <td className={results}>{row.draws}</td>
+              <td className={results}>{row.losses}</td>
               <td className={extra}>{row.goalsFor}</td>
               <td className={extra}>{row.goalsAgainst}</td>
               <td>{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}</td>

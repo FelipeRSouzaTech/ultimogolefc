@@ -26,7 +26,9 @@ function Meta({ match }: { match: MatchWithTeams }) {
       <p className="flex flex-wrap items-center gap-x-4 gap-y-1">
         <span className="inline-flex items-center gap-1.5">
           <CalendarDays aria-hidden="true" className="size-4 text-primary" />
-          <span className="capitalize">{formatWeekday(match.kickoffAt)}</span>, {formatDate(match.kickoffAt)}
+          <span>
+            <span className="capitalize">{formatWeekday(match.kickoffAt)}</span>, {formatDate(match.kickoffAt)}
+          </span>
         </span>
         <span className="inline-flex items-center gap-1.5">
           <Clock aria-hidden="true" className="size-4 text-primary" />

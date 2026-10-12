@@ -53,7 +53,7 @@ export default async function AdminNewsPage({ searchParams }: { searchParams: Se
         <EmptyState title="Nenhuma notícia" description="Crie a primeira notícia para ela aparecer aqui." />
       ) : (
         <div className="card overflow-x-auto">
-          <table className="table">
+          <table className="table table-wide">
             <thead>
               <tr>
                 <th scope="col" className="text-left">

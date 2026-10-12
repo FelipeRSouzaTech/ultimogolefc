@@ -6,7 +6,7 @@ type Props = { name: string; caption: string; photoPath?: string | null; number?
 /** Card de pessoa (jogador, diretoria, comissão). Sem foto, mostra as iniciais. */
 export function PersonCard({ name, caption, photoPath = null, number = null, description = null, href }: Props) {
   return (
-    <article className="card flex h-full flex-col items-center p-5 text-center">
+    <article className="card flex h-full flex-col items-center p-3 text-center sm:p-5">
       <div className="relative">
         <ClubCrest name={name} crestPath={photoPath} size={96} />
         {number !== null ? (
@@ -15,7 +15,7 @@ export function PersonCard({ name, caption, photoPath = null, number = null, des
           </span>
         ) : null}
       </div>
-      <h3 className="mt-4 text-lg uppercase">
+      <h3 className="mt-3 break-words text-sm uppercase sm:mt-4 sm:text-lg">
         {href ? (
           <Link href={href} className="hover:text-primary hover:underline">
             {name}

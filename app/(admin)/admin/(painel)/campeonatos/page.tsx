@@ -25,7 +25,7 @@ export default async function CampeonatosPage() {
           ) : (
             <ul className="divide-y divide-gray-100">
               {competitions.map((competition) => (
-                <li key={competition.id} className="flex items-center justify-between gap-3 py-3">
+                <li key={competition.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-3">
                   <Link href={`/admin/campeonatos/${competition.id}`} className="font-semibold hover:text-primary hover:underline">
                     {competition.name}
                   </Link>

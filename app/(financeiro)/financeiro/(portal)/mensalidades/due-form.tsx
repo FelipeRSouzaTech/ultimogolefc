@@ -16,7 +16,7 @@ export function DueForm({ action, monthName, today, defaultDueOn, directors }: P
 
   return (
     <ActionForm action={action} submitLabel="Incluir mensalidade" className="space-y-4" resetOnSuccess>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
         <div>
           <label className="label" htmlFor="referenceMonth">
             Mês de referência
