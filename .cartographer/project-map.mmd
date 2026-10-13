@@ -1,0 +1,1033 @@
+graph LR
+  n_modules_sponsors_service_ts["modules/sponsors/service.ts"]
+  n_tests_stubs_server_only_ts["tests/stubs/server-only.ts"]
+  n_modules_sponsors_service_ts --> n_tests_stubs_server_only_ts
+  n_lib_db_prisma_ts["lib/db/prisma.ts"]
+  n_modules_sponsors_service_ts --> n_lib_db_prisma_ts
+  n_modules_users_rules_ts["modules/users/rules.ts"]
+  n_lib_auth_permissions_ts["lib/auth/permissions.ts"]
+  n_modules_users_rules_ts --> n_lib_auth_permissions_ts
+  n_modules_finance_service_ts["modules/finance/service.ts"]
+  n_modules_finance_service_ts --> n_tests_stubs_server_only_ts
+  n_modules_finance_service_ts --> n_lib_db_prisma_ts
+  n_lib_action_ts["lib/action.ts"]
+  n_modules_finance_service_ts --> n_lib_action_ts
+  n_lib_audit_ts["lib/audit.ts"]
+  n_modules_finance_service_ts --> n_lib_audit_ts
+  n_modules_squad_rules_ts["modules/squad/rules.ts"]
+  n_modules_finance_service_ts --> n_modules_squad_rules_ts
+  n_modules_finance_rules_ts["modules/finance/rules.ts"]
+  n_lib_datetime_ts["lib/datetime.ts"]
+  n_modules_finance_rules_ts --> n_lib_datetime_ts
+  n_modules_matches_service_ts["modules/matches/service.ts"]
+  n_modules_matches_service_ts --> n_tests_stubs_server_only_ts
+  n_modules_matches_service_ts --> n_lib_db_prisma_ts
+  n_modules_matches_service_ts --> n_lib_action_ts
+  n_modules_matches_service_ts --> n_lib_audit_ts
+  n_modules_matches_service_ts --> n_modules_squad_rules_ts
+  n_modules_matches_service_ts --> n_modules_squad_rules_ts
+  n_modules_media_actions_ts["modules/media/actions.ts"]
+  n_modules_media_actions_ts --> n_lib_action_ts
+  n_modules_media_actions_ts --> n_lib_audit_ts
+  n_lib_auth_guard_ts["lib/auth/guard.ts"]
+  n_modules_media_actions_ts --> n_lib_auth_guard_ts
+  n_modules_media_actions_ts --> n_lib_auth_permissions_ts
+  n_modules_site_service_ts["modules/site/service.ts"]
+  n_modules_media_actions_ts --> n_modules_site_service_ts
+  n_modules_media_service_ts["modules/media/service.ts"]
+  n_modules_media_service_ts --> n_tests_stubs_server_only_ts
+  n_modules_media_service_ts --> n_lib_db_prisma_ts
+  n_modules_media_service_ts --> n_lib_action_ts
+  n_lib_storage_index_ts["lib/storage/index.ts"]
+  n_modules_media_service_ts --> n_lib_storage_index_ts
+  n_modules_media_service_ts --> n_modules_squad_rules_ts
+  n_modules_competitions_service_ts["modules/competitions/service.ts"]
+  n_modules_competitions_service_ts --> n_tests_stubs_server_only_ts
+  n_modules_competitions_service_ts --> n_lib_db_prisma_ts
+  n_modules_competitions_standings_ts["modules/competitions/standings.ts"]
+  n_modules_competitions_service_ts --> n_modules_competitions_standings_ts
+  n_modules_news_service_ts["modules/news/service.ts"]
+  n_modules_news_service_ts --> n_tests_stubs_server_only_ts
+  n_modules_news_service_ts --> n_lib_db_prisma_ts
+  n_modules_site_service_ts --> n_tests_stubs_server_only_ts
+  n_modules_site_service_ts --> n_lib_db_prisma_ts
+  n_modules_site_settings_ts["modules/site/settings.ts"]
+  n_modules_site_service_ts --> n_modules_site_settings_ts
+  n_components_football_match_card_tsx["components/football/match-card.tsx"]
+  n_components_football_match_card_tsx --> n_lib_datetime_ts
+  n_modules_matches_rules_ts["modules/matches/rules.ts"]
+  n_components_football_match_card_tsx --> n_modules_matches_rules_ts
+  n_components_football_match_card_tsx --> n_modules_matches_service_ts
+  n_components_football_club_crest_tsx["components/football/club-crest.tsx"]
+  n_components_football_match_card_tsx --> n_components_football_club_crest_tsx
+  n_components_football_upcoming_match_tsx["components/football/upcoming-match.tsx"]
+  n_components_football_upcoming_match_tsx --> n_lib_datetime_ts
+  n_components_football_upcoming_match_tsx --> n_modules_matches_service_ts
+  n_components_football_upcoming_match_tsx --> n_components_football_club_crest_tsx
+  n_components_football_match_countdown_tsx["components/football/match-countdown.tsx"]
+  n_components_football_upcoming_match_tsx --> n_components_football_match_countdown_tsx
+  n_components_football_match_countdown_tsx --> n_modules_matches_rules_ts
+  n_components_football_standings_table_tsx["components/football/standings-table.tsx"]
+  n_components_football_standings_table_tsx --> n_modules_competitions_service_ts
+  n_components_football_standings_table_tsx --> n_components_football_club_crest_tsx
+  n_components_ui_smart_image_tsx["components/ui/smart-image.tsx"]
+  n_components_football_club_crest_tsx --> n_components_ui_smart_image_tsx
+  n_components_football_person_card_tsx["components/football/person-card.tsx"]
+  n_components_football_person_card_tsx --> n_components_football_club_crest_tsx
+  n_modules_media_rules_ts["modules/media/rules.ts"]
+  n_components_ui_smart_image_tsx --> n_modules_media_rules_ts
+  n_components_ui_toaster_tsx["components/ui/toaster.tsx"]
+  n_lib_toast_ts["lib/toast.ts"]
+  n_components_ui_toaster_tsx --> n_lib_toast_ts
+  n_components_ui_action_button_tsx["components/ui/action-button.tsx"]
+  n_components_ui_action_button_tsx --> n_lib_action_ts
+  n_components_ui_action_button_tsx --> n_lib_toast_ts
+  n_components_ui_action_form_tsx["components/ui/action-form.tsx"]
+  n_components_ui_action_form_tsx --> n_lib_action_ts
+  n_components_ui_action_form_tsx --> n_lib_toast_ts
+  n_components_ui_image_field_tsx["components/ui/image-field.tsx"]
+  n_components_ui_image_field_tsx --> n_lib_toast_ts
+  n_components_ui_image_field_tsx --> n_modules_media_actions_ts
+  n_components_ui_image_field_tsx --> n_components_ui_action_form_tsx
+  n_components_ui_image_field_tsx --> n_components_ui_smart_image_tsx
+  n_components_ui_field_tsx["components/ui/field.tsx"]
+  n_components_ui_field_tsx --> n_components_ui_action_form_tsx
+  n_components_ui_prose_tsx["components/ui/prose.tsx"]
+  n_components_ui_prose_tsx --> n_modules_site_settings_ts
+  n_components_ui_confirm_button_tsx["components/ui/confirm-button.tsx"]
+  n_components_ui_confirm_button_tsx --> n_lib_action_ts
+  n_lib_confirm_ts["lib/confirm.ts"]
+  n_components_ui_confirm_button_tsx --> n_lib_confirm_ts
+  n_components_ui_confirm_button_tsx --> n_lib_toast_ts
+  n_components_layout_site_footer_tsx["components/layout/site-footer.tsx"]
+  n_lib_site_ts["lib/site.ts"]
+  n_components_layout_site_footer_tsx --> n_lib_site_ts
+  n_components_layout_site_footer_tsx --> n_modules_site_service_ts
+  n_components_layout_site_header_tsx["components/layout/site-header.tsx"]
+  n_components_layout_site_header_tsx --> n_lib_site_ts
+  n_components_layout_site_nav_tsx["components/layout/site-nav.tsx"]
+  n_components_layout_site_header_tsx --> n_components_layout_site_nav_tsx
+  n_components_gallery_lightbox_tsx["components/gallery/lightbox.tsx"]
+  n_components_gallery_lightbox_tsx --> n_components_ui_smart_image_tsx
+  n_modules_gallery_rules_ts["modules/gallery/rules.ts"]
+  n_components_gallery_lightbox_tsx --> n_modules_gallery_rules_ts
+  n_components_news_news_card_tsx["components/news/news-card.tsx"]
+  n_components_news_news_card_tsx --> n_components_ui_smart_image_tsx
+  n_components_news_news_card_tsx --> n_lib_datetime_ts
+  n_components_news_share_link_tsx["components/news/share-link.tsx"]
+  n_components_news_share_link_tsx --> n_lib_toast_ts
+  n_app_robots_ts["app/robots.ts"]
+  n_app_robots_ts --> n_lib_site_ts
+  n_app_layout_tsx["app/layout.tsx"]
+  n_app_layout_tsx --> n_components_ui_toaster_tsx
+  n_app_layout_tsx --> n_lib_site_ts
+  n_app_sitemap_ts["app/sitemap.ts"]
+  n_app_sitemap_ts --> n_lib_db_prisma_ts
+  n_app_sitemap_ts --> n_lib_site_ts
+  n_app_sitemap_ts --> n_modules_news_service_ts
+  n_app_financeiro_financeiro_portal_params_ts["app/(financeiro)/financeiro/(portal)/params.ts"]
+  n_lib_params_ts["lib/params.ts"]
+  n_app_financeiro_financeiro_portal_params_ts --> n_lib_params_ts
+  n_app_financeiro_financeiro_portal_params_ts --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_actions_ts["app/(financeiro)/financeiro/(portal)/actions.ts"]
+  n_app_financeiro_financeiro_portal_actions_ts --> n_lib_db_prisma_ts
+  n_app_financeiro_financeiro_portal_actions_ts --> n_lib_action_ts
+  n_app_financeiro_financeiro_portal_actions_ts --> n_lib_audit_ts
+  n_app_financeiro_financeiro_portal_actions_ts --> n_lib_auth_guard_ts
+  n_app_financeiro_financeiro_portal_actions_ts --> n_lib_datetime_ts
+  n_lib_validation_finance_ts["lib/validation/finance.ts"]
+  n_app_financeiro_financeiro_portal_actions_ts --> n_lib_validation_finance_ts
+  n_app_financeiro_financeiro_portal_actions_ts --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_actions_ts --> n_modules_finance_service_ts
+  n_app_financeiro_financeiro_portal_money_tsx["app/(financeiro)/financeiro/(portal)/money.tsx"]
+  n_app_financeiro_financeiro_portal_money_tsx --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_page_tsx["app/(financeiro)/financeiro/(portal)/page.tsx"]
+  n_components_ui_admin_tsx["components/ui/admin.tsx"]
+  n_app_financeiro_financeiro_portal_page_tsx --> n_components_ui_admin_tsx
+  n_lib_auth_finance_guard_ts["lib/auth/finance-guard.ts"]
+  n_app_financeiro_financeiro_portal_page_tsx --> n_lib_auth_finance_guard_ts
+  n_app_financeiro_financeiro_portal_page_tsx --> n_lib_auth_permissions_ts
+  n_app_financeiro_financeiro_portal_page_tsx --> n_lib_datetime_ts
+  n_app_financeiro_financeiro_portal_page_tsx --> n_lib_params_ts
+  n_app_financeiro_financeiro_portal_page_tsx --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_page_tsx --> n_modules_finance_service_ts
+  n_app_financeiro_financeiro_portal_finance_nav_tsx["app/(financeiro)/financeiro/(portal)/finance-nav.tsx"]
+  n_app_financeiro_financeiro_portal_page_tsx --> n_app_financeiro_financeiro_portal_finance_nav_tsx
+  n_app_financeiro_financeiro_portal_page_tsx --> n_app_financeiro_financeiro_portal_money_tsx
+  n_app_financeiro_financeiro_portal_page_tsx --> n_lib_params_ts
+  n_app_financeiro_financeiro_portal_layout_tsx["app/(financeiro)/financeiro/(portal)/layout.tsx"]
+  n_app_admin_admin_actions_ts["app/(admin)/admin/actions.ts"]
+  n_app_financeiro_financeiro_portal_layout_tsx --> n_app_admin_admin_actions_ts
+  n_components_layout_admin_nav_tsx["components/layout/admin-nav.tsx"]
+  n_app_financeiro_financeiro_portal_layout_tsx --> n_components_layout_admin_nav_tsx
+  n_app_financeiro_financeiro_portal_layout_tsx --> n_lib_auth_finance_guard_ts
+  n_app_financeiro_financeiro_portal_layout_tsx --> n_lib_auth_permissions_ts
+  n_app_financeiro_financeiro_portal_layout_tsx --> n_lib_site_ts
+  n_app_financeiro_financeiro_portal_finance_nav_tsx --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_jogos_page_tsx["app/(financeiro)/financeiro/(portal)/jogos/page.tsx"]
+  n_app_financeiro_financeiro_portal_jogos_page_tsx --> n_components_ui_admin_tsx
+  n_components_ui_empty_state_tsx["components/ui/empty-state.tsx"]
+  n_app_financeiro_financeiro_portal_jogos_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_financeiro_financeiro_portal_jogos_page_tsx --> n_lib_auth_finance_guard_ts
+  n_app_financeiro_financeiro_portal_jogos_page_tsx --> n_lib_auth_permissions_ts
+  n_app_financeiro_financeiro_portal_jogos_page_tsx --> n_lib_datetime_ts
+  n_app_financeiro_financeiro_portal_jogos_page_tsx --> n_lib_db_prisma_ts
+  n_app_financeiro_financeiro_portal_jogos_page_tsx --> n_app_financeiro_financeiro_portal_money_tsx
+  n_app_financeiro_financeiro_portal_conta_page_tsx["app/(financeiro)/financeiro/(portal)/conta/page.tsx"]
+  n_app_financeiro_financeiro_portal_conta_page_tsx --> n_app_admin_admin_actions_ts
+  n_app_financeiro_financeiro_portal_conta_page_tsx --> n_components_ui_action_form_tsx
+  n_app_financeiro_financeiro_portal_conta_page_tsx --> n_components_ui_admin_tsx
+  n_app_financeiro_financeiro_portal_conta_page_tsx --> n_components_ui_field_tsx
+  n_app_financeiro_financeiro_portal_conta_page_tsx --> n_lib_auth_finance_guard_ts
+  n_lib_auth_password_policy_ts["lib/auth/password-policy.ts"]
+  n_app_financeiro_financeiro_portal_conta_page_tsx --> n_lib_auth_password_policy_ts
+  n_app_financeiro_financeiro_portal_conta_page_tsx --> n_lib_auth_permissions_ts
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx["app/(financeiro)/financeiro/(portal)/mensalidades/page.tsx"]
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_components_ui_action_button_tsx
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_components_ui_action_form_tsx
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_components_ui_admin_tsx
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_components_ui_field_tsx
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_lib_auth_finance_guard_ts
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_lib_auth_permissions_ts
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_lib_datetime_ts
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_lib_db_prisma_ts
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_lib_params_ts
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_modules_finance_service_ts
+  n_app_public_contato_actions_ts["app/(public)/contato/actions.ts"]
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_app_public_contato_actions_ts
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_app_financeiro_financeiro_portal_finance_nav_tsx
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_app_financeiro_financeiro_portal_money_tsx
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_lib_params_ts
+  n_app_financeiro_financeiro_portal_mensalidades_due_form_tsx["app/(financeiro)/financeiro/(portal)/mensalidades/due-form.tsx"]
+  n_app_financeiro_financeiro_portal_mensalidades_page_tsx --> n_app_financeiro_financeiro_portal_mensalidades_due_form_tsx
+  n_app_financeiro_financeiro_portal_mensalidades_due_form_tsx --> n_components_ui_action_form_tsx
+  n_app_financeiro_financeiro_portal_mensalidades_due_form_tsx --> n_lib_action_ts
+  n_app_financeiro_financeiro_portal_mensalidades_due_form_tsx --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_folha_payroll_form_tsx["app/(financeiro)/financeiro/(portal)/folha/payroll-form.tsx"]
+  n_app_financeiro_financeiro_portal_folha_payroll_form_tsx --> n_components_ui_action_form_tsx
+  n_app_financeiro_financeiro_portal_folha_payroll_form_tsx --> n_lib_action_ts
+  n_app_financeiro_financeiro_portal_folha_payroll_form_tsx --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_folha_page_tsx["app/(financeiro)/financeiro/(portal)/folha/page.tsx"]
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_components_ui_admin_tsx
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_lib_auth_finance_guard_ts
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_lib_auth_permissions_ts
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_lib_datetime_ts
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_lib_db_prisma_ts
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_lib_params_ts
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_modules_finance_service_ts
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_modules_squad_rules_ts
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_app_public_contato_actions_ts
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_app_financeiro_financeiro_portal_finance_nav_tsx
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_app_financeiro_financeiro_portal_money_tsx
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_lib_params_ts
+  n_app_financeiro_financeiro_portal_folha_page_tsx --> n_app_financeiro_financeiro_portal_folha_payroll_form_tsx
+  n_app_financeiro_financeiro_portal_exportar_route_ts["app/(financeiro)/financeiro/(portal)/exportar/route.ts"]
+  n_app_financeiro_financeiro_portal_exportar_route_ts --> n_lib_audit_ts
+  n_app_financeiro_financeiro_portal_exportar_route_ts --> n_lib_auth_guard_ts
+  n_app_financeiro_financeiro_portal_exportar_route_ts --> n_lib_auth_permissions_ts
+  n_app_financeiro_financeiro_portal_exportar_route_ts --> n_lib_datetime_ts
+  n_app_financeiro_financeiro_portal_exportar_route_ts --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_exportar_route_ts --> n_modules_finance_service_ts
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx["app/(financeiro)/financeiro/(portal)/lancamentos/page.tsx"]
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_components_ui_action_form_tsx
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_components_ui_admin_tsx
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_components_ui_field_tsx
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_lib_auth_finance_guard_ts
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_lib_auth_permissions_ts
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_lib_datetime_ts
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_lib_db_prisma_ts
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_lib_params_ts
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_modules_finance_service_ts
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_app_public_contato_actions_ts
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_app_financeiro_financeiro_portal_finance_nav_tsx
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_app_financeiro_financeiro_portal_money_tsx
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_lib_params_ts
+  n_app_financeiro_financeiro_portal_lancamentos_entry_form_tsx["app/(financeiro)/financeiro/(portal)/lancamentos/entry-form.tsx"]
+  n_app_financeiro_financeiro_portal_lancamentos_page_tsx --> n_app_financeiro_financeiro_portal_lancamentos_entry_form_tsx
+  n_app_financeiro_financeiro_portal_lancamentos_entry_form_tsx --> n_components_ui_action_form_tsx
+  n_app_financeiro_financeiro_portal_lancamentos_entry_form_tsx --> n_lib_action_ts
+  n_app_financeiro_financeiro_portal_lancamentos_entry_form_tsx --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_acordos_page_tsx["app/(financeiro)/financeiro/(portal)/acordos/page.tsx"]
+  n_app_financeiro_financeiro_portal_acordos_page_tsx --> n_components_ui_action_button_tsx
+  n_app_financeiro_financeiro_portal_acordos_page_tsx --> n_components_ui_action_form_tsx
+  n_app_financeiro_financeiro_portal_acordos_page_tsx --> n_components_ui_admin_tsx
+  n_app_financeiro_financeiro_portal_acordos_page_tsx --> n_components_ui_field_tsx
+  n_app_financeiro_financeiro_portal_acordos_page_tsx --> n_lib_auth_finance_guard_ts
+  n_app_financeiro_financeiro_portal_acordos_page_tsx --> n_lib_auth_permissions_ts
+  n_app_financeiro_financeiro_portal_acordos_page_tsx --> n_lib_datetime_ts
+  n_app_financeiro_financeiro_portal_acordos_page_tsx --> n_lib_db_prisma_ts
+  n_app_financeiro_financeiro_portal_acordos_page_tsx --> n_modules_finance_rules_ts
+  n_app_financeiro_financeiro_portal_acordos_page_tsx --> n_app_public_contato_actions_ts
+  n_app_financeiro_financeiro_portal_acordos_page_tsx --> n_app_financeiro_financeiro_portal_money_tsx
+  n_app_financeiro_financeiro_login_page_tsx["app/(financeiro)/financeiro/login/page.tsx"]
+  n_app_financeiro_financeiro_login_page_tsx --> n_app_admin_admin_actions_ts
+  n_app_financeiro_financeiro_login_page_tsx --> n_components_ui_action_form_tsx
+  n_app_financeiro_financeiro_login_page_tsx --> n_components_ui_field_tsx
+  n_app_financeiro_financeiro_login_page_tsx --> n_lib_auth_guard_ts
+  n_app_financeiro_financeiro_login_page_tsx --> n_lib_auth_permissions_ts
+  n_app_financeiro_financeiro_login_page_tsx --> n_lib_site_ts
+  n_app_midia_path_route_ts["app/midia/[...path]/route.ts"]
+  n_app_midia_path_route_ts --> n_lib_storage_index_ts
+  n_app_midia_path_route_ts --> n_modules_media_rules_ts
+  n_app_api_seasons_id_standings_route_ts["app/api/seasons/[id]/standings/route.ts"]
+  n_lib_api_ts["lib/api.ts"]
+  n_app_api_seasons_id_standings_route_ts --> n_lib_api_ts
+  n_app_api_seasons_id_standings_route_ts --> n_modules_competitions_service_ts
+  n_lib_rate_limit_ts["lib/rate-limit.ts"]
+  n_app_api_seasons_id_standings_route_ts --> n_lib_rate_limit_ts
+  n_app_api_matches_route_ts["app/api/matches/route.ts"]
+  n_app_api_matches_route_ts --> n_lib_api_ts
+  n_app_api_matches_route_ts --> n_modules_matches_service_ts
+  n_app_api_matches_route_ts --> n_lib_rate_limit_ts
+  n_app_api_news_route_ts["app/api/news/route.ts"]
+  n_app_api_news_route_ts --> n_lib_api_ts
+  n_app_api_news_route_ts --> n_modules_news_service_ts
+  n_app_api_news_route_ts --> n_lib_rate_limit_ts
+  n_app_api_health_route_ts["app/api/health/route.ts"]
+  n_app_api_health_route_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_actions_ts --> n_lib_auth_permissions_ts
+  n_lib_auth_password_ts["lib/auth/password.ts"]
+  n_app_admin_admin_actions_ts --> n_lib_auth_password_ts
+  n_lib_auth_rate_limit_ts["lib/auth/rate-limit.ts"]
+  n_app_admin_admin_actions_ts --> n_lib_auth_rate_limit_ts
+  n_lib_auth_session_ts["lib/auth/session.ts"]
+  n_app_admin_admin_actions_ts --> n_lib_auth_session_ts
+  n_lib_validation_auth_ts["lib/validation/auth.ts"]
+  n_app_admin_admin_actions_ts --> n_lib_validation_auth_ts
+  n_app_admin_admin_painel_page_tsx["app/(admin)/admin/(painel)/page.tsx"]
+  n_app_admin_admin_painel_page_tsx --> n_components_ui_toaster_tsx
+  n_app_admin_admin_painel_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_page_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_page_tsx --> n_lib_params_ts
+  n_app_admin_admin_painel_page_tsx --> n_modules_matches_service_ts
+  n_app_admin_admin_painel_layout_tsx["app/(admin)/admin/(painel)/layout.tsx"]
+  n_app_admin_admin_painel_layout_tsx --> n_components_layout_admin_nav_tsx
+  n_app_admin_admin_painel_layout_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_layout_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_layout_tsx --> n_lib_site_ts
+  n_app_admin_admin_painel_layout_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_mensagens_actions_ts["app/(admin)/admin/(painel)/mensagens/actions.ts"]
+  n_app_admin_admin_painel_mensagens_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_mensagens_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_mensagens_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_mensagens_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_mensagens_page_tsx["app/(admin)/admin/(painel)/mensagens/page.tsx"]
+  n_app_admin_admin_painel_mensagens_page_tsx --> n_components_ui_action_button_tsx
+  n_app_admin_admin_painel_mensagens_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_mensagens_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_mensagens_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_admin_admin_painel_mensagens_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_mensagens_page_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_mensagens_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_mensagens_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_auditoria_page_tsx["app/(admin)/admin/(painel)/auditoria/page.tsx"]
+  n_app_admin_admin_painel_auditoria_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_auditoria_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_admin_admin_painel_auditoria_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_auditoria_page_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_auditoria_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_clubes_actions_ts["app/(admin)/admin/(painel)/clubes/actions.ts"]
+  n_app_admin_admin_painel_clubes_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_clubes_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_clubes_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_clubes_actions_ts --> n_lib_auth_guard_ts
+  n_lib_slug_ts["lib/slug.ts"]
+  n_app_admin_admin_painel_clubes_actions_ts --> n_lib_slug_ts
+  n_lib_validation_football_ts["lib/validation/football.ts"]
+  n_app_admin_admin_painel_clubes_actions_ts --> n_lib_validation_football_ts
+  n_app_admin_admin_painel_clubes_page_tsx["app/(admin)/admin/(painel)/clubes/page.tsx"]
+  n_app_admin_admin_painel_clubes_page_tsx --> n_components_football_club_crest_tsx
+  n_app_admin_admin_painel_clubes_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_clubes_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_clubes_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_clubes_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_clubes_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_clubes_club_form_tsx["app/(admin)/admin/(painel)/clubes/club-form.tsx"]
+  n_app_admin_admin_painel_clubes_page_tsx --> n_app_admin_admin_painel_clubes_club_form_tsx
+  n_app_admin_admin_painel_clubes_club_form_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_clubes_club_form_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_clubes_club_form_tsx --> n_components_ui_image_field_tsx
+  n_app_admin_admin_painel_clubes_club_form_tsx --> n_lib_action_ts
+  n_app_admin_admin_painel_clubes_id_page_tsx["app/(admin)/admin/(painel)/clubes/[id]/page.tsx"]
+  n_app_admin_admin_painel_clubes_id_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_clubes_id_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_clubes_id_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_clubes_id_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_clubes_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_clubes_id_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_clubes_id_page_tsx --> n_app_admin_admin_painel_clubes_club_form_tsx
+  n_app_admin_admin_painel_jogos_actions_ts["app/(admin)/admin/(painel)/jogos/actions.ts"]
+  n_app_admin_admin_painel_jogos_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_jogos_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_jogos_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_jogos_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_jogos_actions_ts --> n_lib_datetime_ts
+  n_app_admin_admin_painel_jogos_actions_ts --> n_lib_validation_football_ts
+  n_modules_matches_events_ts["modules/matches/events.ts"]
+  n_app_admin_admin_painel_jogos_actions_ts --> n_modules_matches_events_ts
+  n_app_admin_admin_painel_jogos_actions_ts --> n_modules_matches_service_ts
+  n_app_admin_admin_painel_jogos_match_form_tsx["app/(admin)/admin/(painel)/jogos/match-form.tsx"]
+  n_app_admin_admin_painel_jogos_match_form_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_jogos_match_form_tsx --> n_lib_action_ts
+  n_app_admin_admin_painel_jogos_match_form_tsx --> n_modules_matches_rules_ts
+  n_app_admin_admin_painel_jogos_match_form_tsx --> n_modules_squad_rules_ts
+  n_app_admin_admin_painel_jogos_page_tsx["app/(admin)/admin/(painel)/jogos/page.tsx"]
+  n_app_admin_admin_painel_jogos_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_jogos_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_admin_admin_painel_jogos_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_jogos_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_jogos_page_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_jogos_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_jogos_page_tsx --> n_lib_params_ts
+  n_app_admin_admin_painel_jogos_page_tsx --> n_modules_matches_rules_ts
+  n_app_admin_admin_painel_jogos_page_tsx --> n_modules_matches_service_ts
+  n_app_admin_admin_painel_jogos_data_ts["app/(admin)/admin/(painel)/jogos/data.ts"]
+  n_app_admin_admin_painel_jogos_data_ts --> n_tests_stubs_server_only_ts
+  n_app_admin_admin_painel_jogos_data_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_jogos_data_ts --> n_modules_squad_rules_ts
+  n_app_admin_admin_painel_jogos_data_ts --> n_app_admin_admin_painel_jogos_match_form_tsx
+  n_app_admin_admin_painel_jogos_id_page_tsx["app/(admin)/admin/(painel)/jogos/[id]/page.tsx"]
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_modules_matches_rules_ts
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_modules_matches_service_ts
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_app_admin_admin_painel_jogos_data_ts
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_app_admin_admin_painel_jogos_match_form_tsx
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_modules_squad_rules_ts
+  n_app_admin_admin_painel_jogos_id_match_details_tsx["app/(admin)/admin/(painel)/jogos/[id]/match-details.tsx"]
+  n_app_admin_admin_painel_jogos_id_page_tsx --> n_app_admin_admin_painel_jogos_id_match_details_tsx
+  n_app_admin_admin_painel_jogos_id_match_details_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_jogos_id_match_details_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_jogos_id_match_details_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_jogos_id_match_details_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_jogos_id_match_details_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_jogos_id_match_details_tsx --> n_modules_matches_events_ts
+  n_app_admin_admin_painel_jogos_id_match_details_tsx --> n_modules_matches_service_ts
+  n_app_admin_admin_painel_jogos_id_match_details_tsx --> n_modules_squad_rules_ts
+  n_app_admin_admin_painel_jogos_id_match_details_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_jogos_novo_page_tsx["app/(admin)/admin/(painel)/jogos/novo/page.tsx"]
+  n_app_admin_admin_painel_jogos_novo_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_jogos_novo_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_admin_admin_painel_jogos_novo_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_jogos_novo_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_jogos_novo_page_tsx --> n_app_admin_admin_painel_jogos_data_ts
+  n_app_admin_admin_painel_jogos_novo_page_tsx --> n_app_admin_admin_painel_jogos_match_form_tsx
+  n_app_admin_admin_painel_elenco_actions_ts["app/(admin)/admin/(painel)/elenco/actions.ts"]
+  n_app_admin_admin_painel_elenco_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_elenco_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_elenco_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_elenco_actions_ts --> n_lib_auth_guard_ts
+  n_lib_validation_site_ts["lib/validation/site.ts"]
+  n_app_admin_admin_painel_elenco_actions_ts --> n_lib_validation_site_ts
+  n_app_admin_admin_painel_elenco_page_tsx["app/(admin)/admin/(painel)/elenco/page.tsx"]
+  n_app_admin_admin_painel_elenco_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_elenco_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_elenco_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_elenco_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_elenco_page_tsx --> n_modules_squad_rules_ts
+  n_app_admin_admin_painel_elenco_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_elenco_athlete_form_tsx["app/(admin)/admin/(painel)/elenco/athlete-form.tsx"]
+  n_app_admin_admin_painel_elenco_page_tsx --> n_app_admin_admin_painel_elenco_athlete_form_tsx
+  n_app_admin_admin_painel_elenco_athlete_form_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_elenco_athlete_form_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_elenco_athlete_form_tsx --> n_components_ui_image_field_tsx
+  n_app_admin_admin_painel_elenco_athlete_form_tsx --> n_lib_action_ts
+  n_app_admin_admin_painel_elenco_athlete_form_tsx --> n_modules_squad_rules_ts
+  n_app_admin_admin_painel_elenco_id_page_tsx["app/(admin)/admin/(painel)/elenco/[id]/page.tsx"]
+  n_app_admin_admin_painel_elenco_id_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_elenco_id_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_elenco_id_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_elenco_id_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_elenco_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_elenco_id_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_elenco_id_page_tsx --> n_app_admin_admin_painel_elenco_athlete_form_tsx
+  n_app_admin_admin_painel_conta_page_tsx["app/(admin)/admin/(painel)/conta/page.tsx"]
+  n_app_admin_admin_painel_conta_page_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_conta_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_conta_page_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_conta_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_conta_page_tsx --> n_lib_auth_password_policy_ts
+  n_app_admin_admin_painel_conta_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_conta_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_patrocinadores_actions_ts["app/(admin)/admin/(painel)/patrocinadores/actions.ts"]
+  n_app_admin_admin_painel_patrocinadores_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_patrocinadores_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_patrocinadores_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_patrocinadores_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_patrocinadores_actions_ts --> n_lib_datetime_ts
+  n_app_admin_admin_painel_patrocinadores_actions_ts --> n_lib_validation_site_ts
+  n_app_admin_admin_painel_patrocinadores_page_tsx["app/(admin)/admin/(painel)/patrocinadores/page.tsx"]
+  n_app_admin_admin_painel_patrocinadores_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_patrocinadores_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_patrocinadores_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_patrocinadores_page_tsx --> n_lib_db_prisma_ts
+  n_modules_sponsors_rules_ts["modules/sponsors/rules.ts"]
+  n_app_admin_admin_painel_patrocinadores_page_tsx --> n_modules_sponsors_rules_ts
+  n_app_admin_admin_painel_patrocinadores_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_patrocinadores_sponsor_form_tsx["app/(admin)/admin/(painel)/patrocinadores/sponsor-form.tsx"]
+  n_app_admin_admin_painel_patrocinadores_page_tsx --> n_app_admin_admin_painel_patrocinadores_sponsor_form_tsx
+  n_app_admin_admin_painel_patrocinadores_sponsor_form_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_patrocinadores_sponsor_form_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_patrocinadores_sponsor_form_tsx --> n_components_ui_image_field_tsx
+  n_app_admin_admin_painel_patrocinadores_sponsor_form_tsx --> n_lib_action_ts
+  n_app_admin_admin_painel_patrocinadores_sponsor_form_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_patrocinadores_sponsor_form_tsx --> n_modules_sponsors_rules_ts
+  n_app_admin_admin_painel_patrocinadores_id_page_tsx["app/(admin)/admin/(painel)/patrocinadores/[id]/page.tsx"]
+  n_app_admin_admin_painel_patrocinadores_id_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_patrocinadores_id_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_patrocinadores_id_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_patrocinadores_id_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_patrocinadores_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_patrocinadores_id_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_patrocinadores_id_page_tsx --> n_app_admin_admin_painel_patrocinadores_sponsor_form_tsx
+  n_app_admin_admin_painel_comissao_tecnica_technical_staff_form["app/(admin)/admin/(painel)/comissao-tecnica/technical-staff-form.tsx"]
+  n_app_admin_admin_painel_comissao_tecnica_technical_staff_form --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_comissao_tecnica_technical_staff_form --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_comissao_tecnica_technical_staff_form --> n_lib_action_ts
+  n_app_admin_admin_painel_comissao_tecnica_technical_staff_form --> n_modules_squad_rules_ts
+  n_app_admin_admin_painel_comissao_tecnica_actions_ts["app/(admin)/admin/(painel)/comissao-tecnica/actions.ts"]
+  n_app_admin_admin_painel_comissao_tecnica_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_comissao_tecnica_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_comissao_tecnica_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_comissao_tecnica_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_comissao_tecnica_actions_ts --> n_lib_validation_site_ts
+  n_app_admin_admin_painel_comissao_tecnica_page_tsx["app/(admin)/admin/(painel)/comissao-tecnica/page.tsx"]
+  n_app_admin_admin_painel_comissao_tecnica_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_comissao_tecnica_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_comissao_tecnica_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_comissao_tecnica_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_comissao_tecnica_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_comissao_tecnica_page_tsx --> n_modules_squad_rules_ts
+  n_app_admin_admin_painel_comissao_tecnica_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_comissao_tecnica_page_tsx --> n_app_admin_admin_painel_comissao_tecnica_technical_staff_form
+  n_app_admin_admin_painel_equipes_actions_ts["app/(admin)/admin/(painel)/equipes/actions.ts"]
+  n_app_admin_admin_painel_equipes_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_equipes_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_equipes_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_equipes_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_equipes_actions_ts --> n_lib_validation_site_ts
+  n_app_admin_admin_painel_equipes_actions_ts --> n_modules_squad_rules_ts
+  n_app_admin_admin_painel_equipes_team_form_tsx["app/(admin)/admin/(painel)/equipes/team-form.tsx"]
+  n_app_admin_admin_painel_equipes_team_form_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_equipes_team_form_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_equipes_team_form_tsx --> n_components_ui_image_field_tsx
+  n_app_admin_admin_painel_equipes_team_form_tsx --> n_lib_action_ts
+  n_app_admin_admin_painel_equipes_page_tsx["app/(admin)/admin/(painel)/equipes/page.tsx"]
+  n_app_admin_admin_painel_equipes_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_equipes_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_equipes_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_equipes_page_tsx --> n_components_ui_smart_image_tsx
+  n_app_admin_admin_painel_equipes_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_equipes_page_tsx --> n_modules_squad_rules_ts
+  n_app_admin_admin_painel_equipes_category_page_tsx["app/(admin)/admin/(painel)/equipes/[category]/page.tsx"]
+  n_app_admin_admin_painel_equipes_category_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_equipes_category_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_equipes_category_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_equipes_category_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_equipes_category_page_tsx --> n_modules_squad_rules_ts
+  n_app_admin_admin_painel_equipes_category_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_equipes_category_page_tsx --> n_app_admin_admin_painel_equipes_team_form_tsx
+  n_app_admin_admin_painel_campeonatos_actions_ts["app/(admin)/admin/(painel)/campeonatos/actions.ts"]
+  n_app_admin_admin_painel_campeonatos_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_campeonatos_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_campeonatos_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_campeonatos_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_campeonatos_actions_ts --> n_lib_slug_ts
+  n_app_admin_admin_painel_campeonatos_actions_ts --> n_lib_validation_football_ts
+  n_modules_competitions_manual_ts["modules/competitions/manual.ts"]
+  n_app_admin_admin_painel_campeonatos_actions_ts --> n_modules_competitions_manual_ts
+  n_app_admin_admin_painel_campeonatos_season_form_tsx["app/(admin)/admin/(painel)/campeonatos/season-form.tsx"]
+  n_app_admin_admin_painel_campeonatos_season_form_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_campeonatos_season_form_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_campeonatos_season_form_tsx --> n_lib_action_ts
+  n_app_admin_admin_painel_campeonatos_season_form_tsx --> n_modules_competitions_standings_ts
+  n_app_admin_admin_painel_campeonatos_competition_form_tsx["app/(admin)/admin/(painel)/campeonatos/competition-form.tsx"]
+  n_app_admin_admin_painel_campeonatos_competition_form_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_campeonatos_competition_form_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_campeonatos_competition_form_tsx --> n_components_ui_image_field_tsx
+  n_app_admin_admin_painel_campeonatos_competition_form_tsx --> n_lib_action_ts
+  n_app_admin_admin_painel_campeonatos_page_tsx["app/(admin)/admin/(painel)/campeonatos/page.tsx"]
+  n_app_admin_admin_painel_campeonatos_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_campeonatos_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_campeonatos_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_campeonatos_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_campeonatos_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_campeonatos_page_tsx --> n_app_admin_admin_painel_campeonatos_competition_form_tsx
+  n_app_admin_admin_painel_campeonatos_id_page_tsx["app/(admin)/admin/(painel)/campeonatos/[id]/page.tsx"]
+  n_app_admin_admin_painel_campeonatos_id_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_campeonatos_id_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_campeonatos_id_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_campeonatos_id_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_campeonatos_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_campeonatos_id_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_campeonatos_id_page_tsx --> n_app_admin_admin_painel_campeonatos_competition_form_tsx
+  n_app_admin_admin_painel_campeonatos_id_page_tsx --> n_app_admin_admin_painel_campeonatos_season_form_tsx
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx["app/(admin)/admin/(painel)/campeonatos/temporadas/[id]/page.tsx"]
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx --> n_components_football_standings_table_tsx
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx --> n_modules_competitions_service_ts
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx --> n_app_admin_admin_painel_campeonatos_season_form_tsx
+  n_app_admin_admin_painel_campeonatos_temporadas_id_manual_tabl["app/(admin)/admin/(painel)/campeonatos/temporadas/[id]/manual-table.tsx"]
+  n_app_admin_admin_painel_campeonatos_temporadas_id_page_tsx --> n_app_admin_admin_painel_campeonatos_temporadas_id_manual_tabl
+  n_app_admin_admin_painel_campeonatos_temporadas_id_manual_tabl --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_campeonatos_temporadas_id_manual_tabl --> n_lib_action_ts
+  n_app_admin_admin_painel_campeonatos_temporadas_id_manual_tabl --> n_modules_competitions_manual_ts
+  n_app_admin_admin_painel_usuarios_actions_ts["app/(admin)/admin/(painel)/usuarios/actions.ts"]
+  n_app_admin_admin_painel_usuarios_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_usuarios_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_usuarios_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_usuarios_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_usuarios_actions_ts --> n_lib_auth_password_ts
+  n_app_admin_admin_painel_usuarios_actions_ts --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_usuarios_actions_ts --> n_lib_validation_auth_ts
+  n_app_admin_admin_painel_usuarios_actions_ts --> n_modules_users_rules_ts
+  n_app_admin_admin_painel_usuarios_page_tsx["app/(admin)/admin/(painel)/usuarios/page.tsx"]
+  n_app_admin_admin_painel_usuarios_page_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_usuarios_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_usuarios_page_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_usuarios_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_usuarios_page_tsx --> n_lib_auth_password_policy_ts
+  n_app_admin_admin_painel_usuarios_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_usuarios_page_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_usuarios_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_usuarios_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_usuarios_id_page_tsx["app/(admin)/admin/(painel)/usuarios/[id]/page.tsx"]
+  n_app_admin_admin_painel_usuarios_id_page_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_usuarios_id_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_usuarios_id_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_usuarios_id_page_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_usuarios_id_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_usuarios_id_page_tsx --> n_lib_auth_password_policy_ts
+  n_app_admin_admin_painel_usuarios_id_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_usuarios_id_page_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_usuarios_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_usuarios_id_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_noticias_actions_ts["app/(admin)/admin/(painel)/noticias/actions.ts"]
+  n_app_admin_admin_painel_noticias_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_noticias_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_noticias_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_noticias_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_noticias_actions_ts --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_noticias_actions_ts --> n_lib_datetime_ts
+  n_app_admin_admin_painel_noticias_actions_ts --> n_lib_slug_ts
+  n_lib_validation_news_ts["lib/validation/news.ts"]
+  n_app_admin_admin_painel_noticias_actions_ts --> n_lib_validation_news_ts
+  n_modules_news_rules_ts["modules/news/rules.ts"]
+  n_app_admin_admin_painel_noticias_actions_ts --> n_modules_news_rules_ts
+  n_app_admin_admin_painel_noticias_news_form_tsx["app/(admin)/admin/(painel)/noticias/news-form.tsx"]
+  n_app_admin_admin_painel_noticias_news_form_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_noticias_news_form_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_noticias_news_form_tsx --> n_components_ui_image_field_tsx
+  n_app_admin_admin_painel_noticias_news_form_tsx --> n_lib_action_ts
+  n_app_admin_admin_painel_noticias_news_form_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_noticias_news_form_tsx --> n_modules_news_rules_ts
+  n_app_admin_admin_painel_noticias_page_tsx["app/(admin)/admin/(painel)/noticias/page.tsx"]
+  n_app_admin_admin_painel_noticias_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_noticias_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_admin_admin_painel_noticias_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_noticias_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_noticias_page_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_noticias_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_noticias_page_tsx --> n_lib_params_ts
+  n_app_admin_admin_painel_noticias_page_tsx --> n_modules_news_rules_ts
+  n_app_admin_admin_painel_noticias_categorias_page_tsx["app/(admin)/admin/(painel)/noticias/categorias/page.tsx"]
+  n_app_admin_admin_painel_noticias_categorias_page_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_noticias_categorias_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_noticias_categorias_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_noticias_categorias_page_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_noticias_categorias_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_noticias_categorias_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_noticias_categorias_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_noticias_categorias_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_noticias_id_page_tsx["app/(admin)/admin/(painel)/noticias/[id]/page.tsx"]
+  n_app_admin_admin_painel_noticias_id_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_noticias_id_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_noticias_id_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_noticias_id_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_noticias_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_noticias_id_page_tsx --> n_modules_news_rules_ts
+  n_app_admin_admin_painel_noticias_id_page_tsx --> n_modules_news_service_ts
+  n_app_admin_admin_painel_noticias_id_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_noticias_id_page_tsx --> n_app_admin_admin_painel_noticias_news_form_tsx
+  n_app_admin_admin_painel_noticias_id_previa_page_tsx["app/(admin)/admin/(painel)/noticias/[id]/previa/page.tsx"]
+  n_app_admin_admin_painel_noticias_id_previa_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_noticias_id_previa_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_noticias_id_previa_page_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_noticias_id_previa_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_noticias_id_previa_page_tsx --> n_modules_news_rules_ts
+  n_app_admin_admin_painel_noticias_novo_page_tsx["app/(admin)/admin/(painel)/noticias/novo/page.tsx"]
+  n_app_admin_admin_painel_noticias_novo_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_noticias_novo_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_noticias_novo_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_noticias_novo_page_tsx --> n_modules_news_service_ts
+  n_app_admin_admin_painel_noticias_novo_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_noticias_novo_page_tsx --> n_app_admin_admin_painel_noticias_news_form_tsx
+  n_app_admin_admin_painel_diretores_actions_ts["app/(admin)/admin/(painel)/diretores/actions.ts"]
+  n_app_admin_admin_painel_diretores_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_diretores_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_diretores_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_diretores_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_diretores_actions_ts --> n_lib_validation_site_ts
+  n_app_admin_admin_painel_diretores_actions_ts --> n_modules_finance_rules_ts
+  n_app_admin_admin_painel_diretores_page_tsx["app/(admin)/admin/(painel)/diretores/page.tsx"]
+  n_app_admin_admin_painel_diretores_page_tsx --> n_components_football_club_crest_tsx
+  n_app_admin_admin_painel_diretores_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_diretores_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_diretores_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_diretores_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_diretores_page_tsx --> n_modules_finance_rules_ts
+  n_app_admin_admin_painel_diretores_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_diretores_director_form_tsx["app/(admin)/admin/(painel)/diretores/director-form.tsx"]
+  n_app_admin_admin_painel_diretores_page_tsx --> n_app_admin_admin_painel_diretores_director_form_tsx
+  n_app_admin_admin_painel_diretores_director_form_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_diretores_director_form_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_diretores_director_form_tsx --> n_components_ui_image_field_tsx
+  n_app_admin_admin_painel_diretores_director_form_tsx --> n_lib_action_ts
+  n_app_admin_admin_painel_diretores_director_form_tsx --> n_modules_finance_rules_ts
+  n_app_admin_admin_painel_diretores_id_page_tsx["app/(admin)/admin/(painel)/diretores/[id]/page.tsx"]
+  n_app_admin_admin_painel_diretores_id_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_diretores_id_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_diretores_id_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_diretores_id_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_diretores_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_diretores_id_page_tsx --> n_modules_finance_rules_ts
+  n_app_admin_admin_painel_diretores_id_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_diretores_id_page_tsx --> n_app_admin_admin_painel_diretores_director_form_tsx
+  n_app_admin_admin_painel_midia_actions_ts["app/(admin)/admin/(painel)/midia/actions.ts"]
+  n_app_admin_admin_painel_midia_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_midia_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_midia_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_midia_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_midia_actions_ts --> n_modules_media_service_ts
+  n_app_admin_admin_painel_midia_page_tsx["app/(admin)/admin/(painel)/midia/page.tsx"]
+  n_app_admin_admin_painel_midia_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_midia_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_midia_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_admin_admin_painel_midia_page_tsx --> n_components_ui_smart_image_tsx
+  n_app_admin_admin_painel_midia_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_midia_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_midia_page_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_midia_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_midia_page_tsx --> n_modules_media_rules_ts
+  n_app_admin_admin_painel_midia_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_galeria_actions_ts["app/(admin)/admin/(painel)/galeria/actions.ts"]
+  n_app_admin_admin_painel_galeria_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_galeria_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_galeria_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_galeria_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_galeria_actions_ts --> n_lib_datetime_ts
+  n_app_admin_admin_painel_galeria_actions_ts --> n_lib_slug_ts
+  n_app_admin_admin_painel_galeria_actions_ts --> n_lib_validation_site_ts
+  n_app_admin_admin_painel_galeria_actions_ts --> n_modules_gallery_rules_ts
+  n_app_admin_admin_painel_galeria_actions_ts --> n_modules_media_service_ts
+  n_app_admin_admin_painel_galeria_page_tsx["app/(admin)/admin/(painel)/galeria/page.tsx"]
+  n_app_admin_admin_painel_galeria_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_galeria_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_galeria_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_galeria_page_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_galeria_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_galeria_page_tsx --> n_modules_gallery_rules_ts
+  n_app_admin_admin_painel_galeria_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_galeria_gallery_form_tsx["app/(admin)/admin/(painel)/galeria/gallery-form.tsx"]
+  n_app_admin_admin_painel_galeria_page_tsx --> n_app_admin_admin_painel_galeria_gallery_form_tsx
+  n_app_admin_admin_painel_galeria_gallery_form_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_galeria_gallery_form_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_galeria_gallery_form_tsx --> n_lib_action_ts
+  n_app_admin_admin_painel_galeria_gallery_form_tsx --> n_lib_datetime_ts
+  n_app_admin_admin_painel_galeria_gallery_form_tsx --> n_modules_gallery_rules_ts
+  n_app_admin_admin_painel_galeria_id_page_tsx["app/(admin)/admin/(painel)/galeria/[id]/page.tsx"]
+  n_app_admin_admin_painel_galeria_id_page_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_galeria_id_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_galeria_id_page_tsx --> n_components_ui_confirm_button_tsx
+  n_app_admin_admin_painel_galeria_id_page_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_galeria_id_page_tsx --> n_components_ui_smart_image_tsx
+  n_app_admin_admin_painel_galeria_id_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_galeria_id_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_galeria_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_galeria_id_page_tsx --> n_modules_media_rules_ts
+  n_app_admin_admin_painel_galeria_id_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_painel_galeria_id_page_tsx --> n_app_admin_admin_painel_galeria_gallery_form_tsx
+  n_app_admin_admin_painel_institucional_actions_ts["app/(admin)/admin/(painel)/institucional/actions.ts"]
+  n_app_admin_admin_painel_institucional_actions_ts --> n_lib_db_prisma_ts
+  n_app_admin_admin_painel_institucional_actions_ts --> n_lib_action_ts
+  n_app_admin_admin_painel_institucional_actions_ts --> n_lib_audit_ts
+  n_app_admin_admin_painel_institucional_actions_ts --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_institucional_actions_ts --> n_lib_validation_site_ts
+  n_app_admin_admin_painel_institucional_actions_ts --> n_modules_site_settings_ts
+  n_app_admin_admin_painel_institucional_page_tsx["app/(admin)/admin/(painel)/institucional/page.tsx"]
+  n_app_admin_admin_painel_institucional_page_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_painel_institucional_page_tsx --> n_components_ui_admin_tsx
+  n_app_admin_admin_painel_institucional_page_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_painel_institucional_page_tsx --> n_components_ui_image_field_tsx
+  n_app_admin_admin_painel_institucional_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_painel_institucional_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_painel_institucional_page_tsx --> n_modules_site_service_ts
+  n_app_admin_admin_painel_institucional_page_tsx --> n_modules_site_settings_ts
+  n_app_admin_admin_painel_institucional_page_tsx --> n_app_public_contato_actions_ts
+  n_app_admin_admin_login_page_tsx["app/(admin)/admin/login/page.tsx"]
+  n_app_admin_admin_login_page_tsx --> n_components_ui_action_form_tsx
+  n_app_admin_admin_login_page_tsx --> n_components_ui_field_tsx
+  n_app_admin_admin_login_page_tsx --> n_lib_auth_guard_ts
+  n_app_admin_admin_login_page_tsx --> n_lib_auth_permissions_ts
+  n_app_admin_admin_login_page_tsx --> n_lib_site_ts
+  n_app_admin_admin_login_page_tsx --> n_app_public_contato_actions_ts
+  n_app_public_page_tsx["app/(public)/page.tsx"]
+  n_app_public_page_tsx --> n_components_football_match_card_tsx
+  n_app_public_page_tsx --> n_components_football_standings_table_tsx
+  n_app_public_page_tsx --> n_components_football_upcoming_match_tsx
+  n_app_public_page_tsx --> n_components_news_news_card_tsx
+  n_app_public_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_public_page_tsx --> n_components_ui_smart_image_tsx
+  n_app_public_page_tsx --> n_lib_site_ts
+  n_app_public_page_tsx --> n_modules_competitions_service_ts
+  n_app_public_page_tsx --> n_modules_matches_service_ts
+  n_app_public_page_tsx --> n_modules_news_service_ts
+  n_app_public_page_tsx --> n_modules_site_service_ts
+  n_app_public_page_tsx --> n_modules_site_settings_ts
+  n_app_public_page_tsx --> n_modules_sponsors_service_ts
+  n_app_public_page_tsx --> n_modules_sponsors_rules_ts
+  n_app_public_page_tsx --> n_lib_db_prisma_ts
+  n_app_public_page_tsx --> n_modules_squad_rules_ts
+  n_app_public_layout_tsx["app/(public)/layout.tsx"]
+  n_app_public_layout_tsx --> n_components_layout_site_footer_tsx
+  n_app_public_layout_tsx --> n_components_layout_site_header_tsx
+  n_app_public_jogos_page_tsx["app/(public)/jogos/page.tsx"]
+  n_app_public_jogos_page_tsx --> n_components_football_match_card_tsx
+  n_components_football_match_filters_tsx["components/football/match-filters.tsx"]
+  n_app_public_jogos_page_tsx --> n_components_football_match_filters_tsx
+  n_app_public_jogos_page_tsx --> n_components_ui_empty_state_tsx
+  n_components_ui_page_title_tsx["components/ui/page-title.tsx"]
+  n_app_public_jogos_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_jogos_page_tsx --> n_lib_params_ts
+  n_app_public_jogos_page_tsx --> n_modules_competitions_service_ts
+  n_app_public_jogos_page_tsx --> n_modules_matches_rules_ts
+  n_app_public_jogos_page_tsx --> n_modules_matches_service_ts
+  n_app_public_jogos_id_page_tsx["app/(public)/jogos/[id]/page.tsx"]
+  n_app_public_jogos_id_page_tsx --> n_components_football_club_crest_tsx
+  n_app_public_jogos_id_page_tsx --> n_lib_datetime_ts
+  n_app_public_jogos_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_public_jogos_id_page_tsx --> n_modules_matches_events_ts
+  n_app_public_jogos_id_page_tsx --> n_modules_matches_rules_ts
+  n_app_public_jogos_id_page_tsx --> n_modules_matches_service_ts
+  n_app_public_jogos_id_page_tsx --> n_modules_squad_rules_ts
+  n_app_public_patrocinadores_page_tsx["app/(public)/patrocinadores/page.tsx"]
+  n_app_public_patrocinadores_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_public_patrocinadores_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_patrocinadores_page_tsx --> n_components_ui_smart_image_tsx
+  n_app_public_patrocinadores_page_tsx --> n_modules_sponsors_rules_ts
+  n_app_public_patrocinadores_page_tsx --> n_modules_sponsors_service_ts
+  n_app_public_contato_actions_ts --> n_lib_db_prisma_ts
+  n_app_public_contato_actions_ts --> n_lib_action_ts
+  n_app_public_contato_actions_ts --> n_lib_auth_session_ts
+  n_app_public_contato_actions_ts --> n_lib_validation_site_ts
+  n_modules_site_contact_ts["modules/site/contact.ts"]
+  n_app_public_contato_actions_ts --> n_modules_site_contact_ts
+  n_app_public_contato_contact_form_tsx["app/(public)/contato/contact-form.tsx"]
+  n_app_public_contato_contact_form_tsx --> n_components_ui_action_form_tsx
+  n_app_public_contato_contact_form_tsx --> n_lib_action_ts
+  n_app_public_contato_page_tsx["app/(public)/contato/page.tsx"]
+  n_app_public_contato_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_contato_page_tsx --> n_modules_site_service_ts
+  n_app_public_contato_page_tsx --> n_app_public_contato_actions_ts
+  n_app_public_contato_page_tsx --> n_app_public_contato_contact_form_tsx
+  n_app_public_equipes_page_tsx["app/(public)/equipes/page.tsx"]
+  n_app_public_equipes_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_public_equipes_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_equipes_page_tsx --> n_components_ui_smart_image_tsx
+  n_app_public_equipes_page_tsx --> n_lib_db_prisma_ts
+  n_app_public_equipes_page_tsx --> n_modules_squad_rules_ts
+  n_app_public_campeonatos_page_tsx["app/(public)/campeonatos/page.tsx"]
+  n_app_public_campeonatos_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_public_campeonatos_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_campeonatos_page_tsx --> n_components_ui_smart_image_tsx
+  n_app_public_campeonatos_page_tsx --> n_lib_db_prisma_ts
+  n_app_public_campeonatos_slug_page_tsx["app/(public)/campeonatos/[slug]/page.tsx"]
+  n_app_public_campeonatos_slug_page_tsx --> n_components_football_club_crest_tsx
+  n_app_public_campeonatos_slug_page_tsx --> n_components_football_match_card_tsx
+  n_app_public_campeonatos_slug_page_tsx --> n_components_football_standings_table_tsx
+  n_app_public_campeonatos_slug_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_public_campeonatos_slug_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_campeonatos_slug_page_tsx --> n_lib_db_prisma_ts
+  n_app_public_campeonatos_slug_page_tsx --> n_lib_params_ts
+  n_app_public_campeonatos_slug_page_tsx --> n_modules_competitions_service_ts
+  n_app_public_campeonatos_slug_page_tsx --> n_modules_competitions_standings_ts
+  n_app_public_campeonatos_slug_page_tsx --> n_modules_matches_service_ts
+  n_app_public_noticias_page_tsx["app/(public)/noticias/page.tsx"]
+  n_app_public_noticias_page_tsx --> n_components_news_news_card_tsx
+  n_app_public_noticias_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_public_noticias_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_noticias_page_tsx --> n_lib_params_ts
+  n_app_public_noticias_page_tsx --> n_modules_news_service_ts
+  n_app_public_noticias_slug_page_tsx["app/(public)/noticias/[slug]/page.tsx"]
+  n_app_public_noticias_slug_page_tsx --> n_components_news_news_card_tsx
+  n_app_public_noticias_slug_page_tsx --> n_components_news_share_link_tsx
+  n_app_public_noticias_slug_page_tsx --> n_components_ui_smart_image_tsx
+  n_app_public_noticias_slug_page_tsx --> n_lib_datetime_ts
+  n_app_public_noticias_slug_page_tsx --> n_lib_site_ts
+  n_app_public_noticias_slug_page_tsx --> n_modules_news_rules_ts
+  n_app_public_noticias_slug_page_tsx --> n_modules_news_service_ts
+  n_app_public_clube_page_tsx["app/(public)/clube/page.tsx"]
+  n_app_public_clube_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_public_clube_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_clube_page_tsx --> n_components_ui_prose_tsx
+  n_app_public_clube_page_tsx --> n_modules_site_service_ts
+  n_app_public_futebol_futebol_content_tsx["app/(public)/futebol/futebol-content.tsx"]
+  n_app_public_futebol_futebol_content_tsx --> n_components_football_person_card_tsx
+  n_app_public_futebol_futebol_content_tsx --> n_components_ui_empty_state_tsx
+  n_app_public_futebol_futebol_content_tsx --> n_modules_squad_rules_ts
+  n_app_public_futebol_page_tsx["app/(public)/futebol/page.tsx"]
+  n_app_public_futebol_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_futebol_page_tsx --> n_lib_db_prisma_ts
+  n_app_public_futebol_page_tsx --> n_modules_squad_rules_ts
+  n_app_public_futebol_page_tsx --> n_app_public_futebol_futebol_content_tsx
+  n_app_public_futebol_category_filter_tsx["app/(public)/futebol/category-filter.tsx"]
+  n_app_public_futebol_category_filter_tsx --> n_modules_squad_rules_ts
+  n_app_public_futebol_jogador_id_page_tsx["app/(public)/futebol/jogador/[id]/page.tsx"]
+  n_app_public_futebol_jogador_id_page_tsx --> n_components_football_club_crest_tsx
+  n_app_public_futebol_jogador_id_page_tsx --> n_components_ui_prose_tsx
+  n_app_public_futebol_jogador_id_page_tsx --> n_lib_db_prisma_ts
+  n_app_public_futebol_jogador_id_page_tsx --> n_modules_squad_rules_ts
+  n_app_public_resultados_page_tsx["app/(public)/resultados/page.tsx"]
+  n_app_public_resultados_page_tsx --> n_components_football_match_card_tsx
+  n_app_public_resultados_page_tsx --> n_components_football_match_filters_tsx
+  n_app_public_resultados_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_public_resultados_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_resultados_page_tsx --> n_lib_params_ts
+  n_app_public_resultados_page_tsx --> n_modules_competitions_service_ts
+  n_app_public_resultados_page_tsx --> n_modules_matches_service_ts
+  n_app_public_galeria_page_tsx["app/(public)/galeria/page.tsx"]
+  n_app_public_galeria_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_public_galeria_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_galeria_page_tsx --> n_components_ui_smart_image_tsx
+  n_app_public_galeria_page_tsx --> n_lib_datetime_ts
+  n_app_public_galeria_page_tsx --> n_lib_db_prisma_ts
+  n_app_public_galeria_page_tsx --> n_lib_params_ts
+  n_app_public_galeria_page_tsx --> n_modules_gallery_rules_ts
+  n_app_public_galeria_page_tsx --> n_modules_media_rules_ts
+  n_app_public_galeria_slug_page_tsx["app/(public)/galeria/[slug]/page.tsx"]
+  n_app_public_galeria_slug_page_tsx --> n_components_gallery_lightbox_tsx
+  n_app_public_galeria_slug_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_galeria_slug_page_tsx --> n_lib_datetime_ts
+  n_app_public_galeria_slug_page_tsx --> n_lib_db_prisma_ts
+  n_app_public_galeria_slug_page_tsx --> n_modules_gallery_rules_ts
+  n_app_public_galeria_slug_page_tsx --> n_modules_media_rules_ts
+  n_app_public_apoie_page_tsx["app/(public)/apoie/page.tsx"]
+  n_components_ui_copy_button_tsx["components/ui/copy-button.tsx"]
+  n_app_public_apoie_page_tsx --> n_components_ui_copy_button_tsx
+  n_app_public_apoie_page_tsx --> n_components_ui_empty_state_tsx
+  n_app_public_apoie_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_apoie_page_tsx --> n_components_ui_prose_tsx
+  n_app_public_apoie_page_tsx --> n_components_ui_smart_image_tsx
+  n_app_public_apoie_page_tsx --> n_modules_site_service_ts
+  n_app_public_privacidade_page_tsx["app/(public)/privacidade/page.tsx"]
+  n_app_public_privacidade_page_tsx --> n_components_ui_page_title_tsx
+  n_app_public_privacidade_page_tsx --> n_modules_site_service_ts
+  n_scripts_create_admin_ts["scripts/create-admin.ts"]
+  n_scripts_create_admin_ts --> n_lib_auth_password_ts
+  n_scripts_create_admin_ts --> n_lib_auth_password_policy_ts
+  n_tests_integration_football_test_ts["tests/integration/football.test.ts"]
+  n_tests_integration_football_test_ts --> n_lib_db_prisma_ts
+  n_tests_integration_football_test_ts --> n_modules_competitions_service_ts
+  n_tests_integration_football_test_ts --> n_modules_matches_service_ts
+  n_tests_integration_football_test_ts --> n_modules_news_service_ts
+  n_tests_integration_finance_test_ts["tests/integration/finance.test.ts"]
+  n_tests_integration_finance_test_ts --> n_lib_db_prisma_ts
+  n_tests_integration_finance_test_ts --> n_lib_action_ts
+  n_tests_integration_finance_test_ts --> n_modules_finance_rules_ts
+  n_tests_integration_finance_test_ts --> n_modules_finance_service_ts
+  n_tests_unit_standings_test_ts["tests/unit/standings.test.ts"]
+  n_tests_unit_standings_test_ts --> n_modules_competitions_standings_ts
+  n_tests_unit_news_test_ts["tests/unit/news.test.ts"]
+  n_tests_unit_news_test_ts --> n_modules_news_rules_ts
+  n_tests_unit_news_test_ts --> n_lib_validation_news_ts
+  n_tests_unit_auth_test_ts["tests/unit/auth.test.ts"]
+  n_tests_unit_auth_test_ts --> n_lib_auth_password_ts
+  n_tests_unit_auth_test_ts --> n_lib_auth_permissions_ts
+  n_tests_unit_auth_test_ts --> n_modules_users_rules_ts
+  n_tests_unit_auth_test_ts --> n_lib_validation_auth_ts
+  n_tests_unit_match_details_test_ts["tests/unit/match-details.test.ts"]
+  n_tests_unit_match_details_test_ts --> n_modules_competitions_manual_ts
+  n_tests_unit_match_details_test_ts --> n_modules_matches_events_ts
+  n_tests_unit_finance_test_ts["tests/unit/finance.test.ts"]
+  n_tests_unit_finance_test_ts --> n_lib_auth_permissions_ts
+  n_tests_unit_finance_test_ts --> n_lib_validation_finance_ts
+  n_tests_unit_media_test_ts["tests/unit/media.test.ts"]
+  n_tests_unit_media_test_ts --> n_lib_auth_permissions_ts
+  n_lib_storage_sigv4_ts["lib/storage/sigv4.ts"]
+  n_tests_unit_media_test_ts --> n_lib_storage_sigv4_ts
+  n_tests_unit_media_test_ts --> n_lib_validation_site_ts
+  n_tests_unit_media_test_ts --> n_modules_gallery_rules_ts
+  n_tests_unit_media_test_ts --> n_modules_media_rules_ts
+  n_tests_unit_site_test_ts["tests/unit/site.test.ts"]
+  n_tests_unit_site_test_ts --> n_lib_auth_permissions_ts
+  n_tests_unit_site_test_ts --> n_lib_validation_site_ts
+  n_tests_unit_site_test_ts --> n_modules_site_contact_ts
+  n_tests_unit_site_test_ts --> n_modules_site_settings_ts
+  n_tests_unit_site_test_ts --> n_modules_sponsors_rules_ts
+  n_tests_unit_site_test_ts --> n_modules_squad_rules_ts
+  n_tests_unit_helpers_test_ts["tests/unit/helpers.test.ts"]
+  n_tests_unit_helpers_test_ts --> n_lib_datetime_ts
+  n_tests_unit_helpers_test_ts --> n_lib_slug_ts
+  n_tests_unit_helpers_test_ts --> n_lib_validation_football_ts
+  n_tests_unit_matches_test_ts["tests/unit/matches.test.ts"]
+  n_tests_unit_matches_test_ts --> n_modules_matches_rules_ts
+  n_tests_unit_toast_test_ts["tests/unit/toast.test.ts"]
+  n_tests_unit_toast_test_ts --> n_lib_confirm_ts
+  n_tests_unit_toast_test_ts --> n_lib_toast_ts
+  n_lib_audit_ts --> n_tests_stubs_server_only_ts
+  n_lib_audit_ts --> n_lib_db_prisma_ts
+  n_lib_rate_limit_ts --> n_tests_stubs_server_only_ts
+  n_lib_rate_limit_ts --> n_lib_db_prisma_ts
+  n_lib_auth_finance_guard_ts --> n_tests_stubs_server_only_ts
+  n_lib_auth_finance_guard_ts --> n_lib_auth_guard_ts
+  n_lib_auth_finance_guard_ts --> n_lib_auth_permissions_ts
+  n_lib_auth_session_ts --> n_tests_stubs_server_only_ts
+  n_lib_auth_session_ts --> n_lib_db_prisma_ts
+  n_lib_auth_guard_ts --> n_tests_stubs_server_only_ts
+  n_lib_auth_guard_ts --> n_lib_db_prisma_ts
+  n_lib_auth_guard_ts --> n_lib_action_ts
+  n_lib_auth_guard_ts --> n_lib_auth_permissions_ts
+  n_lib_auth_guard_ts --> n_lib_auth_session_ts
+  n_lib_auth_rate_limit_ts --> n_tests_stubs_server_only_ts
+  n_lib_auth_rate_limit_ts --> n_lib_db_prisma_ts
+  n_lib_validation_football_ts --> n_modules_competitions_standings_ts
+  n_lib_validation_football_ts --> n_modules_matches_events_ts
+  n_lib_validation_football_ts --> n_modules_matches_rules_ts
+  n_lib_validation_football_ts --> n_modules_squad_rules_ts
+  n_lib_validation_site_ts --> n_modules_finance_rules_ts
+  n_lib_validation_site_ts --> n_modules_gallery_rules_ts
+  n_lib_validation_site_ts --> n_modules_site_settings_ts
+  n_lib_validation_site_ts --> n_modules_sponsors_rules_ts
+  n_lib_validation_site_ts --> n_modules_squad_rules_ts
+  n_lib_validation_site_ts --> n_lib_validation_auth_ts
+  n_lib_validation_finance_ts --> n_modules_finance_rules_ts
+  n_lib_validation_auth_ts --> n_lib_auth_permissions_ts
+  n_lib_validation_auth_ts --> n_lib_auth_password_policy_ts
+  n_lib_validation_news_ts --> n_modules_news_rules_ts
+  n_lib_storage_index_ts --> n_tests_stubs_server_only_ts
+  n_lib_storage_index_ts --> n_modules_media_rules_ts
+  n_lib_storage_index_ts --> n_lib_storage_sigv4_ts

@@ -1,0 +1,163 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Synthetic OpenAPI from cartographer",
+    "version": "synth",
+    "description": "Built from statically detected endpoints. Run the server and use --live-url for richer schemas."
+  },
+  "paths": {
+    "/app/(financeiro)/financeiro/(portal)/exportar": {
+      "get": {
+        "operationId": "get_app_(financeiro)_financeiro_(portal)_exportar",
+        "summary": "",
+        "tags": [
+          "exportar"
+        ],
+        "x-cartographer": {
+          "handler_id": "",
+          "file": "app/(financeiro)/financeiro/(portal)/exportar/route.ts",
+          "line": 12,
+          "framework": "nextjs"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/app/midia/[...path]": {
+      "get": {
+        "operationId": "key",
+        "summary": "",
+        "tags": [
+          "[...path]"
+        ],
+        "x-cartographer": {
+          "handler_id": "app/midia/[...path]/route.ts::key",
+          "file": "app/midia/[...path]/route.ts",
+          "line": 12,
+          "framework": "nextjs"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/app/api/seasons/[id]/standings": {
+      "get": {
+        "operationId": "get_app_api_seasons_[id]_standings",
+        "summary": "",
+        "tags": [
+          "standings"
+        ],
+        "x-cartographer": {
+          "handler_id": "",
+          "file": "app/api/seasons/[id]/standings/route.ts",
+          "line": 8,
+          "framework": "nextjs"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/app/api/matches": {
+      "get": {
+        "operationId": "get_app_api_matches",
+        "summary": "",
+        "tags": [
+          "matches"
+        ],
+        "x-cartographer": {
+          "handler_id": "",
+          "file": "app/api/matches/route.ts",
+          "line": 21,
+          "framework": "nextjs"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/app/api/news": {
+      "get": {
+        "operationId": "get_app_api_news",
+        "summary": "",
+        "tags": [
+          "news"
+        ],
+        "x-cartographer": {
+          "handler_id": "",
+          "file": "app/api/news/route.ts",
+          "line": 9,
+          "framework": "nextjs"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/app/api/health": {
+      "get": {
+        "operationId": "get_app_api_health",
+        "summary": "",
+        "tags": [
+          "health"
+        ],
+        "x-cartographer": {
+          "handler_id": "",
+          "file": "app/api/health/route.ts",
+          "line": 7,
+          "framework": "nextjs"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/lib": {
+      "get": {
+        "operationId": "withRateLimit",
+        "summary": "",
+        "tags": [
+          "lib"
+        ],
+        "x-cartographer": {
+          "handler_id": "lib/rate-limit.ts::withRateLimit",
+          "file": "lib/rate-limit.ts",
+          "line": 61,
+          "framework": "nextjs"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "x-cartographer": {
+    "synthetic": true,
+    "endpoint_count": 7,
+    "handler_index": {
+      "GET /app/(financeiro)/financeiro/(portal)/exportar": "",
+      "GET /app/midia/[...path]": "app/midia/[...path]/route.ts::key",
+      "GET /app/api/seasons/[id]/standings": "",
+      "GET /app/api/matches": "",
+      "GET /app/api/news": "",
+      "GET /app/api/health": "",
+      "GET /lib": "lib/rate-limit.ts::withRateLimit"
+    }
+  }
+}
