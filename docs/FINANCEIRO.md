@@ -72,7 +72,7 @@ As permissões são verificadas no servidor em cada página, em cada operação 
 - Despesas: jogadores e comissão técnica (folha de pagamento), arbitragem, campo, uniforme, material esportivo, transporte,
   inscrição em competição, outras despesas.
 
-As categorias são fixas no código (`modules/finance/rules.ts`). Para incluir outra, é preciso acrescentá-la ali
+As categorias são fixas no código (`modules/finance/rules/catalog.ts`). Para incluir outra, é preciso acrescentá-la ali
 e no `enum FinanceCategory` do banco, com uma migration.
 
 ## Pagamento pela plataforma (preparado, não implementado)

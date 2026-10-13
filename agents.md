@@ -40,7 +40,7 @@
 | **Funções (RBAC)** | 6 funções em `lib/auth/permissions.ts`: SUPERADMIN, ADMIN, EDITOR, FOOTBALL_MANAGER, TREASURER, VIEWER. Tesoureiro só usa `/financeiro` |
 | **Auditoria** | Toda operação de escrita chama `audit()` (`lib/audit.ts`), de preferência dentro da mesma transação |
 | **Formulários** | `ActionForm` + `Field` + Server Action que devolve `ActionState`; não usar `window.confirm`/`prompt` novos |
-| **Regras puras** | Lógica de negócio em `modules/*/rules.ts` sem banco nem cookies, com teste unitário; acesso a dados em `service.ts` |
+| **Regras puras** | Lógica de negócio em `modules/*/rules.ts` (no financeiro, pasta `modules/finance/rules/`) sem banco nem cookies, com teste unitário; acesso a dados em `service.ts` |
 | **Cores** | Só os tokens de `app/globals.css` (`@theme`); a paleta padrão do Tailwind foi removida |
 | **Migrations** | Sempre versionadas em `prisma/migrations`. Nunca reescrever uma migration que já está na `main` |
 | **Financeiro** | Lançamento nunca é apagado: corrige-se por estorno (`voidedAt`). Mensalidade e folha têm telas próprias |
@@ -59,7 +59,7 @@
 | Arquivo | Descrição |
 |---------|-----------|
 | `prisma/schema.prisma` | Modelo de dados completo |
-| `modules/finance/rules.ts` | Regras financeiras + `DIRECTOR_ROLES` (30 roles) |
+| `modules/finance/rules/` | Regras financeiras divididas por assunto (`catalog`, `money`, `months`, `dues`, `directors`, `payroll`, `summary`, `csv`), reexportadas por `index.ts` — importe de `@/modules/finance/rules`. `directors.ts` tem `DIRECTOR_ROLES` (30 roles) |
 | `modules/sponsors/rules.ts` | `SPONSOR_TIERS`, `groupByTier`, `isSponsorVisible` |
 | `lib/rate-limit.ts` | Rate limiting APIs públicas |
 | `app/(public)/page.tsx` | Home — patrocinadores agrupados por tier |
