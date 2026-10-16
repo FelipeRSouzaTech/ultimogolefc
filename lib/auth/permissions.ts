@@ -24,6 +24,7 @@ export const PERMISSIONS = [
   "content:read",
   "content:write",
   "media:upload",
+  "instagram:publish",
   "messages:manage",
   "finance:read",
   "finance:write",
@@ -38,7 +39,7 @@ const MATRIX: Record<Role, readonly Permission[]> = {
   SUPERADMIN: ALL,
   // O administrador consulta o financeiro, mas só tesoureiro e superadministrador fazem lançamentos.
   ADMIN: ALL.filter((permission) => permission !== "users:manage" && permission !== "finance:write"),
-  EDITOR: ["dashboard:view", "news:read", "news:write", "news:publish", "news:delete", "football:read", "content:read", "content:write", "media:upload"],
+  EDITOR: ["dashboard:view", "news:read", "news:write", "news:publish", "news:delete", "football:read", "content:read", "content:write", "media:upload", "instagram:publish"],
   FOOTBALL_MANAGER: ["dashboard:view", "football:read", "football:write", "football:delete", "news:read", "content:read", "media:upload"],
   // O tesoureiro usa só o portal financeiro (/financeiro); não entra no painel administrativo.
   TREASURER: ["finance:read", "finance:write"],

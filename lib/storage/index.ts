@@ -97,7 +97,13 @@ export function getStorage(): Storage {
 }
 
 /** Endereço público de leitura no S3 (bucket público ou CDN). Null quando o driver é local. */
-export function s3PublicUrl(key: string): string | null {
+/** Endereço público do bucket (sem barra no final), quando o driver é S3 e ele está configurado. */
+export function s3PublicBase(): string | null {
   const base = process.env.S3_PUBLIC_URL?.replace(/\/$/, "");
-  return process.env.STORAGE_DRIVER === "s3" && base ? `${base}/${key}` : null;
+  return process.env.STORAGE_DRIVER === "s3" && base ? base : null;
+}
+
+export function s3PublicUrl(key: string): string | null {
+  const base = s3PublicBase();
+  return base ? `${base}/${key}` : null;
 }

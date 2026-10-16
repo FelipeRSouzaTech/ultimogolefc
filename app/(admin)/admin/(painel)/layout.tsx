@@ -24,6 +24,7 @@ type AdminNavItem =
 const MENU: AdminMenuItem[] = [
   { type: "item", href: "/admin", label: "Visão geral", permission: "dashboard:view" },
   { type: "item", href: "/admin/noticias", label: "Notícias", permission: "news:read" },
+  { type: "item", href: "/admin/instagram", label: "Instagram", permission: "content:read" },
   {
     type: "group",
     label: "Futebol",

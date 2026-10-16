@@ -48,7 +48,12 @@ export function ActionForm({ action, children, submitLabel, pendingLabel = "Salv
       try {
         const result = await action(formData);
         setState(result ?? {});
-        if (result?.error) toast("error", result.error);
+        if (result?.error) {
+          toast("error", result.error);
+          // Algumas operações gravam algo antes de falhar (ex.: publicação salva que o Instagram recusou):
+          // nesse caso a action indica para onde levar a pessoa, para ela não repetir o envio.
+          if (result.redirectTo) router.push(result.redirectTo);
+        }
         if (result?.ok) {
           toast("success", result.message);
           if (resetOnSuccess) form.reset();
