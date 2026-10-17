@@ -74,6 +74,18 @@ export default async function InstagramPostPage({ params }: { params: Promise<{ 
         </p>
       ) : null}
 
+      {editable && post.publishImagePath ? (
+        <Panel className="mb-6 max-w-3xl">
+          <div className="flex flex-wrap items-start gap-6">
+            <SmartImage src={post.publishImagePath} alt="Imagem que vai para o Instagram, com os @ escritos" width={1080} height={1920} className="aspect-[9/16] w-full max-w-[10rem] rounded-md border border-gray-100 object-cover" />
+            <div className="min-w-0 flex-1 text-sm">
+              <h2 className="mb-2 text-lg uppercase">Imagem que vai para o Instagram</h2>
+              <p>Cópia da imagem com os @ escritos, gerada ao salvar. A foto original continua no formulário abaixo.</p>
+            </div>
+          </div>
+        </Panel>
+      ) : null}
+
       {editable ? (
         <>
           <AccountNotice config={config} />
@@ -87,6 +99,7 @@ export default async function InstagramPostPage({ params }: { params: Promise<{ 
                 imagePath: post.imagePath,
                 caption: post.caption,
                 userTags: post.userTags,
+                showTagsOnImage: post.showTagsOnImage,
                 scheduledAtLocal: post.status === "SCHEDULED" && post.scheduledAt ? utcToSaoPauloLocal(post.scheduledAt) : null,
               }}
             />
@@ -98,7 +111,7 @@ export default async function InstagramPostPage({ params }: { params: Promise<{ 
           <Panel className="max-w-3xl">
             <div className="flex flex-wrap gap-6">
               <SmartImage
-                src={post.imagePath}
+                src={post.publishImagePath ?? post.imagePath}
                 alt="Imagem da publicação"
                 width={1080}
                 height={post.format === "FEED" ? 1350 : 1920}

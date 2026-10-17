@@ -4,10 +4,12 @@ import type { InstagramPostStatus, Prisma } from "@prisma/client";
 import { audit } from "@/lib/audit";
 import { saoPauloLocalToUtc } from "@/lib/datetime";
 import { prisma } from "@/lib/db/prisma";
+import { renderStoryMentions } from "@/lib/instagram/art";
 import { createInstagramClient, instagramConfig, InstagramApiError, type InstagramClient } from "@/lib/instagram/client";
 import { SITE_URL } from "@/lib/site";
 import { s3PublicBase } from "@/lib/storage";
-import { runAutomations } from "./automation-service";
+import { storeGeneratedImage } from "@/modules/media/service";
+import { readPortalImage, runAutomations } from "./automation-service";
 import { LOCK_TIMEOUT_MS, publicImageUrl, RUN_BATCH_SIZE, shiftWeek, statusAfterFailure } from "./rules";
 
 export type PublishResult = { status: InstagramPostStatus; message: string };
@@ -49,7 +51,7 @@ export async function publishPost(id: string, options: PublishOptions): Promise<
   const post = await prisma.instagramPost.findUniqueOrThrow({ where: { id } });
 
   try {
-    const imageUrl = publicImageUrl(post.imagePath, SITE_URL, s3PublicBase());
+    const imageUrl = publicImageUrl(post.publishImagePath ?? post.imagePath, SITE_URL, s3PublicBase());
     if (!imageUrl) {
       throw new InstagramApiError({
         message: "A imagem não tem um endereço público HTTPS. Em desenvolvimento local o Instagram não alcança o seu computador: veja docs/INSTAGRAM.md.",
@@ -124,6 +126,14 @@ export async function publishPost(id: string, options: PublishOptions): Promise<
     });
     return { status, message };
   }
+}
+
+/** Gera e guarda a cópia do story com os @ escritos. Devolve o caminho da nova imagem, ou null se a foto não pôde ser lida. */
+export async function buildMentionImage(imagePath: string, tags: string[]): Promise<string | null> {
+  const photo = await readPortalImage(imagePath);
+  if (!photo) return null;
+  const jpeg = await renderStoryMentions(photo, tags);
+  return storeGeneratedImage(jpeg, `story-mencoes-${tags.join("-")}.jpg`);
 }
 
 export type RunSummary = {

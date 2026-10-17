@@ -17,6 +17,7 @@ export const instagramPostSchema = z
       .transform((value) => value.replace(/\r\n/g, "\n").trim())
       .transform((value) => (value === "" ? null : value)),
     userTags: z.string().max(1000, "Lista de marcações muito longa.").default("").transform(parseUserTags),
+    showTagsOnImage: z.boolean().default(true),
     when: z.enum(INSTAGRAM_WHEN, { errorMap: () => ({ message: "Escolha quando publicar." }) }),
     scheduledAt: z.string().trim().max(20),
   })

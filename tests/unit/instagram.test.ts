@@ -14,6 +14,8 @@ import {
   isJpegPath,
   LOCK_TIMEOUT_MS,
   MAX_ATTEMPTS,
+  canReuseMentionImage,
+  needsMentionImage,
   parseUserTags,
   publicImageUrl,
   scheduleError,
@@ -180,6 +182,24 @@ describe("validação do formulário", () => {
     if (story.success) expect(story.data.userTags).toEqual(["fulano", "ciclano.fc"]);
     const feed = instagramPostSchema.safeParse({ ...valid, userTags: "@fulano" });
     expect(feed.success).toBe(false);
+  });
+});
+
+describe("@ escritos na imagem do story", () => {
+  it("só gera a imagem em story com marcação e a opção ligada", () => {
+    expect(needsMentionImage("STORY", ["fulano"], true)).toBe(true);
+    expect(needsMentionImage("STORY", ["fulano"], false)).toBe(false);
+    expect(needsMentionImage("STORY", [], true)).toBe(false);
+    expect(needsMentionImage("FEED", ["fulano"], true)).toBe(false);
+  });
+
+  it("reaproveita a imagem gerada quando foto e marcações não mudaram", () => {
+    const previous = { imagePath: "/midia/a.jpg", userTags: ["fulano"], publishImagePath: "/midia/b.jpg" };
+    expect(canReuseMentionImage(previous, { imagePath: "/midia/a.jpg", userTags: ["fulano"] })).toBe(true);
+    expect(canReuseMentionImage(previous, { imagePath: "/midia/c.jpg", userTags: ["fulano"] })).toBe(false);
+    expect(canReuseMentionImage(previous, { imagePath: "/midia/a.jpg", userTags: ["ciclano"] })).toBe(false);
+    expect(canReuseMentionImage({ ...previous, publishImagePath: null }, { imagePath: "/midia/a.jpg", userTags: ["fulano"] })).toBe(false);
+    expect(canReuseMentionImage(null, { imagePath: "/midia/a.jpg", userTags: ["fulano"] })).toBe(false);
   });
 });
 

@@ -20,7 +20,7 @@ import {
   type InstagramWhen,
 } from "@/modules/instagram/rules";
 
-type Values = { format: InstagramFormat; imagePath: string; caption: string | null; userTags: string[]; scheduledAtLocal: string | null };
+type Values = { format: InstagramFormat; imagePath: string; caption: string | null; userTags: string[]; showTagsOnImage: boolean; scheduledAtLocal: string | null };
 
 type Props = {
   action: FormAction;
@@ -75,7 +75,7 @@ function Preview({ format, imagePath, caption, userTags, accountLabel }: { forma
           <p className="text-xs font-semibold text-white">{handle}</p>
         </div>
         {userTags.length > 0 ? (
-          <div className="absolute inset-x-0 bottom-0 flex flex-wrap justify-center gap-1.5 p-3">
+          <div className="absolute inset-x-0 bottom-[15%] flex flex-wrap justify-center gap-1.5 px-4">
             {userTags.map((tag) => (
               <span key={tag} className="rounded-md bg-white px-2 py-1 text-xs font-bold text-primary">
                 @{tag}
@@ -103,6 +103,7 @@ export function InstagramPostForm({ action, values, configured, accountLabel }: 
   const [caption, setCaption] = useState(values?.caption ?? "");
   const [tagsText, setTagsText] = useState((values?.userTags ?? []).map((tag) => `@${tag}`).join(" "));
   const userTags = parseUserTags(tagsText);
+  const [tagsOnImage, setTagsOnImage] = useState(values?.showTagsOnImage ?? true);
   const [when, setWhen] = useState<InstagramWhen>(values && !values.scheduledAtLocal ? "DRAFT" : "SCHEDULE");
   const submit = SUBMIT_LABELS[when];
   const notJpeg = imagePath !== "" && !isJpegPath(imagePath);
@@ -180,6 +181,13 @@ export function InstagramPostForm({ action, values, configured, accountLabel }: 
                 maxLength={1000}
               />
             </Field>
+            <label className="flex items-start gap-2 text-sm">
+              <input type="checkbox" name="showTagsOnImage" className="mt-1" checked={tagsOnImage} onChange={(event) => setTagsOnImage(event.target.checked)} />
+              <span>
+                <strong>Escrever os @ na imagem.</strong> Pela API a menção fica escondida no story; com esta opção os nomes aparecem em etiquetas brancas na parte de
+                baixo da imagem. Desmarque se o @ já estiver na arte.
+              </span>
+            </label>
           </>
         )}
 
@@ -203,7 +211,7 @@ export function InstagramPostForm({ action, values, configured, accountLabel }: 
 
       <section aria-label="Prévia" className="space-y-3">
         <p className="text-sm font-semibold text-gray-600">Prévia no Instagram</p>
-        <Preview format={format} imagePath={imagePath} caption={caption} userTags={format === "STORY" ? userTags : []} accountLabel={accountLabel} />
+        <Preview format={format} imagePath={imagePath} caption={caption} userTags={format === "STORY" && tagsOnImage ? userTags : []} accountLabel={accountLabel} />
       </section>
     </div>
   );

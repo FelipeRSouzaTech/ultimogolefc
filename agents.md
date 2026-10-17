@@ -341,7 +341,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Regras**: automações começam desligadas e só valem para o que acontecer depois de ligadas; nomes de atletas só com divulgação autorizada
 - **Verificação**: testes unitários das regras rodados localmente; `tests/unit/instagram-art.test.ts` desenha as artes de verdade e só roda no CI (o ambiente do agente não tem `next`); visual das artes não conferido em imagem pelo agente
 
-### 23. `claude/instagram-marcacao-story` (PR aberto — Claude)
+### 23. `claude/instagram-marcacao-story` (PR #29 merged — Claude)
 - **Pedido**: inserir o @ de alguém no story
 - **Banco**: migration `20261017030000_instagram_marcacao_story` — `InstagramPost.userTags` (`TEXT[]`, padrão vazio)
 - **Mudança**:
@@ -350,6 +350,17 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `post-form.tsx` — campo "Marcar pessoas (@)" no story e etiquetas na prévia; `[id]/page.tsx` mostra as pessoas marcadas
 - **Decisão**: feed fica sem marcação (a API exige posição x/y na foto); o limite de 20 é nosso (a Meta não documenta teto para `user_tags`)
 - **Verificação**: typecheck, lint e testes do Instagram rodados no computador do usuário (33 passando). `prisma generate` falhou por arquivo travado (servidor de desenvolvimento aberto); nenhuma publicação real com marcação foi feita
+
+### 24. `claude/instagram-mencao-visivel` (PR aberto — Claude)
+- **Pedido**: o @ não aparecia no story publicado. Diagnóstico com a conta de teste: a marcação chega (a API recusa @ inexistente ou privado e aceitou o certo), mas a API não cria o adesivo, então ela fica escondida. A conta de teste era Criador e o usuário mudou para Comercial. O token do `.env` é da @russsaooo
+- **Banco**: migration `20261017120000_instagram_mencao_visivel` — `InstagramPost.showTagsOnImage` (padrão true) e `publishImagePath` (imagem que vai de fato ao Instagram)
+- **Mudança**:
+  - `lib/instagram/art.ts` — `renderStoryMentions(foto, tags)`: recorta para 1080×1920 e sobrepõe etiquetas brancas com os @ (Satori + sharp); teste em `tests/unit/instagram-art.test.ts`
+  - `modules/instagram/rules.ts` — `needsMentionImage`, `canReuseMentionImage` (não gera de novo se foto e @ não mudaram)
+  - `modules/instagram/service.ts` — `buildMentionImage`; `publishPost` usa `publishImagePath ?? imagePath`. `readPortalImage` exportado de `automation-service.ts`
+  - `actions.ts` gera a imagem ao salvar; `post-form.tsx` com a opção "Escrever os @ na imagem"; `[id]/page.tsx` mostra a imagem que vai ao Instagram
+  - `modules/media/service.ts` — `findMediaUsage` conta também `publishImagePath`
+- **Verificação**: typecheck, lint e 38 testes do Instagram (com geração real da imagem) rodados no computador do usuário; imagem conferida visualmente com a foto real de um story. Migration aplicada no banco local (`prisma migrate deploy`). Publicação real com a imagem nova não feita
 
 ## 🎯 Próximas tarefas planejadas
 

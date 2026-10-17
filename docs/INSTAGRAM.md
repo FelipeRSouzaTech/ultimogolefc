@@ -79,6 +79,11 @@ agendador (a cada 5 min) ─┘      1. reserva a postagem (PUBLISHING + lockedA
   `user_tags` só com o nome de usuário (em story a posição é opcional; recurso da API desde jul/2025). Só contas **públicas**
   podem ser marcadas; um @ inexistente ou privado faz o Instagram recusar e a mensagem dele aparece na falha. No feed a marcação
   exigiria a posição de cada pessoa na foto e não foi feita. Automações não marcam ninguém.
+- **A menção da API fica escondida**: não vira o adesivo "@fulano" do aplicativo. Por isso, com a opção "Escrever os @ na imagem"
+  (ligada por padrão), ao salvar o portal gera uma cópia da foto em 9:16 com os @ em etiquetas brancas na parte de baixo
+  (`renderStoryMentions` em `lib/instagram/art.ts`) e guarda em `InstagramPost.publishImagePath`; é essa cópia que vai ao
+  Instagram. A foto original continua em `imagePath`. A notificação "mencionou você" chega no **Direct** de quem foi marcado
+  (em Solicitações, se a pessoa não segue a conta). Testado em 17/10/2026: a API recusa @ inexistente ou privado (código 110/2207018).
 - **Legenda**: até 2.200 caracteres e 30 hashtags.
 - **Limite**: 100 publicações por 24 h por conta (de sobra para o clube).
 - **Proporção**: feed entre 4:5 e 1,91:1; story 9:16. O formulário lê as dimensões da imagem e avisa antes de salvar: no feed, fora
