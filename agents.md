@@ -323,15 +323,26 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - `post-form.tsx` — lê as dimensões da imagem no navegador e mostra o aviso de proporção abaixo do campo
 - **Verificação**: 172 testes unitários passando pela camada de compatibilidade; lint, typecheck e build = CI do PR
 
-### 21. `claude/instagram-agendador-interno` (PR aberto — Claude)
+### 21. `claude/instagram-agendador-interno` (PR #27 merged — Claude)
 - **Pedido**: o usuário não quer passos manuais para os agendamentos saírem
 - **Mudança**: `instrumentation.ts` liga um agendador dentro do servidor do portal que, a cada minuto, chama `/api/cron/instagram` com o `CRON_SECRET` (mesmo caminho do cron externo, sem importar módulos `server-only` na instrumentação). Liga sozinho em `npm run dev`, `npm start` e Docker; desligado na Vercel e nos testes; variável `INSTAGRAM_SCHEDULER=interno|externo` força. Regra pura `internalSchedulerEnabled` com teste
 - **Configuração feita no computador do usuário**: `CRON_SECRET` gerado e gravado direto no `.env` local (cópia anterior em `.env.backup-cron`, ignorada pelo Git)
 - **Verificação**: 174 testes unitários passando pela camada de compatibilidade; o agendador rodando não foi observado no ambiente do agente
 
+### 22. `claude/instagram-automacoes` (PR aberto — Claude) — etapa 2 do Instagram
+- **Pedido**: automações dos mockups (resultado, chamada, escalação, notícia) e artes geradas automaticamente
+- **Banco**: migration `20261017010000_instagram_automacoes` — enum `InstagramAutomationKind`, model `InstagramAutomation` (liga/desliga + `enabledAt`), e em `InstagramPost` os campos `automationKey` (único), `matchId`, `newsArticleId`
+- **Mudança**:
+  - `modules/instagram/automations.ts` (puro, testado): `planAutomationPosts`, legendas, hashtag, data curta, título da chamada
+  - `modules/instagram/automation-service.ts`: `runAutomations` (chamado por `runDuePosts`), `previewArt`, `listAutomations`
+  - `lib/instagram/art.ts`: artes com `next/og` + `sharp` → JPEG; fontes fixas em `lib/instagram/fonts` (Montserrat 500/800, OFL)
+  - `modules/media/service.ts`: `storeGeneratedImage`; `findMediaUsage` conta publicações do Instagram
+  - Painel: seção "Automações" na agenda (ligar/desligar + "Ver arte de exemplo"); rota `/admin/instagram/previa/[kind]`
+- **Regras**: automações começam desligadas e só valem para o que acontecer depois de ligadas; nomes de atletas só com divulgação autorizada
+- **Verificação**: testes unitários das regras rodados localmente; `tests/unit/instagram-art.test.ts` desenha as artes de verdade e só roda no CI (o ambiente do agente não tem `next`); visual das artes não conferido em imagem pelo agente
+
 ## 🎯 Próximas tarefas planejadas
 
-- [ ] Instagram etapa 2: automações e geração das artes (ver `docs/INSTAGRAM.md`)
 - [ ] Instagram: usuário configurar a conta de teste (`INSTAGRAM_*`), o `CRON_SECRET` e o serviço que chama o agendador
 - [ ] Pendências conhecidas (detalhe em `docs/STATUS.md`): redimensionamento de imagens, envio de e-mail do contato, edição de acordos financeiros, relatório financeiro anual, escalação do adversário, linha do tempo e documentos do clube, integração de pagamento
 

@@ -8,7 +8,7 @@ Mockups aprovados pelo usuário em 16/10/2026: tela de nova publicação, agenda
 | Etapa | O que entra | Situação |
 |-------|-------------|----------|
 | **1** | Modelo `InstagramPost`, publicação manual (agora ou agendada) no feed e no story, agenda semanal, fila, agendador por rota protegida, histórico e auditoria | Este PR |
-| **2** | Automações (resultado do jogo, chamada 24 h antes, escalação, notícia publicada) e geração das artes no servidor (JPEG 1080 × 1350 e 1080 × 1920) a partir dos dados do jogo | Planejada |
+| **2** | Automações (resultado do jogo, chamada 24 h antes, escalação, notícia publicada) e geração das artes no servidor (JPEG 1080 × 1350 e 1080 × 1920) a partir dos dados do jogo | Feita (ver abaixo) |
 | **3** | Troca da conta de teste pela conta do clube, revisão do app pela Meta (se necessária) e publicação em produção | Planejada |
 
 ## Conta de teste x conta do clube
@@ -136,11 +136,33 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://<portal>/api/cron/instagram
 | `app/(admin)/admin/(painel)/instagram/` | Agenda (`page.tsx`), nova publicação (`novo/`), detalhe e edição (`[id]/`), formulário com prévia |
 | `tests/unit/instagram.test.ts` | Regras, validação e cliente com `fetch` falso |
 
-## Etapa 2 (planejada) — automações e artes
+## Etapa 2 — automações e artes
 
-- **Artes no servidor**: gerar o JPEG a partir de um modelo (placar, adversário, data, escudo) com `next/og` (`ImageResponse`, gera PNG)
-  convertido para JPEG, ou com `sharp`. Decidir na etapa 2 pelo custo de dependência e pelo tempo de geração.
-- **Automações**: tabela de regras ligáveis no painel (resultado do jogo, chamada 24 h antes, escalação, notícia publicada). Cada
-  automação cria uma `InstagramPost` com `origin = AUTOMATION` e uma chave única (ex.: `resultado:<matchId>:FEED`) para não duplicar.
-  A postagem entra na fila como qualquer outra e pode ser editada ou cancelada antes de sair.
-- **Gatilhos**: o próprio agendador verifica jogos encerrados e jogos nas próximas 24 h; a notícia dispara ao publicar.
+### Automações
+
+Ligadas e desligadas no painel (`/admin/instagram`, painel "Automações"). **Começam desligadas.** Ao ligar, a automação só vale para o
+que acontecer daí em diante (`enabledAt`), sem reprocessar o passado.
+
+| Automação | Gatilho | O que cria |
+|-----------|---------|------------|
+| Resultado do jogo | Jogo do nosso clube encerrado (`FINISHED`, com placar) nos últimos 3 dias | Feed (com legenda) e story, 30 min depois |
+| Chamada do jogo | Jogo agendado nas próximas 24 h (e com pelo menos 2 h de antecedência) | Story, 24 h antes |
+| Escalação | Jogo agendado nas próximas 3 h com titulares salvos | Story, 2 h antes |
+| Notícia publicada | Notícia publicada nas últimas 24 h | Feed (título, resumo e link), 10 min depois |
+
+- Rodam no mesmo disparo do agendador (`runDuePosts` chama `runAutomations` antes de publicar).
+- Cada publicação criada leva `origin = AUTOMATION` e uma chave única (`resultado:<matchId>:FEED` etc.): nunca sai duas vezes,
+  mesmo com dois disparos ao mesmo tempo. Ela entra na fila como "Agendada" e pode ser editada ou cancelada antes de sair.
+- Planejamento puro em `modules/instagram/automations.ts` (testado); busca de dados e gravação em `automation-service.ts`.
+- **Privacidade**: nomes de atletas (gols e escalação) só aparecem com "Divulgação autorizada" (`isPublished`), a mesma regra da
+  página do jogo. Titulares sem autorização entram como "+ N atletas".
+
+### Artes
+
+- Desenhadas com `next/og` (Satori) e convertidas para **JPEG** com `sharp` (`lib/instagram/art.ts`). O `sharp` já vem com o Next.
+- Visual dos mockups aprovados: azul-marinho, branco e Montserrat. Satori não lê fonte variável, então `lib/instagram/fonts` tem
+  Montserrat em pesos fixos (500 e 800), gerados a partir da fonte do site (licença OFL, junto dos arquivos).
+- Escudos e capas vêm do próprio portal (`/brand/...` ou `/midia/...`, local ou S3). Sem escudo, a arte mostra as iniciais.
+- **Prévia** sem publicar nada: botão "Ver arte de exemplo" em cada automação, que abre
+  `/admin/instagram/previa/<AUTOMAÇÃO>?formato=FEED|STORY` com os dados mais recentes.
+- As artes geradas são gravadas como mídia (`MediaAsset`) e contam como "em uso" enquanto houver publicação apontando para elas.

@@ -225,6 +225,7 @@ model User {
   mediaAssets    MediaAsset[]
   financeEntries FinanceEntry[]
   instagramPosts InstagramPost[]
+  instagramAutomations InstagramAutomation[]
 }
 
 model Session {
@@ -300,6 +301,7 @@ model NewsArticle {
 
   category NewsCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   author   User?         @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  instagramPosts InstagramPost[]
 
   @@index([status, publishedAt])
   @@index([categoryId])
@@ -395,6 +397,7 @@ model Match {
   events   MatchEvent[]
   lineup   MatchLineupPlayer[]
   expenses FinanceEntry[]
+  instagramPosts InstagramPost[]
 
   @@index([seasonId, status])
   @@index([status, kickoffAt])
@@ -710,6 +713,25 @@ enum InstagramPostOrigin {
   AUTOMATION
 }
 
+enum InstagramAutomationKind {
+  MATCH_RESULT
+  MATCH_CALL
+  MATCH_LINEUP
+  NEWS_PUBLISHED
+}
+
+/// Regras de publicação automática, ligadas e desligadas no painel. Começam desligadas.
+model InstagramAutomation {
+  kind        InstagramAutomationKind @id
+  enabled     Boolean                 @default(false)
+  /// Quando foi ligada pela última vez: só gera publicações para o que acontecer depois disso (sem reprocessar o passado).
+  enabledAt   DateTime?               @db.Timestamptz(3)
+  updatedById String?
+  updatedAt   DateTime                @updatedAt @db.Timestamptz(3)
+
+  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
 model InstagramPost {
   id            String              @id @default(cuid())
   format        InstagramFormat
@@ -732,11 +754,17 @@ model InstagramPost {
   accountLabel  String?
   publishedAt   DateTime?           @db.Timestamptz(3)
   lastError     String?             @db.Text
+  /// Chave da automação que gerou a publicação (ex.: "resultado:<matchId>:FEED"): impede gerar duas vezes.
+  automationKey String?             @unique
+  matchId       String?
+  newsArticleId String?
   createdById   String?
   createdAt     DateTime            @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime            @updatedAt @db.Timestamptz(3)
 
-  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  match       Match?       @relation(fields: [matchId], references: [id], onDelete: SetNull)
+  newsArticle NewsArticle? @relation(fields: [newsArticleId], references: [id], onDelete: SetNull)
 
   @@index([status, scheduledAt])
   @@index([scheduledAt])
