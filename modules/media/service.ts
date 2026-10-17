@@ -54,7 +54,7 @@ export async function findMediaUsage(key: string): Promise<string[]> {
     prisma.sponsor.count({ where: { logoPath: path } }),
     prisma.newsArticle.count({ where: { coverPath: path } }),
     prisma.siteSetting.count({ where: { value: path } }),
-    prisma.instagramPost.count({ where: { imagePath: path } }),
+    prisma.instagramPost.count({ where: { OR: [{ imagePath: path }, { publishImagePath: path }] } }),
   ]);
   const usage: string[] = [];
   if (galleries) usage.push("galeria");

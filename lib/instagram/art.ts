@@ -243,3 +243,40 @@ export async function renderNewsArt(art: NewsArt): Promise<Buffer> {
   );
   return renderJpeg(element, "FEED");
 }
+
+// --- Menções escritas no story -------------------------------------------------------------------
+
+/**
+ * Escreve os @ marcados na parte de baixo do story, em etiquetas brancas (como o adesivo de menção do aplicativo),
+ * porque a menção feita pela API fica escondida. A foto é recortada para 9:16 (1080 × 1920) e as etiquetas
+ * ficam acima da faixa onde o Instagram mostra o campo de resposta.
+ */
+export async function renderStoryMentions(photo: Uint8Array, tags: string[]): Promise<Buffer> {
+  const { width, height } = ART_SIZE.STORY;
+  const fontSize = tags.length > 8 ? 38 : tags.length > 3 ? 44 : 52;
+  const overlay = h(
+    "div",
+    { width: "100%", height: "100%", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", fontFamily: "Montserrat", padding: "0 70px 300px" },
+    h(
+      "div",
+      { flexWrap: "wrap", justifyContent: "center", gap: 18, maxWidth: 940 },
+      ...tags.map((tag) =>
+        h(
+          "div",
+          { backgroundColor: WHITE, color: NAVY, fontSize, fontWeight: 800, padding: "14px 30px", borderRadius: 16, boxShadow: "0 6px 18px rgba(0,0,0,0.35)" },
+          `@${tag}`,
+        ),
+      ),
+    ),
+  );
+  const response = new ImageResponse(overlay, { width, height, fonts: await fonts() });
+  const layer = Buffer.from(await response.arrayBuffer());
+  const { default: sharp } = await import("sharp");
+  return sharp(photo)
+    .rotate()
+    .resize({ width, height, fit: "cover" })
+    .composite([{ input: layer }])
+    .flatten({ background: WHITE })
+    .jpeg({ quality: 90, mozjpeg: true })
+    .toBuffer();
+}

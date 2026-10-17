@@ -85,6 +85,20 @@ export function userTagsError(format: InstagramFormat, tags: string[]): string |
   return null;
 }
 
+/** O story precisa de uma imagem com os @ escritos? */
+export function needsMentionImage(format: InstagramFormat, tags: string[], showOnImage: boolean): boolean {
+  return format === "STORY" && showOnImage && tags.length > 0;
+}
+
+/** Dá para reaproveitar a imagem com os @ já gerada (mesma foto e mesmas marcações)? */
+export function canReuseMentionImage(
+  previous: { imagePath: string; userTags: string[]; publishImagePath: string | null } | null,
+  next: { imagePath: string; userTags: string[] },
+): boolean {
+  if (!previous?.publishImagePath) return false;
+  return previous.imagePath === next.imagePath && previous.userTags.join(" ") === next.userTags.join(" ");
+}
+
 /** A API do Instagram só publica imagens JPEG. */
 export function isJpegPath(path: string): boolean {
   return /\.(jpg|jpeg)$/i.test(path);

@@ -8,8 +8,8 @@ import { prisma } from "@/lib/db/prisma";
 import { instagramConfig } from "@/lib/instagram/client";
 import { instagramPostSchema } from "@/lib/validation/instagram";
 import { AUTOMATION_INFO, isAutomationKind } from "@/modules/instagram/automations";
-import { initialStatus, isDeletable, isEditable, scheduleError } from "@/modules/instagram/rules";
-import { publishPost } from "@/modules/instagram/service";
+import { canReuseMentionImage, initialStatus, isDeletable, isEditable, needsMentionImage, scheduleError } from "@/modules/instagram/rules";
+import { buildMentionImage, publishPost } from "@/modules/instagram/service";
 
 const LABEL = { FEED: "feed", STORY: "story" } as const;
 
@@ -21,6 +21,7 @@ export async function saveInstagramPostAction(id: string | null, formData: FormD
       imagePath: field(formData, "imagePath"),
       caption: typeof formData.get("caption") === "string" ? (formData.get("caption") as string) : "",
       userTags: field(formData, "userTags"),
+      showTagsOnImage: formData.get("showTagsOnImage") === "on",
       when: field(formData, "when"),
       scheduledAt: field(formData, "scheduledAt"),
     });
@@ -42,11 +43,30 @@ export async function saveInstagramPostAction(id: string | null, formData: FormD
       scheduledAt = new Date();
     }
 
+    // Story com @: a imagem enviada ao Instagram leva os nomes escritos (a menção da API fica escondida).
+    const userTags = data.format === "STORY" ? data.userTags : [];
+    let publishImagePath: string | null = null;
+    if (needsMentionImage(data.format, userTags, data.showTagsOnImage)) {
+      if (canReuseMentionImage(previous, { imagePath: data.imagePath, userTags })) publishImagePath = previous!.publishImagePath;
+      else {
+        try {
+          publishImagePath = await buildMentionImage(data.imagePath, userTags);
+        } catch (error) {
+          console.error("[instagram] falha ao escrever os @ na imagem", error);
+        }
+        if (!publishImagePath) {
+          return { error: "Não foi possível escrever os @ na imagem. Tente de novo ou desmarque \"Escrever os @ na imagem\"." };
+        }
+      }
+    }
+
     const payload = {
       format: data.format,
       imagePath: data.imagePath,
       caption: data.format === "FEED" ? data.caption : null,
-      userTags: data.format === "STORY" ? data.userTags : [],
+      userTags,
+      showTagsOnImage: data.showTagsOnImage,
+      publishImagePath,
       status: initialStatus(data.when),
       scheduledAt,
       // Uma edição recomeça a contagem de tentativas e limpa o erro anterior.

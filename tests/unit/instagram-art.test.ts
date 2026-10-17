@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
-import { renderCallArt, renderLineupArt, renderNewsArt, renderResultArt } from "@/lib/instagram/art";
+import { renderCallArt, renderLineupArt, renderNewsArt, renderResultArt, renderStoryMentions } from "@/lib/instagram/art";
 
 // Desenha as artes de verdade (next/og + sharp) para garantir que saem em JPEG, no tamanho que o Instagram aceita.
 async function expectJpeg(bytes: Buffer, width: number, height: number) {
@@ -25,6 +25,15 @@ describe("artes automáticas", { timeout: 60_000 }, () => {
     };
     await expectJpeg(await renderResultArt({ ...base, format: "FEED" }), 1080, 1350);
     await expectJpeg(await renderResultArt({ ...base, format: "STORY" }), 1080, 1920);
+  });
+
+  it("story com os @ escritos sai em 9:16 mesmo com foto de outra proporção", async () => {
+    const photo = await sharp({ create: { width: 800, height: 800, channels: 3, background: "#336699" } }).png().toBuffer();
+    const result = await renderStoryMentions(new Uint8Array(photo), ["ultimo.gole", "fulano_10"]);
+    await expectJpeg(result, 1080, 1920);
+    // As etiquetas brancas ficam na parte de baixo; o topo continua com a cor da foto.
+    const { data } = await sharp(result).extract({ left: 0, top: 0, width: 1080, height: 400 }).stats().then((s) => ({ data: s.channels.map((c) => c.mean) }));
+    expect(data[0]).toBeLessThan(120);
   });
 
   it("chamada, escalação e notícia", async () => {

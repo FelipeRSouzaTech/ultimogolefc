@@ -32,7 +32,8 @@ import type { InstagramFormat } from "./rules";
 // --- Leitura de imagens do portal (escudos, capas) -------------------------------------------------
 
 /** Lê uma imagem do portal pelo caminho salvo no banco (/brand/... ou /midia/...). Null se não achar. */
-async function readPortalImage(imagePath: string | null | undefined): Promise<Uint8Array | null> {
+/** Lê uma imagem do portal (armazenamento ou pasta public). Devolve null se não estiver disponível. */
+export async function readPortalImage(imagePath: string | null | undefined): Promise<Uint8Array | null> {
   if (!imagePath) return null;
   try {
     const key = pathToKey(imagePath);
