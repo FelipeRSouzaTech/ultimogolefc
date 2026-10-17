@@ -28,7 +28,7 @@ type Props = {
   accountLabel: string;
 };
 
-const PREVIEWABLE = /^\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp)$/;
+const PREVIEWABLE = /^\/(?!\/)[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp)$/;
 
 const WHEN_OPTIONS: { value: InstagramWhen; label: string }[] = [
   { value: "SCHEDULE", label: "Agendar" },

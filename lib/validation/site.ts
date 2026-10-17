@@ -17,7 +17,7 @@ const imagePath = z
   .string()
   .trim()
   .max(200, "Caminho muito longo.")
-  .regex(/^(\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp|svg))?$/, "Use um caminho local de imagem, por exemplo /brand/imagem.png.")
+  .regex(/^(\/(?!\/)[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp|svg))?$/, "Use um caminho local de imagem, por exemplo /brand/imagem.png.")
   .transform((value) => (value === "" ? null : value));
 
 /** Apresentação de uma equipe (categoria): nome de exibição opcional e imagem do cartão. */

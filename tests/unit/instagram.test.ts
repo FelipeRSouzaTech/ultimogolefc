@@ -164,6 +164,8 @@ describe("validação do formulário", () => {
     expect(noDate.success).toBe(false);
     const story = instagramPostSchema.safeParse({ ...valid, format: "STORY" });
     expect(story.success).toBe(false);
+    const protocolRelative = instagramPostSchema.safeParse({ ...valid, imagePath: "//2026/10/abcdefabcdefabcdefabcdef.jpg" });
+    expect(protocolRelative.success).toBe(false);
     const storyOk = instagramPostSchema.safeParse({ ...valid, format: "STORY", caption: "" });
     expect(storyOk.success).toBe(true);
   });
