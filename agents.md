@@ -315,13 +315,19 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Fora desta etapa**: automações e geração das artes (etapa 2), renovação automática do token e troca para a conta do clube (etapa 3). Plano em `docs/INSTAGRAM.md`
 - **Verificação**: testes unitários rodados localmente por camada de compatibilidade (Bun + zod local): 166 passando, 21 novos. Lint, typecheck, build e telas **não** verificados no ambiente do agente (npm bloqueado); validação = CI do PR. Nenhuma chamada real à API do Instagram foi feita
 
-### 20. `claude/instagram-diagnostico` (PR aberto — Claude)
+### 20. `claude/instagram-diagnostico` (PR #26 merged — Claude)
 - **Pedido**: no primeiro teste real (conta do usuário + Supabase Storage público) a publicação falhou com "não conseguiu baixar a imagem", embora o endereço abrisse; a imagem era 9:16 e provavelmente foi enviada como feed
 - **Mudança**:
   - `modules/instagram/rules.ts` — `describeGraphError` sempre anexa o texto original do Instagram e os códigos (`graphErrorDetail`); código 9004 sem subcódigo deixa de ser tratado como falha de download; mensagens próprias para 2207004 (8 MB) e 2207005 (formato); `checkAspectRatio` (feed 4:5 a 1,91:1 → erro; story fora de 9:16 → aviso)
   - `lib/instagram/client.ts` — `containerStatus` lê também o campo `status` e devolve `{ code, detail }`; `service.ts` inclui o motivo na falha
   - `post-form.tsx` — lê as dimensões da imagem no navegador e mostra o aviso de proporção abaixo do campo
 - **Verificação**: 172 testes unitários passando pela camada de compatibilidade; lint, typecheck e build = CI do PR
+
+### 21. `claude/instagram-agendador-interno` (PR aberto — Claude)
+- **Pedido**: o usuário não quer passos manuais para os agendamentos saírem
+- **Mudança**: `instrumentation.ts` liga um agendador dentro do servidor do portal que, a cada minuto, chama `/api/cron/instagram` com o `CRON_SECRET` (mesmo caminho do cron externo, sem importar módulos `server-only` na instrumentação). Liga sozinho em `npm run dev`, `npm start` e Docker; desligado na Vercel e nos testes; variável `INSTAGRAM_SCHEDULER=interno|externo` força. Regra pura `internalSchedulerEnabled` com teste
+- **Configuração feita no computador do usuário**: `CRON_SECRET` gerado e gravado direto no `.env` local (cópia anterior em `.env.backup-cron`, ignorada pelo Git)
+- **Verificação**: 174 testes unitários passando pela camada de compatibilidade; o agendador rodando não foi observado no ambiente do agente
 
 ## 🎯 Próximas tarefas planejadas
 

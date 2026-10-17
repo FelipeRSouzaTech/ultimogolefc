@@ -269,3 +269,21 @@ export function groupByDay<T extends { publishedAt: Date | null; scheduledAt: Da
   for (const list of map.values()) list.sort((a, b) => agendaDate(a)!.getTime() - agendaDate(b)!.getTime());
   return map;
 }
+
+// --- Agendador interno ---------------------------------------------------------------------------
+
+/** Intervalo do agendador interno (o servidor confere a fila sozinho, sem chamada externa). */
+export const INTERNAL_SCHEDULER_INTERVAL_MS = 60_000;
+
+/**
+ * O agendador interno roda dentro do próprio servidor do portal (npm run dev, npm start ou Docker), sem precisar
+ * de cron externo. Fica desligado na Vercel (funções sem servidor permanente: lá vale o /api/cron/instagram) e
+ * pode ser desligado com INSTAGRAM_SCHEDULER=externo.
+ */
+export function internalSchedulerEnabled(env: Record<string, string | undefined>): boolean {
+  const mode = env.INSTAGRAM_SCHEDULER?.trim().toLowerCase();
+  if (mode === "externo" || mode === "off") return false;
+  if (mode === "interno" || mode === "on") return true;
+  if (env.NODE_ENV === "test" || env.VITEST) return false;
+  return !env.VERCEL;
+}
