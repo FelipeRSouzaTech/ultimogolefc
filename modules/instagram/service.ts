@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db/prisma";
 import { createInstagramClient, instagramConfig, InstagramApiError, type InstagramClient } from "@/lib/instagram/client";
 import { SITE_URL } from "@/lib/site";
 import { s3PublicBase } from "@/lib/storage";
+import { runAutomations } from "./automation-service";
 import { LOCK_TIMEOUT_MS, publicImageUrl, RUN_BATCH_SIZE, shiftWeek, statusAfterFailure } from "./rules";
 
 export type PublishResult = { status: InstagramPostStatus; message: string };
@@ -120,11 +121,26 @@ export async function publishPost(id: string, options: PublishOptions): Promise<
   }
 }
 
-export type RunSummary = { configured: boolean; processed: { id: string; status: InstagramPostStatus }[] };
+export type RunSummary = {
+  configured: boolean;
+  /** Publicações criadas pelas automações neste disparo. */
+  automations?: { created: number; failed: number };
+  processed: { id: string; status: InstagramPostStatus }[];
+};
 
 /** Disparado pelo agendador (rota /api/cron/instagram): publica o que já passou do horário. */
 export async function runDuePosts(now: Date = new Date(), client?: InstagramClient): Promise<RunSummary> {
   if (!client && !instagramConfig()) return { configured: false, processed: [] };
+
+  // Primeiro as automações criam o que for preciso (resultado, chamada, escalação, notícia); depois sai o que venceu.
+  let automations: RunSummary["automations"];
+  try {
+    const run = await runAutomations(now);
+    automations = { created: run.created.length, failed: run.failed.length };
+  } catch (error) {
+    console.error("[instagram] automações falharam", error);
+  }
+
   const due = await prisma.instagramPost.findMany({
     where: {
       OR: [
@@ -141,7 +157,7 @@ export async function runDuePosts(now: Date = new Date(), client?: InstagramClie
     const result = await publishPost(id, { userId: null, from: ["SCHEDULED"], client });
     processed.push({ id, status: result.status });
   }
-  return { configured: true, processed };
+  return { configured: true, automations, processed };
 }
 
 const agendaSelect = {

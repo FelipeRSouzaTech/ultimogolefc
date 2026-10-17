@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ActionButton } from "@/components/ui/action-button";
 import { AdminHeading, Panel } from "@/components/ui/admin";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requirePagePermission } from "@/lib/auth/guard";
@@ -18,8 +19,11 @@ import {
   weekStartKey,
   type InstagramPostStatus,
 } from "@/modules/instagram/rules";
+import { AUTOMATION_INFO, AUTOMATION_KINDS } from "@/modules/instagram/automations";
+import { listAutomations } from "@/modules/instagram/automation-service";
 import { listQueue, listWeek, type AgendaPost } from "@/modules/instagram/service";
 import { AccountNotice } from "./account-notice";
+import { setInstagramAutomationAction } from "./actions";
 import { StatusBadge } from "./status-badge";
 
 export const metadata: Metadata = { title: "Instagram" };
@@ -90,7 +94,7 @@ export default async function InstagramAgendaPage({ searchParams }: { searchPara
   const user = await requirePagePermission("content:read");
   const start = weekStartKey(param(await searchParams, "semana", 10));
   const days = weekDays(start);
-  const [week, queue] = await Promise.all([listWeek(start), listQueue()]);
+  const [week, queue, automations] = await Promise.all([listWeek(start), listQueue(), listAutomations()]);
   const byDay = groupByDay(week);
   const today = saoPauloDateKey(new Date());
   const config = instagramConfig();
@@ -176,6 +180,44 @@ export default async function InstagramAgendaPage({ searchParams }: { searchPara
           <li className="flex items-center gap-1.5">
             <span className="size-3 border-l-4 border-gray-400 bg-white" aria-hidden="true" /> Rascunho
           </li>
+        </ul>
+      </Panel>
+
+      <Panel title="Automações" className="mb-6">
+        <p className="mb-4 text-sm text-gray-600">
+          Publicações criadas a partir dos dados do clube. Cada uma entra na fila como agendada e pode ser editada ou cancelada antes de sair.
+          Ao ligar, a automação vale só para o que acontecer daí em diante.
+        </p>
+        <ul className="divide-y divide-gray-100 border-y border-gray-100">
+          {AUTOMATION_KINDS.map((kind) => {
+            const state = automations[kind];
+            const previews: readonly ("FEED" | "STORY")[] = kind === "MATCH_RESULT" ? ["FEED", "STORY"] : kind === "NEWS_PUBLISHED" ? ["FEED"] : ["STORY"];
+            return (
+              <li key={kind} className="flex flex-wrap items-start justify-between gap-4 py-4">
+                <div className="min-w-0 flex-1">
+                  <p className="flex flex-wrap items-center gap-2 font-semibold">
+                    {AUTOMATION_INFO[kind].name}
+                    <span className={state.enabled ? "badge badge-solid" : "badge text-gray-600"}>{state.enabled ? "Ligada" : "Desligada"}</span>
+                  </p>
+                  <p className="mt-1 text-sm text-gray-600">{AUTOMATION_INFO[kind].description}</p>
+                  <p className="mt-2 flex flex-wrap gap-3 text-sm">
+                    {previews.map((format) => (
+                      <a key={format} href={`/admin/instagram/previa/${kind}?formato=${format}`} target="_blank" rel="noreferrer" className="link">
+                        Ver arte de exemplo{previews.length > 1 ? ` (${format === "FEED" ? "feed" : "story"})` : ""}
+                      </a>
+                    ))}
+                  </p>
+                </div>
+                {canWrite ? (
+                  <ActionButton
+                    action={setInstagramAutomationAction.bind(null, kind, !state.enabled)}
+                    label={state.enabled ? "Desligar" : "Ligar"}
+                    className={`btn btn-sm ${state.enabled ? "btn-secondary" : "btn-primary"}`}
+                  />
+                ) : null}
+              </li>
+            );
+          })}
         </ul>
       </Panel>
 

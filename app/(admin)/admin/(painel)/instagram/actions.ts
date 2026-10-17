@@ -7,6 +7,7 @@ import { saoPauloLocalToUtc } from "@/lib/datetime";
 import { prisma } from "@/lib/db/prisma";
 import { instagramConfig } from "@/lib/instagram/client";
 import { instagramPostSchema } from "@/lib/validation/instagram";
+import { AUTOMATION_INFO, isAutomationKind } from "@/modules/instagram/automations";
 import { initialStatus, isDeletable, isEditable, scheduleError } from "@/modules/instagram/rules";
 import { publishPost } from "@/modules/instagram/service";
 
@@ -115,5 +116,27 @@ export async function deleteInstagramPostAction(id: string): Promise<ActionState
       );
     });
     return { ok: true, message: "Publicação excluída.", redirectTo: "/admin/instagram" };
+  });
+}
+
+export async function setInstagramAutomationAction(kind: string, enabled: boolean): Promise<ActionState> {
+  return withPermission("instagram:publish", async (user) => {
+    if (!isAutomationKind(kind)) return { error: "Automação desconhecida." };
+    const now = new Date();
+    await prisma.$transaction(async (tx) => {
+      const previous = await tx.instagramAutomation.findUnique({ where: { kind } });
+      // Ao ligar, marca o momento: a automação só vale para o que acontecer daqui em diante.
+      const enabledAt = enabled ? (previous?.enabled ? previous.enabledAt : now) : (previous?.enabledAt ?? null);
+      await tx.instagramAutomation.upsert({
+        where: { kind },
+        create: { kind, enabled, enabledAt, updatedById: user.id },
+        update: { enabled, enabledAt, updatedById: user.id },
+      });
+      await audit(
+        { userId: user.id, action: enabled ? "instagram.automation.enable" : "instagram.automation.disable", entity: "InstagramAutomation", entityId: kind, summary: `${enabled ? "Ligou" : "Desligou"} a automação "${AUTOMATION_INFO[kind].name}"` },
+        tx,
+      );
+    });
+    return { ok: true, message: enabled ? `Automação "${AUTOMATION_INFO[kind].name}" ligada.` : `Automação "${AUTOMATION_INFO[kind].name}" desligada.` };
   });
 }
