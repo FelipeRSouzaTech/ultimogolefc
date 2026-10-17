@@ -224,6 +224,7 @@ model User {
   auditLogs      AuditLog[]
   mediaAssets    MediaAsset[]
   financeEntries FinanceEntry[]
+  instagramPosts InstagramPost[]
 }
 
 model Session {
@@ -684,4 +685,59 @@ model Director {
   dues MembershipDue[]
 
   @@index([status, name])
+}
+
+// --- Instagram -----------------------------------------------------------------------------------
+// Publicações no feed e nos stories pela API oficial do Instagram. A conta usada (teste ou do clube)
+// vem das variáveis de ambiente; cada publicação guarda em qual conta saiu. Regras em docs/INSTAGRAM.md.
+
+enum InstagramFormat {
+  FEED
+  STORY
+}
+
+enum InstagramPostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  CANCELED
+}
+
+enum InstagramPostOrigin {
+  MANUAL
+  AUTOMATION
+}
+
+model InstagramPost {
+  id            String              @id @default(cuid())
+  format        InstagramFormat
+  /// Caminho da imagem no portal (/midia/...). A API do Instagram só aceita JPEG.
+  imagePath     String
+  /// Legenda (só no feed; stories publicados pela API não levam legenda).
+  caption       String?             @db.Text
+  status        InstagramPostStatus @default(DRAFT)
+  origin        InstagramPostOrigin @default(MANUAL)
+  /// Quando publicar (UTC). Obrigatório para SCHEDULED.
+  scheduledAt   DateTime?           @db.Timestamptz(3)
+  /// Tentativas de publicação já feitas (o agendador desiste depois do limite em modules/instagram/rules.ts).
+  attempts      Int                 @default(0)
+  /// Marca de "em publicação", para dois disparos do agendador não publicarem a mesma postagem.
+  lockedAt      DateTime?           @db.Timestamptz(3)
+  containerId   String?
+  mediaId       String?
+  permalink     String?
+  /// Conta em que foi publicada (ex.: @conta.teste), para separar testes de publicações do clube.
+  accountLabel  String?
+  publishedAt   DateTime?           @db.Timestamptz(3)
+  lastError     String?             @db.Text
+  createdById   String?
+  createdAt     DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime            @updatedAt @db.Timestamptz(3)
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([status, scheduledAt])
+  @@index([scheduledAt])
 }

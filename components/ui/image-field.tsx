@@ -6,14 +6,18 @@ import { uploadImageAction } from "@/modules/media/actions";
 import { FieldError } from "./action-form";
 import { SmartImage } from "./smart-image";
 
-type Props = { name: string; label: string; defaultValue?: string | null; hint?: string };
+type Props = { name: string; label: string; defaultValue?: string | null; hint?: string; onChange?: (path: string) => void };
 
 /**
  * Campo de imagem do painel: envia um arquivo (PNG, JPG ou WebP, até 5 MB) e guarda o caminho resultante.
  * O caminho também pode ser digitado, para usar arquivos estáticos do projeto (ex.: /brand/escudo.png).
  */
-export function ImageField({ name, label, defaultValue, hint }: Props) {
-  const [path, setPath] = useState(defaultValue ?? "");
+export function ImageField({ name, label, defaultValue, hint, onChange }: Props) {
+  const [path, setPathState] = useState(defaultValue ?? "");
+  function setPath(next: string) {
+    setPathState(next);
+    onChange?.(next);
+  }
   const [pending, startTransition] = useTransition();
   const fileInput = useRef<HTMLInputElement>(null);
 

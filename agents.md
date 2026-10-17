@@ -12,7 +12,7 @@
 - **Deploy**: Docker + GitHub Actions → Vercel/Railway (repo **privado** em produção)
 - **Repo**: https://github.com/FelipeRSouzaTech/ultimogolefc
 - **Três áreas**: portal público (`app/(public)`), painel administrativo em `/admin` (`app/(admin)`) e portal financeiro em `/financeiro` (`app/(financeiro)`)
-- **Documentação detalhada**: `docs/STATUS.md` (o que foi verificado e o que falta), `docs/ARQUITETURA.md` (decisões, permissões, regras), `docs/FINANCEIRO.md`, `docs/IMPLANTACAO.md`, `docs/BACKUP.md`
+- **Documentação detalhada**: `docs/STATUS.md` (o que foi verificado e o que falta), `docs/ARQUITETURA.md` (decisões, permissões, regras), `docs/FINANCEIRO.md`, `docs/IMPLANTACAO.md`, `docs/BACKUP.md`, `docs/INSTAGRAM.md`
 
 ---
 
@@ -289,7 +289,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - Card de jogo: espaço antes da vírgula na data
 - **Não verificado**: interação real no aparelho (abrir menus, teclado virtual); validação = CI do PR + teste do usuário no celular
 
-### 18. `claude/home-countdown` (PR aberto — Claude)
+### 18. `claude/home-countdown` (PR #22 merged — Claude)
 - **Pedido**: na home, contagem regressiva do jogo mais próximo (cores do projeto) e "Próximos jogos" com os 4 próximos, etiqueta com a categoria (ex.: Principal / Adulto) no lugar de "Masculino"; "Ver todos" continua em `/jogos`
 - **Banco**: migration `20261012220000_match_category` — `Match.category AthleteCategory @default(ADULT)` (partidas antigas ficam como Principal / Adulto)
 - **Mudança**:
@@ -300,9 +300,25 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - Painel de jogos: campo **Categoria** no formulário (`match-form.tsx`, `actions.ts`, `jogos/data.ts` → `loadCategoryLabels` com os nomes editados em Equipes)
 - **Não verificado**: contagem rodando no navegador (a renderização local não executa o JavaScript do cliente); validação = CI do PR
 
+### 19. `claude/instagram` (PR aberto — Claude) — etapa 1 da integração com o Instagram
+- **Pedido**: publicar no feed e nos stories do Instagram pelo painel, com agendador; mockups aprovados (nova publicação, agenda semanal, artes automáticas). O usuário testa com a **própria conta** e só depois liga a do clube
+- **Banco**: migration `20261016220000_instagram` — enums `InstagramFormat`, `InstagramPostStatus`, `InstagramPostOrigin` e model `InstagramPost` (validada aplicando todas as migrations num PostgreSQL 16 local)
+- **Permissão nova**: `instagram:publish` (superadministrador, administrador, editor). Ver a agenda usa `content:read`
+- **Mudança**:
+  - `modules/instagram/rules.ts` (puro, testado) e `modules/instagram/service.ts` (`publishPost` com reserva condicional anti-duplicidade, `runDuePosts`, `listWeek`, `listQueue`)
+  - `lib/instagram/client.ts` — conta lida de `INSTAGRAM_*` (trocar de conta = trocar variáveis); token no corpo/cabeçalho, nunca na URL
+  - `app/api/cron/instagram/route.ts` — agendador, exige `Authorization: Bearer <CRON_SECRET>`; precisa de chamada externa a cada 5 min (cron-job.org ou Supabase pg_cron; Vercel Cron gratuito roda 1×/dia)
+  - `app/(admin)/admin/(painel)/instagram/` — agenda semanal + fila, nova publicação com prévia, detalhe/edição; item "Instagram" no menu
+  - `components/ui/image-field.tsx` ganhou `onChange` opcional; `components/ui/action-form.tsx` segue `redirectTo` também quando a action devolve erro (publicação salva que o Instagram recusou)
+  - `lib/storage` expõe `s3PublicBase()`; `vitest.config.ts` usa o stub de `server-only` (para testar o cliente com `fetch` falso)
+- **Regras do Instagram**: só JPEG; imagem com endereço público HTTPS (localhost não funciona — ver `docs/INSTAGRAM.md`); story sem legenda; legenda até 2.200 caracteres e 30 hashtags
+- **Fora desta etapa**: automações e geração das artes (etapa 2), renovação automática do token e troca para a conta do clube (etapa 3). Plano em `docs/INSTAGRAM.md`
+- **Verificação**: testes unitários rodados localmente por camada de compatibilidade (Bun + zod local): 166 passando, 21 novos. Lint, typecheck, build e telas **não** verificados no ambiente do agente (npm bloqueado); validação = CI do PR. Nenhuma chamada real à API do Instagram foi feita
+
 ## 🎯 Próximas tarefas planejadas
 
-- [ ] Aguardar próxima instrução do usuário
+- [ ] Instagram etapa 2: automações e geração das artes (ver `docs/INSTAGRAM.md`)
+- [ ] Instagram: usuário configurar a conta de teste (`INSTAGRAM_*`), o `CRON_SECRET` e o serviço que chama o agendador
 - [ ] Pendências conhecidas (detalhe em `docs/STATUS.md`): redimensionamento de imagens, envio de e-mail do contato, edição de acordos financeiros, relatório financeiro anual, escalação do adversário, linha do tempo e documentos do clube, integração de pagamento
 
 ---
