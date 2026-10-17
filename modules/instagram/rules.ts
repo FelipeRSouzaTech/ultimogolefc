@@ -61,6 +61,30 @@ export function captionError(format: InstagramFormat, caption: string | null): s
   return null;
 }
 
+/** Máximo de pessoas marcadas em um story (a Meta limita a 20 as menções na legenda; usamos o mesmo teto). */
+export const STORY_MAX_TAGS = 20;
+
+const USERNAME = /^(?!\.)(?!.*\.\.)[a-z0-9._]{1,30}(?<!\.)$/;
+
+/** Lê os @ digitados (separados por espaço, vírgula ou linha): sem "@", em minúsculas e sem repetição. */
+export function parseUserTags(text: string): string[] {
+  const tags = text
+    .split(/[\s,;]+/)
+    .map((item) => item.trim().replace(/^@+/, "").toLowerCase())
+    .filter((item) => item !== "");
+  return [...new Set(tags)];
+}
+
+/** Valida as marcações. Só stories levam marcação por aqui; o feed exigiria a posição de cada pessoa na foto. */
+export function userTagsError(format: InstagramFormat, tags: string[]): string | null {
+  if (tags.length === 0) return null;
+  if (format !== "STORY") return "Marcar pessoas está disponível só para stories.";
+  if (tags.length > STORY_MAX_TAGS) return `Marque no máximo ${STORY_MAX_TAGS} pessoas.`;
+  const invalid = tags.find((tag) => !USERNAME.test(tag));
+  if (invalid) return `"@${invalid}" não é um nome de usuário válido do Instagram (letras, números, ponto e sublinhado, até 30 caracteres).`;
+  return null;
+}
+
 /** A API do Instagram só publica imagens JPEG. */
 export function isJpegPath(path: string): boolean {
   return /\.(jpg|jpeg)$/i.test(path);

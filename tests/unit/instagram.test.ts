@@ -14,10 +14,13 @@ import {
   isJpegPath,
   LOCK_TIMEOUT_MS,
   MAX_ATTEMPTS,
+  parseUserTags,
   publicImageUrl,
   scheduleError,
   shiftWeek,
   statusAfterFailure,
+  STORY_MAX_TAGS,
+  userTagsError,
   weekDays,
   weekStartKey,
 } from "@/modules/instagram/rules";
@@ -170,6 +173,34 @@ describe("validação do formulário", () => {
     const storyOk = instagramPostSchema.safeParse({ ...valid, format: "STORY", caption: "" });
     expect(storyOk.success).toBe(true);
   });
+
+  it("aceita @ em story e recusa no feed", () => {
+    const story = instagramPostSchema.safeParse({ ...valid, format: "STORY", caption: "", userTags: "@Fulano, @ciclano.fc" });
+    expect(story.success).toBe(true);
+    if (story.success) expect(story.data.userTags).toEqual(["fulano", "ciclano.fc"]);
+    const feed = instagramPostSchema.safeParse({ ...valid, userTags: "@fulano" });
+    expect(feed.success).toBe(false);
+  });
+});
+
+describe("marcação de pessoas em story", () => {
+  it("lê os @ sem arroba, em minúsculas e sem repetição", () => {
+    expect(parseUserTags(" @Fulano  ciclano,@fulano\n@@beltrano_10 ")).toEqual(["fulano", "ciclano", "beltrano_10"]);
+    expect(parseUserTags("   ")).toEqual([]);
+  });
+
+  it("valida nomes de usuário e o limite", () => {
+    expect(userTagsError("STORY", [])).toBeNull();
+    expect(userTagsError("FEED", [])).toBeNull();
+    expect(userTagsError("STORY", ["ultimogolefc", "a.b_c1"])).toBeNull();
+    expect(userTagsError("FEED", ["fulano"])).toMatch(/só para stories/);
+    expect(userTagsError("STORY", ["nome-com-hifen"])).toMatch(/não é um nome de usuário válido/);
+    expect(userTagsError("STORY", [".ponto"])).not.toBeNull();
+    expect(userTagsError("STORY", ["dois..pontos"])).not.toBeNull();
+    expect(userTagsError("STORY", ["a".repeat(31)])).not.toBeNull();
+    const many = Array.from({ length: STORY_MAX_TAGS + 1 }, (_, i) => `pessoa${i}`);
+    expect(userTagsError("STORY", many)).toMatch(/no máximo/);
+  });
 });
 
 describe("cliente da Graph API", () => {
@@ -201,6 +232,17 @@ describe("cliente da Graph API", () => {
     expect(body.get("media_type")).toBe("STORIES");
     expect(body.get("caption")).toBeNull();
     expect(body.get("access_token")).toBe("segredo");
+    expect(body.get("user_tags")).toBeNull();
+  });
+
+  it("story com marcação envia user_tags só com o nome de usuário", async () => {
+    const { impl, calls } = fakeFetch([{ body: { id: "c3" } }, { body: { id: "c4" } }]);
+    const client = createInstagramClient(config, impl);
+    await client.createContainer({ format: "STORY", imageUrl: "https://x/a.jpg", caption: null, userTags: ["fulano", "ciclano"] });
+    const body = new URLSearchParams(String(calls[0]?.init?.body));
+    expect(JSON.parse(body.get("user_tags") ?? "null")).toEqual([{ username: "fulano" }, { username: "ciclano" }]);
+    await client.createContainer({ format: "FEED", imageUrl: "https://x/a.jpg", caption: null, userTags: ["fulano"] });
+    expect(new URLSearchParams(String(calls[1]?.init?.body)).get("user_tags")).toBeNull();
   });
 
   it("feed leva a legenda; publicação usa creation_id", async () => {

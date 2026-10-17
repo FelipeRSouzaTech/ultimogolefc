@@ -329,7 +329,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Configuração feita no computador do usuário**: `CRON_SECRET` gerado e gravado direto no `.env` local (cópia anterior em `.env.backup-cron`, ignorada pelo Git)
 - **Verificação**: 174 testes unitários passando pela camada de compatibilidade; o agendador rodando não foi observado no ambiente do agente
 
-### 22. `claude/instagram-automacoes` (PR aberto — Claude) — etapa 2 do Instagram
+### 22. `claude/instagram-automacoes` (PR #28 merged — Claude) — etapa 2 do Instagram
 - **Pedido**: automações dos mockups (resultado, chamada, escalação, notícia) e artes geradas automaticamente
 - **Banco**: migration `20261017010000_instagram_automacoes` — enum `InstagramAutomationKind`, model `InstagramAutomation` (liga/desliga + `enabledAt`), e em `InstagramPost` os campos `automationKey` (único), `matchId`, `newsArticleId`
 - **Mudança**:
@@ -340,6 +340,16 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - Painel: seção "Automações" na agenda (ligar/desligar + "Ver arte de exemplo"); rota `/admin/instagram/previa/[kind]`
 - **Regras**: automações começam desligadas e só valem para o que acontecer depois de ligadas; nomes de atletas só com divulgação autorizada
 - **Verificação**: testes unitários das regras rodados localmente; `tests/unit/instagram-art.test.ts` desenha as artes de verdade e só roda no CI (o ambiente do agente não tem `next`); visual das artes não conferido em imagem pelo agente
+
+### 23. `claude/instagram-marcacao-story` (PR aberto — Claude)
+- **Pedido**: inserir o @ de alguém no story
+- **Banco**: migration `20261017030000_instagram_marcacao_story` — `InstagramPost.userTags` (`TEXT[]`, padrão vazio)
+- **Mudança**:
+  - `modules/instagram/rules.ts` — `parseUserTags` (tira "@", minúsculas, sem repetição), `userTagsError` (só story, até `STORY_MAX_TAGS` = 20, formato de usuário do Instagram); testes em `tests/unit/instagram.test.ts`
+  - `lib/validation/instagram.ts` — campo `userTags`; `lib/instagram/client.ts` envia `user_tags=[{"username":…}]` só em story; `service.ts` repassa
+  - `post-form.tsx` — campo "Marcar pessoas (@)" no story e etiquetas na prévia; `[id]/page.tsx` mostra as pessoas marcadas
+- **Decisão**: feed fica sem marcação (a API exige posição x/y na foto); o limite de 20 é nosso (a Meta não documenta teto para `user_tags`)
+- **Verificação**: typecheck, lint e testes do Instagram rodados no computador do usuário (33 passando). `prisma generate` falhou por arquivo travado (servidor de desenvolvimento aberto); nenhuma publicação real com marcação foi feita
 
 ## 🎯 Próximas tarefas planejadas
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { captionError, CAPTION_MAX_CHARS, INSTAGRAM_FORMATS, INSTAGRAM_WHEN, isJpegPath } from "@/modules/instagram/rules";
+import { captionError, CAPTION_MAX_CHARS, INSTAGRAM_FORMATS, INSTAGRAM_WHEN, isJpegPath, parseUserTags, userTagsError } from "@/modules/instagram/rules";
 
 export const instagramPostSchema = z
   .object({
@@ -16,12 +16,15 @@ export const instagramPostSchema = z
       .max(CAPTION_MAX_CHARS + 500, "Legenda muito longa.")
       .transform((value) => value.replace(/\r\n/g, "\n").trim())
       .transform((value) => (value === "" ? null : value)),
+    userTags: z.string().max(1000, "Lista de marcações muito longa.").default("").transform(parseUserTags),
     when: z.enum(INSTAGRAM_WHEN, { errorMap: () => ({ message: "Escolha quando publicar." }) }),
     scheduledAt: z.string().trim().max(20),
   })
   .superRefine((data, ctx) => {
     const error = captionError(data.format, data.caption);
     if (error) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["caption"], message: error });
+    const tagsError = userTagsError(data.format, data.userTags);
+    if (tagsError) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["userTags"], message: tagsError });
     if (data.when === "SCHEDULE" && data.scheduledAt === "") {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["scheduledAt"], message: "Informe data e horário." });
     }
