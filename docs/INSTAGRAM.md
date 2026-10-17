@@ -95,7 +95,13 @@ O Instagram precisa baixar a imagem, e ele não alcança `localhost`. Duas saíd
 Rota: `GET` ou `POST /api/cron/instagram`, com o cabeçalho `Authorization: Bearer <CRON_SECRET>`.
 Sem `CRON_SECRET` a rota responde 503; com segredo errado, 401. Cada disparo publica até 5 postagens vencidas e devolve um resumo.
 
-A rota precisa ser chamada **a cada 5 minutos** por um serviço externo. Opções sem custo:
+**Agendador interno (padrão)**: quando o portal roda em servidor próprio (`npm run dev`, `npm start` ou Docker), o
+`instrumentation.ts` liga um agendador dentro do próprio servidor, que chama essa rota a cada minuto. Não há nada a configurar
+além do `CRON_SECRET`. Ele fica desligado na Vercel (sem servidor permanente) e pode ser desligado com `INSTAGRAM_SCHEDULER=externo`;
+`INSTAGRAM_SCHEDULER=interno` força ligar. Com o servidor desligado, nada é publicado; o que venceu nesse período sai assim que
+ele volta.
+
+**Agendador externo**: na Vercel, a rota precisa ser chamada **a cada 5 minutos** por um serviço externo. Opções sem custo:
 
 | Opção | Observação |
 |-------|------------|

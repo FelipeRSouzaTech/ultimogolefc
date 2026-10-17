@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createInstagramClient, instagramConfig, InstagramApiError, type InstagramConfig } from "@/lib/instagram/client";
 import { instagramPostSchema } from "@/lib/validation/instagram";
 import {
+  internalSchedulerEnabled,
   captionError,
   checkAspectRatio,
   countHashtags,
@@ -270,5 +271,19 @@ describe("situação do contêiner", () => {
       new Response(JSON.stringify({ status_code: "ERROR", status: "Error: Media ID is not available" }), { status: 200 })) as unknown as typeof fetch;
     const client = createInstagramClient({ host: "graph.instagram.com", version: "v25.0", userId: "1", accessToken: "t", accountLabel: "@t" }, impl);
     await expect(client.containerStatus("c")).resolves.toEqual({ code: "ERROR", detail: "Error: Media ID is not available" });
+  });
+});
+
+describe("agendador interno", () => {
+  it("liga sozinho no servidor próprio e fica desligado na Vercel e nos testes", () => {
+    expect(internalSchedulerEnabled({ NODE_ENV: "development" })).toBe(true);
+    expect(internalSchedulerEnabled({ NODE_ENV: "production" })).toBe(true);
+    expect(internalSchedulerEnabled({ NODE_ENV: "production", VERCEL: "1" })).toBe(false);
+    expect(internalSchedulerEnabled({ NODE_ENV: "test" })).toBe(false);
+  });
+
+  it("pode ser forçado pela variável INSTAGRAM_SCHEDULER", () => {
+    expect(internalSchedulerEnabled({ NODE_ENV: "development", INSTAGRAM_SCHEDULER: "externo" })).toBe(false);
+    expect(internalSchedulerEnabled({ NODE_ENV: "production", VERCEL: "1", INSTAGRAM_SCHEDULER: "interno" })).toBe(true);
   });
 });
