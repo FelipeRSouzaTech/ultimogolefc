@@ -77,8 +77,10 @@ agendador (a cada 5 min) ─┘      1. reserva a postagem (PUBLISHING + lockedA
 - **Story não leva legenda** pela API: o campo some no formulário e o servidor recusa legenda em story.
 - **Legenda**: até 2.200 caracteres e 30 hashtags.
 - **Limite**: 100 publicações por 24 h por conta (de sobra para o clube).
-- **Proporção**: feed entre 4:5 e 1,91:1; story 9:16. Hoje a proporção não é medida no envio; se estiver fora, a publicação falha
-  com a mensagem do Instagram. A geração das artes na etapa 2 já sai no tamanho certo.
+- **Proporção**: feed entre 4:5 e 1,91:1; story 9:16. O formulário lê as dimensões da imagem e avisa antes de salvar: no feed, fora
+  da faixa, mostra erro (o Instagram recusa); no story, só um aviso (o Instagram corta ou põe bordas). O servidor não mede a imagem.
+- **Diagnóstico**: toda falha mostra a nossa explicação **e** o texto original do Instagram com os códigos (ex.: `código 9004/2207052`),
+  porque o Instagram usa o mesmo código para problemas diferentes. Em erro de processamento, o motivo vem do campo `status` do contêiner.
 
 ### Testar no computador (desenvolvimento local)
 

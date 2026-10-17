@@ -3,6 +3,7 @@ import { createInstagramClient, instagramConfig, InstagramApiError, type Instagr
 import { instagramPostSchema } from "@/lib/validation/instagram";
 import {
   captionError,
+  checkAspectRatio,
   countHashtags,
   describeGraphError,
   groupByDay,
@@ -220,5 +221,52 @@ describe("cliente da Graph API", () => {
     const failing = createInstagramClient(config, server.impl);
     const temporary = await failing.publish("c").catch((e: unknown) => e);
     expect((temporary as InstagramApiError).retryable).toBe(true);
+  });
+});
+
+describe("diagnóstico das falhas", () => {
+  it("sempre mostra o texto original do Instagram e os códigos", () => {
+    const info = describeGraphError({ code: 9004, error_subcode: 2207052, message: "Media download has failed.", error_user_msg: "The media could not be fetched from this uri" });
+    expect(info.message).toMatch(/baixar a imagem/);
+    expect(info.message).toContain("The media could not be fetched from this uri");
+    expect(info.message).toContain("(código 9004/2207052)");
+  });
+
+  it("código 9004 genérico não afirma que foi o download", () => {
+    const info = describeGraphError({ code: 9004, message: "Only photo or video can be accepted as media type." });
+    expect(info.message).not.toMatch(/baixar/);
+    expect(info.message).toContain("Only photo or video");
+  });
+
+  it("proporção, tamanho e formato têm mensagens próprias", () => {
+    expect(describeGraphError({ code: 36003, error_subcode: 2207009 }).message).toMatch(/Proporção/);
+    expect(describeGraphError({ code: 9004, error_subcode: 2207004 }).message).toMatch(/8 MB/);
+    expect(describeGraphError({ code: 9004, error_subcode: 2207005 }).message).toMatch(/JPEG/);
+  });
+});
+
+describe("proporção da imagem", () => {
+  it("feed recusa imagem vertical de story e aceita 4:5, quadrada e 1,91:1", () => {
+    expect(checkAspectRatio("FEED", 736, 1308)?.level).toBe("error");
+    expect(checkAspectRatio("FEED", 1080, 1350)).toBeNull();
+    expect(checkAspectRatio("FEED", 1080, 1080)).toBeNull();
+    expect(checkAspectRatio("FEED", 1080, 566)).toBeNull();
+    expect(checkAspectRatio("FEED", 1920, 800)?.message).toMatch(/larga demais/);
+  });
+
+  it("story só avisa quando não é 9:16", () => {
+    expect(checkAspectRatio("STORY", 736, 1308)).toBeNull();
+    expect(checkAspectRatio("STORY", 1080, 1920)).toBeNull();
+    expect(checkAspectRatio("STORY", 1080, 1080)?.level).toBe("warning");
+    expect(checkAspectRatio("STORY", 0, 0)).toBeNull();
+  });
+});
+
+describe("situação do contêiner", () => {
+  it("traz o motivo do erro dado pelo Instagram", async () => {
+    const impl = (async () =>
+      new Response(JSON.stringify({ status_code: "ERROR", status: "Error: Media ID is not available" }), { status: 200 })) as unknown as typeof fetch;
+    const client = createInstagramClient({ host: "graph.instagram.com", version: "v25.0", userId: "1", accessToken: "t", accountLabel: "@t" }, impl);
+    await expect(client.containerStatus("c")).resolves.toEqual({ code: "ERROR", detail: "Error: Media ID is not available" });
   });
 });

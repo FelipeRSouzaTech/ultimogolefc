@@ -63,9 +63,10 @@ export async function publishPost(id: string, options: PublishOptions): Promise<
     let ready = false;
     for (let check = 0; check < 6 && !ready; check += 1) {
       const status = await client.containerStatus(containerId);
-      if (status === "FINISHED") ready = true;
-      else if (status === "ERROR" || status === "EXPIRED") {
-        throw new InstagramApiError({ message: "O Instagram não conseguiu processar a imagem. Confira o formato (JPEG) e a proporção.", retryable: false });
+      if (status.code === "FINISHED") ready = true;
+      else if (status.code === "ERROR" || status.code === "EXPIRED") {
+        const detail = status.detail ? ` Resposta do Instagram: ${status.detail}.` : "";
+        throw new InstagramApiError({ message: `O Instagram não conseguiu processar a imagem. Confira o formato (JPEG) e a proporção.${detail}`, retryable: false });
       } else await sleep(2_000);
     }
     if (!ready) throw new InstagramApiError({ message: "O Instagram ainda está processando a imagem. A publicação será tentada de novo.", retryable: true });
