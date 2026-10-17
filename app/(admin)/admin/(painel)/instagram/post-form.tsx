@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ActionForm } from "@/components/ui/action-form";
 import { Field } from "@/components/ui/field";
 import { ImageField } from "@/components/ui/image-field";
@@ -8,6 +8,7 @@ import { SmartImage } from "@/components/ui/smart-image";
 import type { FormAction } from "@/lib/action";
 import {
   CAPTION_MAX_CHARS,
+  checkAspectRatio,
   countHashtags,
   INSTAGRAM_FORMAT_LABELS,
   INSTAGRAM_FORMAT_SIZES,
@@ -26,6 +27,8 @@ type Props = {
   configured: boolean;
   accountLabel: string;
 };
+
+const PREVIEWABLE = /^\/(?!\/)[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp)$/;
 
 const WHEN_OPTIONS: { value: InstagramWhen; label: string }[] = [
   { value: "SCHEDULE", label: "Agendar" },
@@ -53,7 +56,7 @@ function Choice({ name, value, checked, disabled, onSelect, children }: { name: 
 }
 
 function Preview({ format, imagePath, caption, accountLabel }: { format: InstagramFormat; imagePath: string; caption: string; accountLabel: string }) {
-  const showImage = /^\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp)$/.test(imagePath);
+  const showImage = PREVIEWABLE.test(imagePath);
   const image = showImage ? (
     <SmartImage src={imagePath} alt="Imagem da publicação" width={1080} height={format === "FEED" ? 1350 : 1920} className="h-full w-full object-cover" />
   ) : (
@@ -90,6 +93,22 @@ export function InstagramPostForm({ action, values, configured, accountLabel }: 
   const [when, setWhen] = useState<InstagramWhen>(values && !values.scheduledAtLocal ? "DRAFT" : "SCHEDULE");
   const submit = SUBMIT_LABELS[when];
   const notJpeg = imagePath !== "" && !isJpegPath(imagePath);
+  const [size, setSize] = useState<{ path: string; width: number; height: number } | null>(null);
+
+  // Lê as dimensões reais da imagem para avisar antes de enviar ao Instagram (feed fora de 4:5 a 1,91:1 é recusado).
+  useEffect(() => {
+    if (!PREVIEWABLE.test(imagePath)) return;
+    let active = true;
+    const probe = new window.Image();
+    probe.onload = () => {
+      if (active) setSize({ path: imagePath, width: probe.naturalWidth, height: probe.naturalHeight });
+    };
+    probe.src = imagePath;
+    return () => {
+      active = false;
+    };
+  }, [imagePath]);
+  const ratio = size && size.path === imagePath ? checkAspectRatio(format, size.width, size.height) : null;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -114,6 +133,11 @@ export function InstagramPostForm({ action, values, configured, accountLabel }: 
             hint={`JPG, até 5 MB. Tamanho recomendado: ${INSTAGRAM_FORMAT_SIZES[format]}.`}
           />
           {notJpeg ? <p className="field-error">O Instagram só aceita JPEG. Envie a imagem em .jpg.</p> : null}
+          {ratio ? (
+            <p className={ratio.level === "error" ? "field-error" : "hint text-warning"} role={ratio.level === "error" ? "alert" : undefined}>
+              {ratio.message}
+            </p>
+          ) : null}
         </div>
 
         {format === "FEED" ? (

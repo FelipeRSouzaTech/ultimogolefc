@@ -27,7 +27,7 @@ export const newsSchema = z.object({
     .string()
     .trim()
     .max(200, "Caminho muito longo.")
-    .regex(/^(\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp))?$/, "Envie uma imagem PNG, JPG ou WebP.")
+    .regex(/^(\/(?!\/)[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp))?$/, "Envie uma imagem PNG, JPG ou WebP.")
     .transform((value) => (value === "" ? null : value)),
   seoTitle: optionalText(70, "O título SEO deve ter no máximo 70 caracteres."),
   seoDescription: optionalText(170, "A descrição SEO deve ter no máximo 170 caracteres."),

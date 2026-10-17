@@ -22,7 +22,7 @@ const imagePath = z
   .string()
   .trim()
   .max(200, "Caminho muito longo.")
-  .regex(/^(\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp|svg))?$/, "Use um caminho local de imagem, por exemplo /brand/escudo.png.")
+  .regex(/^(\/(?!\/)[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp|svg))?$/, "Use um caminho local de imagem, por exemplo /brand/escudo.png.")
   .transform((value) => (value === "" ? null : value));
 
 export const clubSchema = z.object({

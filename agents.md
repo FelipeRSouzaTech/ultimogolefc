@@ -300,7 +300,7 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
   - Painel de jogos: campo **Categoria** no formulário (`match-form.tsx`, `actions.ts`, `jogos/data.ts` → `loadCategoryLabels` com os nomes editados em Equipes)
 - **Não verificado**: contagem rodando no navegador (a renderização local não executa o JavaScript do cliente); validação = CI do PR
 
-### 19. `claude/instagram` (PR aberto — Claude) — etapa 1 da integração com o Instagram
+### 19. `claude/instagram` (PR #24 merged — Claude) — etapa 1 da integração com o Instagram
 - **Pedido**: publicar no feed e nos stories do Instagram pelo painel, com agendador; mockups aprovados (nova publicação, agenda semanal, artes automáticas). O usuário testa com a **própria conta** e só depois liga a do clube
 - **Banco**: migration `20261016220000_instagram` — enums `InstagramFormat`, `InstagramPostStatus`, `InstagramPostOrigin` e model `InstagramPost` (validada aplicando todas as migrations num PostgreSQL 16 local)
 - **Permissão nova**: `instagram:publish` (superadministrador, administrador, editor). Ver a agenda usa `content:read`
@@ -314,6 +314,14 @@ Feita em 09/10/2026, a partir da especificação do usuário. O detalhe de cada 
 - **Regras do Instagram**: só JPEG; imagem com endereço público HTTPS (localhost não funciona — ver `docs/INSTAGRAM.md`); story sem legenda; legenda até 2.200 caracteres e 30 hashtags
 - **Fora desta etapa**: automações e geração das artes (etapa 2), renovação automática do token e troca para a conta do clube (etapa 3). Plano em `docs/INSTAGRAM.md`
 - **Verificação**: testes unitários rodados localmente por camada de compatibilidade (Bun + zod local): 166 passando, 21 novos. Lint, typecheck, build e telas **não** verificados no ambiente do agente (npm bloqueado); validação = CI do PR. Nenhuma chamada real à API do Instagram foi feita
+
+### 20. `claude/instagram-diagnostico` (PR aberto — Claude)
+- **Pedido**: no primeiro teste real (conta do usuário + Supabase Storage público) a publicação falhou com "não conseguiu baixar a imagem", embora o endereço abrisse; a imagem era 9:16 e provavelmente foi enviada como feed
+- **Mudança**:
+  - `modules/instagram/rules.ts` — `describeGraphError` sempre anexa o texto original do Instagram e os códigos (`graphErrorDetail`); código 9004 sem subcódigo deixa de ser tratado como falha de download; mensagens próprias para 2207004 (8 MB) e 2207005 (formato); `checkAspectRatio` (feed 4:5 a 1,91:1 → erro; story fora de 9:16 → aviso)
+  - `lib/instagram/client.ts` — `containerStatus` lê também o campo `status` e devolve `{ code, detail }`; `service.ts` inclui o motivo na falha
+  - `post-form.tsx` — lê as dimensões da imagem no navegador e mostra o aviso de proporção abaixo do campo
+- **Verificação**: 172 testes unitários passando pela camada de compatibilidade; lint, typecheck e build = CI do PR
 
 ## 🎯 Próximas tarefas planejadas
 

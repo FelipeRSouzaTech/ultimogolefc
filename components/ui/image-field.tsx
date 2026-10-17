@@ -40,7 +40,7 @@ export function ImageField({ name, label, defaultValue, hint, onChange }: Props)
     });
   }
 
-  const previewable = /^\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp|svg)$/.test(path);
+  const previewable = /^\/(?!\/)[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp|svg)$/.test(path);
 
   return (
     <div>

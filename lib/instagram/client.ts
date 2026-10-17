@@ -1,6 +1,6 @@
 import "server-only";
 
-import { describeGraphError, type GraphErrorInfo, type InstagramFormat } from "@/modules/instagram/rules";
+import { describeGraphError, type GraphError, type GraphErrorInfo, type InstagramFormat } from "@/modules/instagram/rules";
 
 /**
  * Cliente mínimo da API de publicação do Instagram (Graph API).
@@ -44,8 +44,6 @@ export class InstagramApiError extends Error {
 }
 
 type Fetch = typeof fetch;
-
-type GraphError = { code?: number; error_subcode?: number; message?: string };
 
 async function call<T>(
   config: InstagramConfig,
@@ -99,9 +97,10 @@ export function createInstagramClient(config: InstagramConfig, fetchImpl: Fetch 
       return result.id;
     },
 
-    async containerStatus(containerId: string): Promise<ContainerStatus> {
-      const result = await call<{ status_code?: ContainerStatus }>(config, "GET", containerId, { fields: "status_code" }, fetchImpl);
-      return result.status_code ?? "IN_PROGRESS";
+    /** Situação do contêiner. Em ERROR, `detail` traz o motivo dado pelo Instagram (campo "status"). */
+    async containerStatus(containerId: string): Promise<{ code: ContainerStatus; detail: string | null }> {
+      const result = await call<{ status_code?: ContainerStatus; status?: string }>(config, "GET", containerId, { fields: "status_code,status" }, fetchImpl);
+      return { code: result.status_code ?? "IN_PROGRESS", detail: result.status?.trim().slice(0, 240) || null };
     },
 
     /** Publica o contêiner (passo 2). Devolve o id da mídia publicada. */

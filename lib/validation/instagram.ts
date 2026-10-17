@@ -9,7 +9,7 @@ export const instagramPostSchema = z
       .trim()
       .min(1, "Escolha a imagem da publicação.")
       .max(200, "Caminho muito longo.")
-      .regex(/^\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp)$/, "Envie uma imagem pelo campo acima.")
+      .regex(/^\/(?!\/)[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp)$/, "Envie uma imagem pelo campo acima.")
       .refine(isJpegPath, "O Instagram só aceita imagens JPEG (.jpg). Converta a imagem e envie de novo."),
     caption: z
       .string()

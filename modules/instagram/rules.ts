@@ -116,10 +116,24 @@ export function publicImageUrl(imagePath: string, siteUrl: string, s3PublicBase:
 
 export type GraphErrorInfo = { message: string; retryable: boolean };
 
-/** Traduz um erro da Graph API para uma mensagem útil no painel. */
-export function describeGraphError(error: { code?: number; error_subcode?: number; message?: string } | null | undefined): GraphErrorInfo {
-  const code = error?.code;
-  const sub = error?.error_subcode;
+export type GraphError = {
+  code?: number;
+  error_subcode?: number;
+  message?: string;
+  error_user_title?: string;
+  error_user_msg?: string;
+};
+
+/** Texto original do Instagram, para não esconder o motivo real atrás da nossa tradução. */
+export function graphErrorDetail(error: GraphError | null | undefined): string {
+  if (!error) return "";
+  const text = (error.error_user_msg || error.message || "").replace(/\s+/g, " ").trim().slice(0, 240);
+  const codes = [error.code, error.error_subcode].filter((value) => value !== undefined).join("/");
+  if (!text && !codes) return "";
+  return ` Resposta do Instagram: ${text || "sem descrição"}${codes ? ` (código ${codes})` : ""}.`;
+}
+
+function categorize(code: number | undefined, sub: number | undefined): GraphErrorInfo | null {
   if (code === 190 || code === 102) {
     return { message: "O token da conta do Instagram é inválido ou expirou. Gere um novo token e atualize a variável INSTAGRAM_ACCESS_TOKEN.", retryable: false };
   }
@@ -129,17 +143,67 @@ export function describeGraphError(error: { code?: number; error_subcode?: numbe
   if (code === 4 || code === 17 || code === 32 || code === 613 || sub === 2207042) {
     return { message: "Limite de publicações ou de chamadas do Instagram atingido. A publicação será tentada de novo mais tarde.", retryable: true };
   }
-  if (code === 36003 || sub === 2207009) {
-    return { message: "Proporção da imagem não aceita. No feed use entre 4:5 e 1,91:1; no story, 9:16.", retryable: false };
+  if (sub === 2207009 || code === 36003) {
+    return { message: "Proporção da imagem não aceita. No feed use entre 4:5 e 1,91:1 (ex.: 1080 × 1350); no story, 9:16 (1080 × 1920).", retryable: false };
   }
-  if (code === 9004 || sub === 2207052 || sub === 2207083) {
-    return { message: "O Instagram não conseguiu baixar a imagem. Confira se o endereço dela é público (HTTPS) e se o arquivo é JPEG.", retryable: false };
+  if (sub === 2207004) return { message: "A imagem é grande demais para o Instagram (máximo 8 MB).", retryable: false };
+  if (sub === 2207005) return { message: "Formato de imagem não aceito pelo Instagram. Use JPEG.", retryable: false };
+  if (sub === 2207052 || sub === 2207083) {
+    return { message: "O Instagram não conseguiu baixar a imagem. Confira se o endereço dela abre numa janela anônima (HTTPS público).", retryable: false };
   }
   if (code === 1 || code === 2 || sub === 2207001) {
     return { message: "Instabilidade temporária no Instagram. A publicação será tentada de novo.", retryable: true };
   }
-  const detail = error?.message ? ` Detalhe: ${error.message.slice(0, 200)}` : "";
-  return { message: `O Instagram recusou a publicação.${detail}`, retryable: false };
+  if (code === 9004) {
+    // O Instagram usa este código para vários problemas com a mídia (download, formato, proporção): o detalhe diz qual.
+    return { message: "O Instagram recusou a imagem.", retryable: false };
+  }
+  return null;
+}
+
+/** Traduz um erro da Graph API para uma mensagem útil no painel, sempre com o texto original do Instagram. */
+export function describeGraphError(error: GraphError | null | undefined): GraphErrorInfo {
+  const known = categorize(error?.code, error?.error_subcode);
+  const base = known ?? { message: "O Instagram recusou a publicação.", retryable: false };
+  return { message: `${base.message}${graphErrorDetail(error)}`, retryable: base.retryable };
+}
+
+// --- Proporção da imagem -------------------------------------------------------------------------
+
+export const FEED_MIN_RATIO = 4 / 5;
+export const FEED_MAX_RATIO = 1.91;
+export const STORY_RATIO = 9 / 16;
+
+export type RatioCheck = { level: "error" | "warning"; message: string } | null;
+
+function ratioLabel(width: number, height: number): string {
+  return `${width} × ${height} px`;
+}
+
+/**
+ * Confere a proporção da imagem com o formato escolhido.
+ * Feed fora de 4:5 a 1,91:1 é recusado pelo Instagram ("error"); story fora de 9:16 é aceito, mas com corte ou bordas ("warning").
+ */
+export function checkAspectRatio(format: InstagramFormat, width: number, height: number): RatioCheck {
+  if (!(width > 0 && height > 0)) return null;
+  const ratio = width / height;
+  const size = ratioLabel(width, height);
+  if (format === "FEED") {
+    if (ratio < FEED_MIN_RATIO - 0.01) {
+      return {
+        level: "error",
+        message: `A imagem (${size}) é alta demais para o feed: o Instagram vai recusar. Use 4:5 (1080 × 1350) ou quadrada, ou publique como story.`,
+      };
+    }
+    if (ratio > FEED_MAX_RATIO + 0.01) {
+      return { level: "error", message: `A imagem (${size}) é larga demais para o feed: o Instagram vai recusar. Use no máximo 1,91:1 (1080 × 566).` };
+    }
+    return null;
+  }
+  if (Math.abs(ratio - STORY_RATIO) > 0.03) {
+    return { level: "warning", message: `A imagem (${size}) não é 9:16. No story o Instagram vai cortar ou colocar bordas; o ideal é 1080 × 1920.` };
+  }
+  return null;
 }
 
 // --- Agenda semanal ------------------------------------------------------------------------------

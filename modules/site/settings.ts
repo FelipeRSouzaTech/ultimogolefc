@@ -70,7 +70,7 @@ export const SETTING_GROUPS: SettingGroup[] = [
 
 export const SETTING_DEFS: SettingDef[] = SETTING_GROUPS.flatMap((group) => group.settings);
 
-const IMAGE_PATH = /^\/[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp|svg)$/;
+const IMAGE_PATH = /^\/(?!\/)[A-Za-z0-9._\-/]+\.(png|jpg|jpeg|webp|svg)$/;
 const INTERNAL_PATH = /^\/[A-Za-z0-9._\-/?=&%#]*$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
