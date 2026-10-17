@@ -89,10 +89,13 @@ export function createInstagramClient(config: InstagramConfig, fetchImpl: Fetch 
     config,
 
     /** Cria o contêiner de mídia (passo 1). Devolve o id do contêiner. */
-    async createContainer(input: { format: InstagramFormat; imageUrl: string; caption: string | null }): Promise<string> {
+    async createContainer(input: { format: InstagramFormat; imageUrl: string; caption: string | null; userTags?: string[] }): Promise<string> {
       const params: Record<string, string> = { image_url: input.imageUrl };
-      if (input.format === "STORY") params.media_type = "STORIES";
-      else if (input.caption) params.caption = input.caption;
+      if (input.format === "STORY") {
+        params.media_type = "STORIES";
+        // Em stories a posição (x/y) da marcação é opcional; vai só o nome de usuário.
+        if (input.userTags?.length) params.user_tags = JSON.stringify(input.userTags.map((username) => ({ username })));
+      } else if (input.caption) params.caption = input.caption;
       const result = await call<{ id: string }>(config, "POST", `${config.userId}/media`, params, fetchImpl);
       return result.id;
     },

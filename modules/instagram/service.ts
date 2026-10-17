@@ -57,7 +57,12 @@ export async function publishPost(id: string, options: PublishOptions): Promise<
       });
     }
 
-    const containerId = await client.createContainer({ format: post.format, imageUrl, caption: post.format === "FEED" ? post.caption : null });
+    const containerId = await client.createContainer({
+      format: post.format,
+      imageUrl,
+      caption: post.format === "FEED" ? post.caption : null,
+      userTags: post.format === "STORY" ? post.userTags : [],
+    });
     await prisma.instagramPost.update({ where: { id }, data: { containerId } });
 
     // O Instagram processa a imagem antes de liberar a publicação; em fotos costuma levar poucos segundos.

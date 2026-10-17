@@ -86,6 +86,7 @@ export default async function InstagramPostPage({ params }: { params: Promise<{ 
                 format: post.format,
                 imagePath: post.imagePath,
                 caption: post.caption,
+                userTags: post.userTags,
                 scheduledAtLocal: post.status === "SCHEDULED" && post.scheduledAt ? utcToSaoPauloLocal(post.scheduledAt) : null,
               }}
             />
@@ -106,6 +107,12 @@ export default async function InstagramPostPage({ params }: { params: Promise<{ 
               <div className="min-w-0 flex-1">
                 <h2 className="mb-2 text-lg uppercase">Legenda</h2>
                 <p className="whitespace-pre-line text-sm">{post.caption ?? (post.format === "STORY" ? "Stories não levam legenda." : "Sem legenda.")}</p>
+                {post.userTags.length > 0 ? (
+                  <>
+                    <h2 className="mb-2 mt-6 text-lg uppercase">Pessoas marcadas</h2>
+                    <p className="text-sm">{post.userTags.map((tag) => `@${tag}`).join(" ")}</p>
+                  </>
+                ) : null}
               </div>
             </div>
           </Panel>

@@ -75,6 +75,10 @@ agendador (a cada 5 min) ─┘      1. reserva a postagem (PUBLISHING + lockedA
 - **Imagem com endereço público HTTPS.** O Instagram baixa a imagem do nosso servidor. Com `STORAGE_DRIVER=s3` usa `S3_PUBLIC_URL`;
   senão, `NEXT_PUBLIC_SITE_URL` + `/midia/...`. Endereços `http://` e `localhost` são recusados com aviso.
 - **Story não leva legenda** pela API: o campo some no formulário e o servidor recusa legenda em story.
+- **Marcar pessoas (@) em story**: campo "Marcar pessoas" no formulário (até 20, separados por espaço ou vírgula), enviado como
+  `user_tags` só com o nome de usuário (em story a posição é opcional; recurso da API desde jul/2025). Só contas **públicas**
+  podem ser marcadas; um @ inexistente ou privado faz o Instagram recusar e a mensagem dele aparece na falha. No feed a marcação
+  exigiria a posição de cada pessoa na foto e não foi feita. Automações não marcam ninguém.
 - **Legenda**: até 2.200 caracteres e 30 hashtags.
 - **Limite**: 100 publicações por 24 h por conta (de sobra para o clube).
 - **Proporção**: feed entre 4:5 e 1,91:1; story 9:16. O formulário lê as dimensões da imagem e avisa antes de salvar: no feed, fora

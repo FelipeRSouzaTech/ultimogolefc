@@ -14,11 +14,13 @@ import {
   INSTAGRAM_FORMAT_SIZES,
   INSTAGRAM_FORMATS,
   isJpegPath,
+  parseUserTags,
+  STORY_MAX_TAGS,
   type InstagramFormat,
   type InstagramWhen,
 } from "@/modules/instagram/rules";
 
-type Values = { format: InstagramFormat; imagePath: string; caption: string | null; scheduledAtLocal: string | null };
+type Values = { format: InstagramFormat; imagePath: string; caption: string | null; userTags: string[]; scheduledAtLocal: string | null };
 
 type Props = {
   action: FormAction;
@@ -55,7 +57,7 @@ function Choice({ name, value, checked, disabled, onSelect, children }: { name: 
   );
 }
 
-function Preview({ format, imagePath, caption, accountLabel }: { format: InstagramFormat; imagePath: string; caption: string; accountLabel: string }) {
+function Preview({ format, imagePath, caption, userTags, accountLabel }: { format: InstagramFormat; imagePath: string; caption: string; userTags: string[]; accountLabel: string }) {
   const showImage = PREVIEWABLE.test(imagePath);
   const image = showImage ? (
     <SmartImage src={imagePath} alt="Imagem da publicação" width={1080} height={format === "FEED" ? 1350 : 1920} className="h-full w-full object-cover" />
@@ -72,6 +74,15 @@ function Preview({ format, imagePath, caption, accountLabel }: { format: Instagr
           <div className="h-0.5 rounded bg-white/90" />
           <p className="text-xs font-semibold text-white">{handle}</p>
         </div>
+        {userTags.length > 0 ? (
+          <div className="absolute inset-x-0 bottom-0 flex flex-wrap justify-center gap-1.5 p-3">
+            {userTags.map((tag) => (
+              <span key={tag} className="rounded-md bg-white px-2 py-1 text-xs font-bold text-primary">
+                @{tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -90,6 +101,8 @@ export function InstagramPostForm({ action, values, configured, accountLabel }: 
   const [format, setFormat] = useState<InstagramFormat>(values?.format ?? "FEED");
   const [imagePath, setImagePath] = useState(values?.imagePath ?? "");
   const [caption, setCaption] = useState(values?.caption ?? "");
+  const [tagsText, setTagsText] = useState((values?.userTags ?? []).map((tag) => `@${tag}`).join(" "));
+  const userTags = parseUserTags(tagsText);
   const [when, setWhen] = useState<InstagramWhen>(values && !values.scheduledAtLocal ? "DRAFT" : "SCHEDULE");
   const submit = SUBMIT_LABELS[when];
   const notJpeg = imagePath !== "" && !isJpegPath(imagePath);
@@ -145,9 +158,29 @@ export function InstagramPostForm({ action, values, configured, accountLabel }: 
             <textarea id="caption" name="caption" className="input" rows={7} value={caption} onChange={(event) => setCaption(event.target.value)} maxLength={CAPTION_MAX_CHARS} />
           </Field>
         ) : (
-          <p className="alert alert-info">
-            <strong>Story não leva legenda.</strong> Pela API do Instagram, stories são publicados só com a imagem. Coloque o texto na própria arte.
-          </p>
+          <>
+            <p className="alert alert-info">
+              <strong>Story não leva legenda.</strong> Pela API do Instagram, stories são publicados só com a imagem. Coloque o texto na própria arte.
+            </p>
+            <Field
+              name="userTags"
+              label="Marcar pessoas (@)"
+              hint={`Opcional. Separe por espaço ou vírgula, até ${STORY_MAX_TAGS}. Só contas públicas podem ser marcadas; a pessoa recebe a notificação da menção. ${userTags.length} / ${STORY_MAX_TAGS}`}
+            >
+              <input
+                id="userTags"
+                name="userTags"
+                className="input"
+                placeholder="@jogador @parceiro"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                value={tagsText}
+                onChange={(event) => setTagsText(event.target.value)}
+                maxLength={1000}
+              />
+            </Field>
+          </>
         )}
 
         <fieldset className="space-y-3">
@@ -170,7 +203,7 @@ export function InstagramPostForm({ action, values, configured, accountLabel }: 
 
       <section aria-label="Prévia" className="space-y-3">
         <p className="text-sm font-semibold text-gray-600">Prévia no Instagram</p>
-        <Preview format={format} imagePath={imagePath} caption={caption} accountLabel={accountLabel} />
+        <Preview format={format} imagePath={imagePath} caption={caption} userTags={format === "STORY" ? userTags : []} accountLabel={accountLabel} />
       </section>
     </div>
   );

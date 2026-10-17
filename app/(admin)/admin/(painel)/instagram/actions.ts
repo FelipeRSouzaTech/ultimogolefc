@@ -20,6 +20,7 @@ export async function saveInstagramPostAction(id: string | null, formData: FormD
       format: field(formData, "format"),
       imagePath: field(formData, "imagePath"),
       caption: typeof formData.get("caption") === "string" ? (formData.get("caption") as string) : "",
+      userTags: field(formData, "userTags"),
       when: field(formData, "when"),
       scheduledAt: field(formData, "scheduledAt"),
     });
@@ -45,6 +46,7 @@ export async function saveInstagramPostAction(id: string | null, formData: FormD
       format: data.format,
       imagePath: data.imagePath,
       caption: data.format === "FEED" ? data.caption : null,
+      userTags: data.format === "STORY" ? data.userTags : [],
       status: initialStatus(data.when),
       scheduledAt,
       // Uma edição recomeça a contagem de tentativas e limpa o erro anterior.
@@ -62,7 +64,7 @@ export async function saveInstagramPostAction(id: string | null, formData: FormD
           entityId: post.id,
           summary: `${id ? "Editou" : "Criou"} publicação do Instagram (${LABEL[post.format]}, ${post.status === "DRAFT" ? "rascunho" : "agendada"})`,
           before: previous ? { status: previous.status, scheduledAt: previous.scheduledAt?.toISOString() ?? null } : undefined,
-          after: { status: post.status, format: post.format, scheduledAt: post.scheduledAt?.toISOString() ?? null },
+          after: { status: post.status, format: post.format, scheduledAt: post.scheduledAt?.toISOString() ?? null, userTags: post.userTags },
         },
         tx,
       );

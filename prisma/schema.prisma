@@ -739,6 +739,8 @@ model InstagramPost {
   imagePath     String
   /// Legenda (só no feed; stories publicados pela API não levam legenda).
   caption       String?             @db.Text
+  /// Pessoas marcadas (nomes de usuário sem "@"). Só em stories; precisam ser contas públicas.
+  userTags      String[]            @default([])
   status        InstagramPostStatus @default(DRAFT)
   origin        InstagramPostOrigin @default(MANUAL)
   /// Quando publicar (UTC). Obrigatório para SCHEDULED.
